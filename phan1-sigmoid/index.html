@@ -4,41 +4,113 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f4f6f8;--ink:#17203a;--mut:#667085;--card:#fff;--ln:#d5dbe3;--pos:#4338ca;--ok:#12998a;--bad:#c2410c}
-@media(prefers-color-scheme:dark){:root{--bg:#10162b;--ink:#e8ecf5;--mut:#98a2b8;--card:#1a2240;--ln:#2d3760;--pos:#8b87f0}}
+:root{
+  --bg:#0b1020; --bg2:#0e1730; --card:#162142; --ink:#eef2ff; --mut:#94a3c8;
+  --ln:#243258; --pos:#38bdf8; --pos2:#a78bfa; --ok:#34d399; --bad:#fb7185;
+  --dot:rgba(148,163,200,.07); --glow1:rgba(56,189,248,.10); --glow2:rgba(167,139,250,.08);
+}
 *{box-sizing:border-box}html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font:18px/1.5 Newsreader,Georgia,serif;display:flex;flex-direction:column}
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(ellipse at 15% 0%, var(--glow1), transparent 50%),
+    radial-gradient(ellipse at 90% 100%, var(--glow2), transparent 50%),
+    radial-gradient(var(--dot) 1px, transparent 1.4px);
+  background-size:auto, auto, 24px 24px;
+  background-attachment:fixed;
+  color:var(--ink);font:18px/1.6 'Newsreader',Georgia,serif;
+  display:flex;flex-direction:column;
+}
 main{flex:1;overflow:hidden;position:relative}
-.s{position:absolute;inset:0;padding:24px 5vw;display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-auto-rows:minmax(min-content,1fr);gap:32px;overflow:auto}
-.s.on{display:grid}.s>*{margin-block:auto}
-h2{font-size:1.55rem;margin:0 0 .4em;line-height:1.2}
-p{margin:.45em 0}.mut{color:var(--mut)}.box{border-left:3px solid var(--pos);padding:2px 12px;background:var(--card);border-radius:0 6px 6px 0}
-.v{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:14px}
+
+/* SLIDE */
+.s{
+  position:absolute;inset:0;padding:28px 5vw;
+  display:none;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);
+  grid-auto-rows:minmax(min-content,1fr);gap:36px;overflow:auto;
+}
+.s.on{display:grid}
+.s>*{margin-block:auto}
+
+/* HEADER CHÍNH PHỤ TRONG SLIDE */
+.eyebrow{
+  font:600 11px 'Inter',system-ui;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--pos);margin:0 0 10px;
+}
+h2{
+  font-family:'Inter',system-ui,sans-serif;font-size:clamp(1.4rem,2.4vw,1.75rem);
+  line-height:1.15;margin:0 0 .5em;letter-spacing:-.01em;
+  background:linear-gradient(90deg,#fff 40%,#a5b4fc 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+p{margin:.5em 0;color:var(--ink)}
+.mut{color:var(--mut)}
+.box{
+  border-left:3px solid var(--pos);padding:10px 14px;
+  background:linear-gradient(90deg,rgba(56,189,248,.08),transparent 60%);
+  border-radius:0 8px 8px 0;margin-top:14px;
+}
+.v{
+  background:var(--card);border:1px solid var(--ln);border-radius:14px;
+  padding:16px;box-shadow:0 10px 28px -18px rgba(0,0,0,.6);
+}
 canvas{width:100%;height:300px;display:block}canvas.sm{height:200px}canvas.xs{height:150px}canvas.cl{cursor:crosshair}
-.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:14px system-ui,sans-serif;margin-top:8px}
+.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:14px 'Inter',system-ui,sans-serif;margin-top:10px}
 .c input{width:100%;accent-color:var(--pos)}
-.o{font:14px/1.6 system-ui,sans-serif;margin-top:8px;color:var(--mut)}.o b{color:var(--ink)}
-.b{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-button,.nb{font:14px system-ui;padding:6px 12px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:6px;cursor:pointer;text-decoration:none}
+.o{font:14px/1.6 'Inter',system-ui,sans-serif;margin-top:10px;color:var(--mut)}
+.o b{color:var(--ink)}
+.b{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button,.nb{
+  font:500 13px 'Inter',system-ui;padding:7px 14px;border:1px solid var(--ln);
+  background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer;text-decoration:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+button:hover,.nb:hover{border-color:var(--pos)}
 button.on{border-color:var(--pos);box-shadow:0 0 0 1px var(--pos)}
-button:focus-visible,input:focus-visible,.nb:focus-visible{outline:2px solid var(--pos)}
-nav{display:flex;gap:12px;align-items:center;justify-content:center;padding:10px;border-top:1px solid var(--ln);font:14px system-ui}
-.katex-display{overflow-x:auto;overflow-y:hidden;margin:.6em 0}
+button:focus-visible,input:focus-visible,.nb:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
+nav{
+  display:flex;gap:12px;align-items:center;justify-content:center;padding:12px;
+  border-top:1px solid var(--ln);font:13px 'Inter',system-ui;
+  background:rgba(11,16,32,.85);backdrop-filter:blur(8px);
+}
+
+/* CÔNG THỨC ĐƯỢC TÔ ĐẬM */
+.katex{color:#fff;font-size:1.02em}
+.katex-display{
+  overflow-x:auto;overflow-y:hidden;margin:.8em 0;
+  padding:12px 16px;
+  background:linear-gradient(90deg,rgba(56,189,248,.08),rgba(167,139,250,.05));
+  border-left:3px solid var(--pos);
+  border-radius:0 8px 8px 0;
+  box-shadow:inset 0 0 0 1px rgba(56,189,248,.06);
+}
+.katex-display>.katex{color:#fff}
+.katex .mord,.katex .mbin,.katex .mrel,.katex .mopen,.katex .mclose,.katex .mpunct{color:#fff}
+.katex .mfrac .frac-line{border-color:#a5b4fc}
+.katex .sqrt>.sqrt-line{border-color:#a5b4fc}
+.katex .mop{color:#a5b4fc}
+.katex .msupsub{color:#fff}
+.katex-display .tag{color:var(--mut)}
+
+/* công thức inline tô nhẹ */
+p .katex{color:#fff;font-weight:500}
+
 @media(max-width:860px){.s{grid-template-columns:1fr;grid-auto-rows:auto}}
 </style></head><body>
 <main>
-<section class="s on"><div><p class="mut">Logistic Regression · Phần 1 / 6</p><h2>1. Linear hay Logistic?</h2>
+<section class="s on"><div><p class="eyebrow">Logistic Regression · Phần 1 / 5</p><h2>1. Linear hay Logistic?</h2>
 <p><b>Bài toán:</b> dự đoán khả năng sinh viên đậu môn dựa trên số giờ ôn tập $X$ (1 đến 10 giờ). Nhãn $y=1$ là đậu, $y=0$ là rớt.</p>
 <p><b>Vấn đề:</b> Linear Regression $\hat p(X)=\beta_0+\beta_1X$ không bị chặn trong $[0,1]$, nên có thể cho xác suất âm ($-0.2$) hoặc lớn hơn 1 ($1.4$).</p>
 <p><b>Giải pháp:</b> biến đổi đầu ra tuyến tính bằng Sigmoid:</p>
 $$\hat p(X)=\frac{1}{1+e^{-(\beta_0+\beta_1X)}}\in(0,1)$$
 <p class="box">Kéo thanh trượt để đổi đường linear và sigmoid. <b>Bấm vào đồ thị</b> để thêm điểm dữ liệu (nửa trên: $y=1$, nửa dưới: $y=0$); bấm gần một điểm để xóa. Dùng hai nút khớp để xem đường nào hợp lý hơn.</p></div>
 <div class="v"><canvas id="c1" class="cl"></canvas><div class="c" id="k1"></div>
-<div class="b"><button id="f1">Khớp Linear (bình phương tối thiểu)</button><button id="f2">Khớp Logistic (MLE)</button><button id="f3">Đặt lại điểm</button></div><div class="o" id="o1"></div></div></section>
+<div class="b"><button id="f1">Khớp Linear</button><button id="f2">Khớp Logistic (MLE)</button><button id="f3">Đặt lại điểm</button></div><div class="o" id="o1"></div></div></section>
 
-<section class="s"><div><h2>2. Bernoulli → Odds → Logit</h2>
+<section class="s"><div><p class="eyebrow">Logistic Regression · Phần 1 / 5</p><h2>2. Bernoulli → Odds → Logit</h2>
 <p>Giả sử $Y_i\mid x_i\sim\mathrm{Bernoulli}(p_i)$, tức $P(Y_i=y_i\mid x_i)=p_i^{y_i}(1-p_i)^{1-y_i}$. Ta cần $p=f(x)\in[0,1]$ trong khi $z=w^Tx+b\in\mathbb R$, tức một phép biến đổi $\mathbb R\to(0,1)$.</p>
 $$\text{Odds}=\frac{p}{1-p}\in(0,+\infty)$$
 <p>Odds mới chỉ nhận giá trị dương. Dùng logarit để phủ toàn $\mathbb R$:</p>
@@ -47,7 +119,7 @@ $$\mathrm{Logit}(p)=\ln\frac{p}{1-p}\in\mathbb R$$
 <p class="box">Kéo $p$: odds bùng nổ khi $p\to1$; logit bằng 0 tại $p=0.5$ và đối xứng quanh đó.</p></div>
 <div class="v"><canvas id="c2a" class="sm"></canvas><canvas id="c2b" class="sm"></canvas><div class="c" id="k2"></div><div class="o" id="o2"></div></div></section>
 
-<section class="s"><div><h2>3. Từ Log-odds suy ra Sigmoid</h2>
+<section class="s"><div><p class="eyebrow">Logistic Regression · Phần 1 / 5</p><h2>3. Từ Log-odds suy ra Sigmoid</h2>
 <p>Từ $\ln\frac{p}{1-p}=z$, lấy mũ hai vế: $\frac{p}{1-p}=e^z$, suy ra $p(1+e^z)=e^z$:</p>
 $$p=\frac{e^z}{1+e^z}=\frac{1}{1+e^{-z}}=\sigma(z)$$
 <p>Đồ thị trên cùng là đường thẳng trong không gian log-odds; đồ thị giữa là Sigmoid tương ứng. Ba tính chất:</p>
@@ -57,7 +129,7 @@ $$p=\frac{e^z}{1+e^z}=\frac{1}{1+e^{-z}}=\sigma(z)$$
 <p class="box">Kéo $x$ (hoặc $w,b$) để di chuyển $z$; chấm tím là $\sigma(z)$, chấm xanh là $\sigma(-z)$. Tính chất (3) sẽ dùng khi tính gradient ở phần 2.</p></div>
 <div class="v"><canvas id="c3a" class="xs"></canvas><canvas id="c3b" class="xs"></canvas><canvas id="c3c" class="xs"></canvas><div class="c" id="k3"></div><div class="o" id="o3"></div></div></section>
 
-<section class="s"><div><h2>4. Likelihood và Log-Likelihood</h2>
+<section class="s"><div><p class="eyebrow">Logistic Regression · Phần 1 / 5</p><h2>4. Likelihood và Log-Likelihood</h2>
 <p>Với $n$ mẫu độc lập, xác suất mô hình "đoán đúng" cả tập dữ liệu là tích:</p>
 $$L(\theta)=\prod_{i=1}^n p_i^{y_i}(1-p_i)^{1-y_i},\quad p_i=\sigma(\theta^Tx_i)$$
 <p>Tích nhiều số nhỏ khó xử lý, nên lấy logarit:</p>
@@ -66,7 +138,7 @@ $$\ell(\theta)=\sum_{i=1}^n\big[y_i\ln p_i+(1-y_i)\ln(1-p_i)\big]$$
 <p class="box">Dùng chung các điểm dữ liệu với slide 1, nên điểm bạn thêm hoặc xóa ở đó sẽ ảnh hưởng ở đây. Kéo $w,b$ để đưa dấu cam về dấu xanh.</p></div>
 <div class="v"><canvas id="c5a" class="sm"></canvas><canvas id="c5b" class="sm"></canvas><div class="c" id="k5"></div><div class="b"><button id="m1">Về nghiệm MLE</button></div><div class="o" id="o5"></div></div></section>
 
-<section class="s"><div><h2>5. Binary Cross-Entropy Loss</h2>
+<section class="s"><div><p class="eyebrow">Logistic Regression · Phần 1 / 5</p><h2>5. Binary Cross-Entropy Loss</h2>
 <p>Đổi dấu và chia cho $n$ để chuyển bài toán maximize thành minimize:</p>
 $$J(\theta)=-\frac1n\sum_{i=1}^n\big[y_i\ln p_i+(1-y_i)\ln(1-p_i)\big]$$
 <p>Với một mẫu: nếu $y=1$ thì loss là $-\ln p$, nếu $y=0$ thì loss là $-\ln(1-p)$. Dự đoán sai mà tự tin ($p\to0$ khi $y=1$) bị phạt rất nặng.</p>
@@ -77,18 +149,19 @@ $$J(\theta)=-\frac1n\sum_{i=1}^n\big[y_i\ln p_i+(1-y_i)\ln(1-p_i)\big]$$
 
 <script>
 const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan2-gradient-hessian/';
-const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
+const C={a:'#fbbf24',ok:'#34d399',bad:'#fb7185',pos:'#38bdf8'};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
 function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
 const PAD={l:38,r:8,t:22,b:22};
 function plot(id,xs,cs,o={}){const t=cv(id);if(!t)return;const[c,W,H]=t,p=PAD,x0=o.x0??xs[0],x1=o.x1??xs.at(-1),y0=o.y0??0,y1=o.y1;
 const X=x=>p.l+(x-x0)/(x1-x0)*(W-p.l-p.r),Y=y=>H-p.b-(y-y0)/(y1-y0)*(H-p.t-p.b);
-c.font='12px system-ui';c.fillStyle=c.strokeStyle=css('--mut');c.lineWidth=1;const ax=X(Math.max(x0,Math.min(0,x1)));
+c.font='12px Inter,system-ui';c.fillStyle=c.strokeStyle=css('--mut');c.lineWidth=1;const ax=X(Math.max(x0,Math.min(0,x1)));
 c.beginPath();c.moveTo(p.l,Y(y0));c.lineTo(W-p.r,Y(y0));c.moveTo(ax,p.t);c.lineTo(ax,H-p.b);c.stroke();
 for(let k=0;k<=4;k++){const v=x0+(x1-x0)*k/4;c.fillText(+v.toFixed(1),X(v)-9,H-6)}
 for(let k=0;k<=2;k++){const v=y0+(y1-y0)*k/2;c.fillText(+v.toFixed(1),0,Y(v)+4)}
 c.save();c.beginPath();c.rect(p.l,p.t,W-p.l-p.r,H-p.t-p.b);c.clip();
 (o.h||[]).forEach(v=>{c.setLineDash([4,4]);c.beginPath();c.moveTo(p.l,Y(v));c.lineTo(W-p.r,Y(v));c.stroke();c.setLineDash([])});
-cs.forEach(k=>{c.strokeStyle=c.fillStyle=k.c;c.lineWidth=2;c.setLineDash(k.dash?[6,4]:[]);
+cs.forEach(k=>{c.strokeStyle=c.fillStyle=k.c;c.lineWidth=2.5;c.setLineDash(k.dash?[6,4]:[]);
 if(k.pts)k.pts.forEach(q=>{c.beginPath();c.arc(X(q[0]),Y(q[1]),k.r||4,0,7);c.fill()});
 else{c.beginPath();k.y.forEach((v,i)=>i?c.lineTo(X(xs[i]),Y(v)):c.moveTo(X(xs[i]),Y(v)));c.stroke()}c.setLineDash([])});
 (o.v||[]).forEach(v=>{c.strokeStyle=v[1]||css('--mut');c.setLineDash([3,3]);c.beginPath();c.moveTo(X(v[0]),p.t);c.lineTo(X(v[0]),H-p.b);c.stroke();c.setLineDash([])});c.restore();
@@ -97,7 +170,6 @@ if(o.t){c.fillStyle=css('--mut');c.textAlign='right';c.fillText(o.t,W-p.r,13);c.
 function sl(h,lab,mn,mx,st,v,f,fmt=x=>x){const g=$(h),l=document.createElement('label'),i=document.createElement('input'),o=document.createElement('span');l.textContent=lab;
 Object.assign(i,{type:'range',min:mn,max:mx,step:st,value:v});o.textContent=fmt(+v);i.oninput=()=>{o.textContent=fmt(+i.value);f()};g.append(l,i,o);
 const q=()=>+i.value;q.set=a=>{i.value=a;o.textContent=fmt(+i.value)};return q}
-// dữ liệu dùng chung giữa slide 1 và slide 4
 const P0=()=>[1,2,3,4,5,6,7,8,9,10].map((x,i)=>[x,[0,0,0,0,1,0,1,1,1,1][i]]);let PTS=P0();
 function ols(){const n=PTS.length,mx=PTS.reduce((a,q)=>a+q[0],0)/n,my=PTS.reduce((a,q)=>a+q[1],0)/n;let a=0,b=0;PTS.forEach(([x,y])=>{a+=(x-mx)*(y-my);b+=(x-mx)**2});const s=b?a/b:0;return[my-s*mx,s]}
 function mle(){let w=0,b=0;for(let it=0;it<40;it++){let g0=1e-3*w,g1=0,a=1e-3,bb=0,c=1e-6;for(const[x,y]of PTS){const p=sg(w*x+b),q=p*(1-p)+1e-9;g0+=(p-y)*x;g1+=p-y;a+=q*x*x;bb+=q*x;c+=q}
@@ -105,12 +177,12 @@ const d=a*c-bb*bb,dw=(c*g0-bb*g1)/d,db=(-bb*g0+a*g1)/d,m=Math.max(Math.abs(dw),M
 const Jwb=(w,b)=>{let l=0;for(const[x,y]of PTS){const z=w*x+b;l+=Math.log1p(Math.exp(y?-z:z))}return l/PTS.length};
 const ptsOf=y=>PTS.filter(q=>q[1]==y);
 // 1
-{const xs=lin(0,12,120),b0=sl('#k1','β₀ (linear)',-1,1,.01,-.2,dr,f2),b1=sl('#k1','β₁ (linear)',0,.5,.005,.15,dr,f3),w=sl('#k1','w (sigmoid)',0,4,.05,1.5,dr,f2),b=sl('#k1','b (sigmoid)',-20,4,.1,-7.5,dr,f2);
+{const xs=lin(0,12,120),b0=sl('#k1','β₀',-1,1,.01,-.2,dr,f2),b1=sl('#k1','β₁',0,.5,.005,.15,dr,f3),w=sl('#k1','w',0,4,.05,1.5,dr,f2),b=sl('#k1','b',-20,4,.1,-7.5,dr,f2);
 const E=$('#c1'),R={x0:0,x1:12,y0:-.5,y1:1.5};
 function dr(){plot('#c1',xs,[{y:xs.map(x=>b0()+b1()*x),c:C.pos,n:'Linear'},{y:xs.map(x=>sg(w()*x+b())),c:C.bad,n:'Sigmoid'},{pts:ptsOf(1),c:C.ok,r:5},{pts:ptsOf(0),c:C.a,r:5}],{...R,h:[0,1]});
 const lo=b0(),hi=b0()+b1()*12,mn=Math.min(lo,hi),mx=Math.max(lo,hi),out=mn<0||mx>1;let mse=0,ll=0;PTS.forEach(([x,y])=>{mse+=(b0()+b1()*x-y)**2;ll+=Math.log1p(Math.exp(y?-(w()*x+b()):w()*x+b()))});
-$('#w1').innerHTML=out?`<b style="color:var(--bad)">Cảnh báo:</b> với 0 đến 12 giờ, đường linear nhận giá trị từ <b>${f2(mn)}</b> đến <b>${f2(mx)}</b>, ra ngoài $[0,1]$ nên không phải xác suất hợp lệ.`:`<b style="color:var(--ok)">Đường linear hiện vẫn trong [0,1]</b> (từ ${f2(mn)} đến ${f2(mx)}). Hãy tăng độ dốc hoặc kéo dài khoảng giờ để thấy nó vượt ngưỡng.`;
-$('#o1').innerHTML=`Linear: MSE = <b>${f3(mse/PTS.length)}</b> · Sigmoid (luôn trong (0,1)): BCE = <b>${f3(ll/PTS.length)}</b><br>${PTS.length} điểm (xanh: đậu, cam: rớt)`}
+$('#w1').innerHTML=out?`<b style="color:var(--bad)">Cảnh báo:</b> đường linear từ <b>${f2(mn)}</b> đến <b>${f2(mx)}</b>, ra ngoài $[0,1]$.`:`<b style="color:var(--ok)">Đường linear vẫn trong [0,1]</b> (${f2(mn)} → ${f2(mx)}).`;
+$('#o1').innerHTML=`Linear: MSE = <b>${f3(mse/PTS.length)}</b> · Sigmoid: BCE = <b>${f3(ll/PTS.length)}</b><br>${PTS.length} điểm (xanh: đậu, vàng: rớt)`}
 E.onclick=e=>{const r=E.getBoundingClientRect(),p=PAD,W=r.width,H=r.height,px=e.clientX-r.left,py=e.clientY-r.top,
 X=x=>p.l+x/12*(W-p.l-p.r),Y=y=>H-p.b-(y+.5)/2*(H-p.t-p.b),k=PTS.findIndex(([x,y])=>Math.hypot(X(x)-px,Y(y)-py)<12);
 if(k>=0&&PTS.length>2)PTS.splice(k,1);else if(PTS.length<30){const x=Math.max(0,Math.min(12,Math.round((px-p.l)/(W-p.l-p.r)*24)/2)),y=1.5-(py-p.t)/(H-p.t-p.b)*2;PTS.push([x,y>.5?1:0])}dr()};
@@ -123,33 +195,4 @@ function dr(){const v=p();plot('#c2a',ps,[{y:ps.map(a=>a/(1-a)),c:C.bad,n:'Odds 
 plot('#c2b',ps,[{y:ps.map(a=>Math.log(a/(1-a))),c:C.ok,n:'Logit = ln(p/(1−p))'},{pts:[[v,Math.log(v/(1-v))]],c:C.pos}],{y0:-5,y1:5,h:[0],v:[[v]]});
 $('#o2').innerHTML=`p = <b>${f2(v)}</b> → odds = <b>${f2(v/(1-v))}</b> → ln(odds) = <b>${f2(Math.log(v/(1-v)))}</b>`}D[1]=dr}
 // 3
-{const xs=lin(0,12,120),zs=lin(-8,8,160),w=sl('#k3','w',0,3,.05,1.2,dr,f2),b=sl('#k3','b',-15,5,.1,-6,dr,f2),x=sl('#k3','x',0,12,.1,7,dr,f2);
-function dr(){const z=w()*x()+b(),s=sg(z);
-plot('#c3a',xs,[{y:xs.map(a=>w()*a+b()),c:C.ok,n:'z = wx + b (log-odds)'},{pts:[[x(),z]],c:C.pos}],{y0:-15,y1:15,h:[0],v:[[x()]]});
-plot('#c3b',zs,[{y:zs.map(sg),c:C.bad,n:'σ(z)'},{pts:[[z,s]],c:C.pos},{pts:[[-z,sg(-z)]],c:C.ok},{pts:[[0,.5]],c:C.a,r:3}],{y0:-.1,y1:1.1,h:[0,.5,1],v:[[z],[-z]]});
-plot('#c3c',zs,[{y:zs.map(a=>sg(a)*(1-sg(a))),c:C.ok,n:"σ′(z) = σ(1−σ)"},{pts:[[z,s*(1-s)]],c:C.pos}],{y0:-.05,y1:.3,v:[[z]]});
-$('#o3').innerHTML=`z = <b>${f2(z)}</b> → odds = <b>${f2(Math.exp(z))}</b> → p = <b>${f3(s)}</b> · σ(−z) = <b>${f3(sg(-z))}</b> = 1−σ(z) = <b>${f3(1-s)}</b> · σ′(z) = <b>${f3(s*(1-s))}</b> (tối đa 0.25) · p = 0.5 tại x = −b/w = <b>${w()?f2(-b()/w()):'-'}</b>`}D[2]=dr}
-// 4
-function heat(id,f,x0,x1,y0,y1,mk){const t=cv(id);if(!t)return;const[c,W,H]=t,K=40,F=[];let mn=1e9;
-for(let i=0;i<K;i++)for(let j=0;j<K;j++){const v=f(x0+(i+.5)*(x1-x0)/K,y0+(j+.5)*(y1-y0)/K);F.push(v);mn=Math.min(mn,v)}
-F.forEach((v,k)=>{const i=Math.floor(k/K),j=k%K,l=Math.floor(Math.log(v-mn+.01)*2.2);c.fillStyle=l%2?'rgba(67,56,202,.10)':'rgba(67,56,202,.26)';c.fillRect(i*W/K,H-(j+1)*H/K,W/K+1,H/K+1)});
-c.font='12px system-ui';c.fillStyle=css('--mut');c.fillText('J(w,b): trục ngang w, trục dọc b',6,H-6);
-mk.forEach(m=>{const X=(m[0]-x0)/(x1-x0)*W,Y=H-(m[1]-y0)/(y1-y0)*H;c.fillStyle=m[2];c.beginPath();c.arc(X,Y,5,0,7);c.fill();c.fillText(m[3],X+8,Y-6)})}
-{const xs=lin(0,12,120),w=sl('#k5','w',0,4,.05,1,dr,f2),b=sl('#k5','b',-20,4,.1,-4,dr,f2);
-function dr(){const[mw,mb]=mle(),ps=PTS.map(([x,y])=>y?sg(w()*x+b()):1-sg(w()*x+b())),ll=ps.reduce((a,q)=>a+Math.log(q),0);
-plot('#c5a',xs,[{y:xs.map(a=>sg(w()*a+b())),c:C.bad,n:'σ(wx+b)'},{pts:ptsOf(1),c:C.ok,r:5},{pts:ptsOf(0),c:C.a,r:5}],{y0:-.1,y1:1.1,h:[0,1]});
-heat('#c5b',Jwb,0,4,-20,4,[[mw,mb,'#12998a','MLE'],[w(),b(),'#c2410c','hiện tại']]);
-$('#o5').innerHTML=`L = ∏pᵢ = <b>${ps.reduce((a,q)=>a*q,1).toExponential(2)}</b> · ℓ = ln L = <b>${f2(ll)}</b> · J = −ℓ/n = <b>${f3(-ll/ps.length)}</b><br>MLE (≈): w = <b>${f2(mw)}</b>, b = <b>${f2(mb)}</b>`}
-$('#m1').onclick=()=>{const[a,s]=mle();w.set(Math.max(0,Math.min(4,a)));b.set(Math.max(-20,Math.min(4,s)));dr()};D[3]=dr}
-// 5
-{const ps=lin(.01,.99,98),p=sl('#k6','p',.01,.99,.01,.3,dr,f2);let Y=1;
-function dr(){const v=p(),L=Y?-Math.log(v):-Math.log(1-v);plot('#c6',ps,[{y:ps.map(a=>-Math.log(a)),c:C.ok,n:'y=1: −ln p'},{y:ps.map(a=>-Math.log(1-a)),c:C.bad,n:'y=0: −ln(1−p)'},{pts:[[v,L]],c:C.pos,r:5}],{y0:0,y1:5,v:[[v]]});
-$('#o6').innerHTML=`y = <b>${Y}</b>, p = <b>${f2(v)}</b> → loss = <b>${f3(L)}</b> ${L>2?'<b style="color:var(--bad)">(dự đoán sai và tự tin: loss lớn)</b>':L<.4?'(dự đoán tốt)':''}`}
-const sy=y=>{Y=y;$('#y1').classList.toggle('on',y==1);$('#y0').classList.toggle('on',!y);dr()};$('#y1').onclick=()=>sy(1);$('#y0').onclick=()=>sy(0);D[4]=dr}
-// điều hướng
-let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}cu=Math.max(0,i);S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#nx').textContent=cu==S.length-1?'Phần 2 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
-$('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
-addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
-addEventListener('resize',()=>D[cu]&&D[cu]());
-addEventListener('load',()=>{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});go((+location.hash.slice(1)||1)-1)});
-</script></body></html>
+{
