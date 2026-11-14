@@ -144,11 +144,6 @@ plot('#c5a',xs,[{y:xs.map(a=>sg(w()*a+b())),c:C.bad,n:'σ(wx+b)'},{pts:ptsOf(1),
 heat('#c5b',Jwb,0,4,-20,4,[[mw,mb,'#12998a','MLE'],[w(),b(),'#c2410c','hiện tại']]);
 $('#o5').innerHTML=`L = ∏pᵢ = <b>${ps.reduce((a,q)=>a*q,1).toExponential(2)}</b> · ℓ = ln L = <b>${f2(ll)}</b> · J = −ℓ/n = <b>${f3(-ll/ps.length)}</b><br>MLE (≈): w = <b>${f2(mw)}</b>, b = <b>${f2(mb)}</b>`}
 $('#m1').onclick=()=>{const[a,s]=mle();w.set(Math.max(0,Math.min(4,a)));b.set(Math.max(-20,Math.min(4,s)));dr()};D[4]=dr}
-// 6
-{const ps=lin(.01,.99,98),p=sl('#k6','p',.01,.99,.01,.3,dr,f2);let Y=1;
-function dr(){const v=p(),L=Y?-Math.log(v):-Math.log(1-v);plot('#c6',ps,[{y:ps.map(a=>-Math.log(a)),c:C.ok,n:'y=1: −ln p'},{y:ps.map(a=>-Math.log(1-a)),c:C.bad,n:'y=0: −ln(1−p)'},{pts:[[v,L]],c:C.pos,r:5}],{y0:0,y1:5,v:[[v]]});
-$('#o6').innerHTML=`y = <b>${Y}</b>, p = <b>${f2(v)}</b> → loss = <b>${f3(L)}</b> ${L>2?'<b style="color:var(--bad)">(dự đoán sai và tự tin: loss lớn)</b>':L<.4?'(dự đoán tốt)':''}`}
-const sy=y=>{Y=y;$('#y1').classList.toggle('on',y==1);$('#y0').classList.toggle('on',!y);dr()};$('#y1').onclick=()=>sy(1);$('#y0').onclick=()=>sy(0);D[5]=dr}
 // điều hướng
 let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}cu=Math.max(0,i);S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#nx').textContent=cu==S.length-1?'Phần 2 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
 $('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
