@@ -71,12 +71,6 @@ $$J(\theta)=-\frac1n\sum_{i=1}^n\big[y_i\ln p_i+(1-y_i)\ln(1-p_i)\big]$$
 <p class="box">Chọn $y$, kéo $p$ và quan sát loss. Thử $p=0.01$ với $y=1$.</p></div>
 <div class="v"><canvas id="c6"></canvas><div class="c" id="k6"></div><div class="b"><button id="y1" class="on">y = 1</button><button id="y0">y = 0</button></div><div class="o" id="o6"></div></div></section>
 
-<section class="s"><div><h2>6. Tóm tắt và Quiz</h2>
-<ol class="f"><li>Bernoulli: $P(y\mid x)=p^y(1-p)^{1-y}$</li><li>Odds: $\frac{p}{1-p}\in(0,\infty)$</li><li>Log-odds: $\ln\frac{p}{1-p}\in\mathbb R$, giả định $=w^Tx+b$</li><li>Sigmoid: $p=\frac1{1+e^{-z}}$</li><li>Likelihood, rồi Log-likelihood $\ell(\theta)$</li><li>Loss: $J=-\frac1n\ell(\theta)$ (BCE)</li></ol>
-<p>Phần tiếp theo: tính gradient và Hessian của $J$ và chứng minh $J$ lồi.</p></div>
-<div class="v" id="qz"></div></section>
-</main>
-<nav><a class="nb" href="../index.html">☰ Mục lục</a><button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button></nav>
 
 <script>
 const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan2-gradient-hessian/';
