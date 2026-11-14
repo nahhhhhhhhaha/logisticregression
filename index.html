@@ -1,193 +1,35 @@
 <!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Logistic Regression: từ Sigmoid đến Bayesian</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<title>Học Regression qua đồ thị tương tác</title>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f4f6f8;--ink:#17203a;--mut:#667085;--card:#fff;--ln:#d5dbe3;--pos:#4338ca}
 @media(prefers-color-scheme:dark){:root{--bg:#10162b;--ink:#e8ecf5;--mut:#98a2b8;--card:#1a2240;--ln:#2d3760}}
-*{box-sizing:border-box}html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font:18px/1.5 Newsreader,Georgia,serif;display:flex;flex-direction:column}
-main{flex:1;overflow:hidden;position:relative}
-.s{position:absolute;inset:0;padding:24px 5vw;display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:30px;overflow:auto;align-content:start}
-.s.on{display:grid}
-h1{font-size:2.5rem;line-height:1.1;margin:.2em 0}h2{font-size:1.6rem;margin:0 0 .4em;line-height:1.2}
-p{margin:.45em 0}.mut{color:var(--mut)}
-.v{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:14px;align-self:start}
-canvas{width:100%;height:320px;display:block}
-.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:14px system-ui,sans-serif;margin-top:8px}
-.c input{width:100%;accent-color:var(--pos)}
-.o{font:14px/1.6 system-ui,sans-serif;margin-top:8px;color:var(--mut)}.o b{color:var(--ink)}
-.b{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-button{font:14px system-ui;padding:6px 12px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:6px;cursor:pointer}
-button:focus-visible,input:focus-visible{outline:2px solid var(--pos)}
-nav{display:flex;gap:12px;align-items:center;justify-content:center;padding:10px;border-top:1px solid var(--ln);font:14px system-ui}
-table{border-collapse:collapse;width:100%;font:13px system-ui}td,th{border-bottom:1px solid var(--ln);padding:5px 6px;text-align:left}
-.full{grid-column:1/-1}.katex-display{overflow-x:auto;overflow-y:hidden;margin:.6em 0}
-@media(max-width:860px){.s{grid-template-columns:1fr}h1{font-size:2rem}}
-</style></head><body>
-<main>
-<section class="s on"><div class="full"><h1>Logistic Regression: từ Sigmoid, tối ưu hóa đến Bayesian</h1>
-<p class="mut">Mỗi slide có một đồ thị tương tác. Dùng phím ← → hoặc nút bên dưới để chuyển slide.</p>
-<p>Lộ trình: Linear vs Logistic → Sigmoid → Loss, Gradient, Hessian → Gradient Descent → Newton / IRLS → BFGS → So sánh → Regularization → Bayesian và MAP → Dự đoán.</p></div></section>
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.5 Newsreader,Georgia,serif;text-align:center}
+main{max-width:980px;margin:0 auto;padding:48px 5vw 64px}
+h1{font-size:2.6rem;line-height:1.1;margin:0 0 .3em}h2{font-size:1.7rem;margin:1.6em 0 .2em}
+.mut{color:var(--mut)}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:18px}
+.k{display:block;background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:16px;color:inherit;text-decoration:none;text-align:center}
+a.k:hover,a.k:focus-visible{border-color:var(--pos);outline:none;box-shadow:0 0 0 2px var(--pos)}
+.k b{display:block;font-size:1.1rem}.k span{font-size:.9rem;color:var(--mut)}.n{font:12px system-ui;color:var(--pos);letter-spacing:.06em}
+.k.off{opacity:.55}.tag{display:inline-block;font:12px system-ui;border:1px solid var(--ln);border-radius:99px;padding:1px 10px;margin-top:6px;color:var(--mut)}
+.big{background:var(--card);border:1px dashed var(--ln);border-radius:12px;padding:22px;margin-top:14px;opacity:.7}
+</style></head><body><main>
+<h1>Học Regression qua đồ thị tương tác</h1>
+<p class="mut">Mỗi phần là một deck riêng: kéo thanh trượt, bấm nút, quan sát công thức hoạt động.</p>
 
-<section class="s"><div><h2>1. Vì sao không dùng Linear Regression?</h2>
-<p>Dự đoán đậu/rớt ($y\in\{0,1\}$) theo số giờ ôn $X$. Hồi quy tuyến tính $\hat p=\beta_0+\beta_1X$ có thể ra $-20\%$ hoặc $140\%$, vô nghĩa với xác suất.</p>
-<p>Logistic Regression ép đầu ra vào $(0,1)$: $$\hat p(X)=\sigma(wX+b)$$</p><p class="mut">Chỉnh $w,b$ và so với đường thẳng bình phương tối thiểu.</p></div>
-<div class="v"><canvas id="c1"></canvas><div class="c" id="k1"></div><div class="o" id="o1"></div></div></section>
+<h2>1. Logistic Regression</h2>
+<p class="mut">Bảy phần, từ xây dựng mô hình đến suy diễn Bayesian.</p>
+<div class="g">
+<a class="k" href="phan1-sigmoid/"><div class="n">PHẦN 1</div><b>Sigmoid và Loss</b><span>Bài toán, Bernoulli → Odds → Log-Odds → Sigmoid, Likelihood, Binary Cross-Entropy</span></a>
+<div class="k off"><div class="n">PHẦN 2</div><b>Gradient và Hessian</b><span>Đạo hàm của loss, ma trận Hessian, tính lồi</span><br><i class="tag">Sắp có</i></div>
+<div class="k off"><div class="n">PHẦN 3</div><b>Gradient Descent</b><span>Batch GD, SGD, Momentum, điều kiện hội tụ</span><br><i class="tag">Sắp có</i></div>
+<div class="k off"><div class="n">PHẦN 4</div><b>Newton và IRLS</b><span>Xấp xỉ bậc hai, hội tụ bậc hai</span><br><i class="tag">Sắp có</i></div>
+<div class="k off"><div class="n">PHẦN 5</div><b>Quasi-Newton</b><span>Secant, BFGS, L-BFGS</span><br><i class="tag">Sắp có</i></div>
+<div class="k off"><div class="n">PHẦN 6</div><b>Regularization</b><span>L1, L2, subgradient</span><br><i class="tag">Sắp có</i></div>
+<div class="k off"><div class="n">PHẦN 7</div><b>Bayesian và MAP</b><span>Prior, Posterior, Laplace, MCMC</span><br><i class="tag">Sắp có</i></div>
+</div>
 
-<section class="s"><div><h2>2. Xây dựng Sigmoid</h2>
-<p>Bernoulli $P(Y=y)=p^y(1-p)^{1-y}$, rồi đi qua odds và log-odds:</p>
-$$\text{odds}=\frac{p}{1-p},\qquad \ln\frac{p}{1-p}=z=w^Tx+b$$
-$$p=\sigma(z)=\frac{1}{1+e^{-z}},\qquad \sigma'(z)=p(1-p)$$
-<p>Log-odds là tuyến tính theo $x$, còn xác suất thì uốn cong thành chữ S. Kéo $z$ để xem ba đại lượng liên hệ ra sao; đạo hàm $p(1-p)$ lớn nhất tại $p=0.5$.</p></div>
-<div class="v"><canvas id="c2"></canvas><div class="c" id="k2"></div><div class="o" id="o2"></div></div></section>
-
-<section class="s"><div><h2>3. Loss, Gradient và Hessian</h2>
-$$L=-[y\ln p+(1-y)\ln(1-p)],\quad p=\sigma(w^Tx+b)$$
-$$\frac{\partial L}{\partial w}=(p-y)x,\qquad \frac{\partial L}{\partial b}=p-y$$
-$$\nabla J=X^T(p-y),\qquad \nabla^2J=X^TSX,\ S=\mathrm{diag}\big(p_i(1-p_i)\big)$$
-<p>Vì $p_i(1-p_i)>0$ nên $v^TX^TSXv=\sum_i s_i(x_i^Tv)^2\ge0$: Hessian nửa xác định dương, hàm mất mát <b>lồi</b>. Dự đoán sai càng tự tin thì loss càng lớn (đồ thị bên phải).</p></div>
-<div class="v"><canvas id="c3"></canvas><div class="c" id="k3"></div><div class="o" id="o3"></div></div></section>
-
-<section class="s"><div><h2>4. Gradient Descent</h2>
-$$\theta_{t+1}=\theta_t-\eta\,\nabla f(\theta_t)$$
-<p>Momentum (Heavy Ball): $v_{t+1}=\beta v_t-\eta\nabla f,\ \theta_{t+1}=\theta_t+v_{t+1}$. Nền màu là đường đồng mức của loss theo $(w,b)$; chấm tròn là bước lặp.</p>
-<p>Thử $\eta$ quá nhỏ (chậm), vừa phải, và quá lớn (dao động hoặc phân kỳ). Momentum giúp đi nhanh dọc thung lũng hẹp.</p></div>
-<div class="v"><canvas id="c4"></canvas><div class="c" id="k4"></div><div class="b"><button id="a1">+1 bước</button><button id="a2">+10</button><button id="a3">Làm lại</button></div><div class="o" id="o4"></div></div></section>
-
-<section class="s"><div><h2>5. Newton và IRLS</h2>
-<p>Xấp xỉ Taylor bậc hai $f_{quad}=f+g^T d+\tfrac12d^THd$, giải điểm dừng ra bước Newton:</p>
-$$\theta_{k+1}=\theta_k-H_k^{-1}g_k$$
-<p>Với Logistic Regression, bước này chính là IRLS (bình phương tối thiểu có trọng số $S$). Hội tụ bậc hai: chỉ vài bước, nhưng mỗi bước tốn $O(D^3)$. Bấm +1 bước và xem sai số giảm rất nhanh.</p></div>
-<div class="v"><canvas id="c5"></canvas><div class="b"><button id="b1">+1 bước</button><button id="b2">+10</button><button id="b3">Làm lại</button></div><div class="o" id="o5"></div></div></section>
-
-<section class="s"><div><h2>6. Quasi-Newton: BFGS</h2>
-<p>Không tính Hessian, chỉ dùng $s_k=\theta_{k+1}-\theta_k$ và $y_k=g_{k+1}-g_k$ với phương trình secant $C_{k+1}y_k=s_k$ ($C\approx H^{-1}$). Với $\rho_k=1/y_k^Ts_k$:</p>
-$$C_{k+1}=(I-\rho_ks_ky_k^T)\,C_k\,(I-\rho_ky_ks_k^T)+\rho_ks_ks_k^T$$
-<p>Bước đầu giống GD (vì $C_0=I$), rồi nhanh dần khi $C_k$ học được độ cong. L-BFGS chỉ giữ vài cặp $(s,y)$ gần nhất để tiết kiệm bộ nhớ.</p></div>
-<div class="v"><canvas id="c6"></canvas><div class="b"><button id="d1">+1 bước</button><button id="d2">+10</button><button id="d3">Làm lại</button></div><div class="o" id="o6"></div></div></section>
-
-<section class="s"><div><h2>7. So sánh các phương pháp</h2>
-<p>Chạy cả bốn từ cùng điểm xuất phát và so số bước.</p>
-<table><tr><th>Phương pháp</th><th>Bộ nhớ</th><th>Chi phí/bước</th><th>Hội tụ</th></tr>
-<tr><td>Batch GD</td><td>$O(D)$</td><td>$O(ND)$</td><td>Tuyến tính</td></tr>
-<tr><td>SGD</td><td>$O(D)$</td><td>$O(D)$</td><td>Sublinear</td></tr>
-<tr><td>Momentum</td><td>$O(D)$</td><td>$O(BD)$</td><td>Tuyến tính nâng cao</td></tr>
-<tr><td>Newton / IRLS</td><td>$O(D^2)$</td><td>$O(ND^2+D^3)$</td><td>Bậc hai</td></tr>
-<tr><td>BFGS</td><td>$O(D^2)$</td><td>$O(D^2)+O(ND)$</td><td>Siêu tuyến tính</td></tr></table></div>
-<div class="v"><canvas id="c7"></canvas><div class="c" id="k7"></div><div class="b"><button id="e1">+1 bước</button><button id="e2">+10</button><button id="e3">Làm lại</button></div><div class="o" id="o7"></div></div></section>
-
-<section class="s"><div><h2>8. Regularization: L1 và L2</h2>
-$$J_{L1}=J_{BCE}+\lambda\|\theta\|_1,\qquad J_{L2}=J_{BCE}+\tfrac{\lambda}{2}\|\theta\|_2^2$$
-<p>Xét một tham số với nghiệm không phạt là $a$. L2 co đều: $w^*=\frac{a}{1+\lambda}$. L1 (không khả vi tại 0, dùng subgradient) cho soft-threshold: $w^*=\mathrm{sign}(a)\max(|a|-\lambda,0)$.</p>
-<p>Tăng $\lambda$: L1 đưa nghiệm nhỏ về đúng 0 (mô hình thưa), L2 chỉ thu nhỏ.</p></div>
-<div class="v"><canvas id="c8"></canvas><div class="c" id="k8"></div><div class="o" id="o8"></div></div></section>
-
-<section class="s"><div><h2>9. Bayesian, MAP và Laplace</h2>
-$$P(w\mid D)\propto P(D\mid w)\,P(w),\quad w\sim\mathcal N(0,\sigma^2)$$
-$$w_{MAP}=\arg\min_w\big[L_{BCE}+\tfrac{1}{2\sigma^2}w^Tw\big]$$
-<p>MAP với Gaussian prior chính là L2 với $\lambda=\frac1{2\sigma^2}$. Laplace xấp xỉ posterior bằng $\mathcal N(w_{MAP},\Sigma)$, $\Sigma=(X^TWX+\sigma^{-2}I)^{-1}$. Giảm $n$ xuống 2 (dữ liệu phân tách) để thấy MLE chạy ra vô cực còn MAP vẫn hữu hạn.</p></div>
-<div class="v"><canvas id="c9"></canvas><div class="c" id="k9"></div><div class="o" id="o9"></div></div></section>
-
-<section class="s"><div><h2>10. Dự đoán: MAP và Bayesian đầy đủ</h2>
-$$P(y^*=1\mid x^*,D)=\int\sigma(w^Tx^*)P(w\mid D)\,dw$$
-$$\mathbb E[\sigma(w^Tx^*)]\ne\sigma(\mathbb E[w]^Tx^*)$$
-<p>MAP dùng một $w$ duy nhất; Bayesian lấy trung bình theo toàn bộ posterior nên đường dự đoán thoải hơn khi xa dữ liệu, phản ánh sự không chắc chắn. MAP chỉ là ước lượng điểm, chưa phải toàn bộ suy diễn Bayesian.</p></div>
-<div class="v"><canvas id="c10"></canvas><div class="c" id="k10"></div><div class="o" id="o10"></div></div></section>
-</main>
-<nav><button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button></nav>
-
-<script>
-const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={};
-const C={pri:'#d9822b',lik:'#12998a',pos:'#4338ca',red:'#c2410c',gd:'#c2410c',mom:'#d9822b',newton:'#12998a',bfgs:'#4338ca'};
-const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2);
-function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
-function plot(id,xs,cs,o={}){const t=cv(id);if(!t)return;const[c,W,H]=t,p={l:34,r:8,t:22,b:22};
-const x0=o.x0??xs[0],x1=o.x1??xs.at(-1),y0=o.y0??0,y1=o.y1??Math.max(...cs.flatMap(k=>k.y||k.by||[0]),1e-9)*1.15;
-const X=x=>p.l+(x-x0)/(x1-x0)*(W-p.l-p.r),Y=y=>H-p.b-(y-y0)/(y1-y0)*(H-p.t-p.b);
-c.font='12px system-ui';c.fillStyle=c.strokeStyle=css('--mut');c.lineWidth=1;const ax=X(Math.max(x0,Math.min(0,x1)));
-c.beginPath();c.moveTo(p.l,Y(y0));c.lineTo(W-p.r,Y(y0));c.moveTo(ax,p.t);c.lineTo(ax,H-p.b);c.stroke();
-for(let k=0;k<=4;k++){const v=x0+(x1-x0)*k/4;c.fillText(v.toFixed(1),X(v)-9,H-6)}
-for(let k=0;k<=2;k++){const v=y0+(y1-y0)*k/2;c.fillText(v.toFixed(1),0,Y(v)+4)}
-(o.h||[]).forEach(v=>{c.setLineDash([4,4]);c.beginPath();c.moveTo(p.l,Y(v));c.lineTo(W-p.r,Y(v));c.stroke();c.setLineDash([])});
-let lx=p.l+6;
-cs.forEach(k=>{c.strokeStyle=c.fillStyle=k.c;c.lineWidth=2;c.setLineDash(k.dash?[6,4]:[]);
-if(k.pts)k.pts.forEach(q=>{c.beginPath();c.arc(X(q[0]),Y(q[1]),4,0,7);c.fill()});
-else{c.beginPath();k.y.forEach((v,i)=>i?c.lineTo(X(xs[i]),Y(v)):c.moveTo(X(xs[i]),Y(v)));c.stroke();
-if(k.fill){c.lineTo(X(xs.at(-1)),Y(0));c.lineTo(X(xs[0]),Y(0));c.globalAlpha=.15;c.fill();c.globalAlpha=1}}
-c.setLineDash([]);if(k.n){c.fillText(k.n,lx,13);lx+=c.measureText(k.n).width+14}});
-(o.v||[]).forEach(v=>{c.strokeStyle=v[1]||css('--mut');c.setLineDash([3,3]);c.beginPath();c.moveTo(X(v[0]),p.t);c.lineTo(X(v[0]),H-p.b);c.stroke();c.setLineDash([])})}
-function sl(h,lab,mn,mx,st,v,f,fmt=x=>x){const g=$(h),l=document.createElement('label'),i=document.createElement('input'),o=document.createElement('span');l.textContent=lab;
-Object.assign(i,{type:'range',min:mn,max:mx,step:st,value:v});o.textContent=fmt(+v);i.oninput=()=>{o.textContent=fmt(+i.value);f()};g.append(l,i,o);return()=>+i.value}
-// 1 linear vs logistic
-{const h=[1,2,3,4,5,6,7,8,9,10],y=[0,0,0,0,1,0,1,1,1,1];let sxy=0,sxx=0;h.forEach((v,i)=>{sxy+=(v-5.5)*(y[i]-.6);sxx+=(v-5.5)**2});
-const b1=sxy/sxx,b0=.6-b1*5.5,xs=lin(-1,12,130),w=sl('#k1','w',0,3,.05,.8,dr,f2),b=sl('#k1','b',-12,4,.1,-4,dr,f2);
-function dr(){plot('#c1',xs,[{y:xs.map(x=>b0+b1*x),c:C.red,n:'Linear'},{y:xs.map(x=>sg(w()*x+b())),c:C.pos,n:'Sigmoid'},{pts:h.map((v,i)=>[v,y[i]]),c:C.lik}],{y0:-.4,y1:1.5,h:[0,1]});
-$('#o1').innerHTML=`Linear: <b>${f2(b0)}</b> tại 0 giờ, <b>${f2(b0+b1*12)}</b> tại 12 giờ (ngoài [0,1]).`}D[1]=dr}
-// 2 sigmoid
-{const xs=lin(-6,6,120),z=sl('#k2','z',-6,6,.1,1,dr,f2);
-function dr(){const v=z(),p=sg(v);plot('#c2',xs,[{y:xs.map(sg),c:C.pos,n:'σ(z)'},{y:xs.map(a=>sg(a)*(1-sg(a))),c:C.pri||'#d9822b',n:'σ′=p(1−p)',dash:1},{pts:[[v,p]],c:C.red}],{y0:0,y1:1.05,h:[.5],v:[[v]]});
-$('#o2').innerHTML=`z = <b>${f2(v)}</b> &nbsp; p = <b>${p.toFixed(3)}</b> &nbsp; odds = <b>${(p/(1-p)).toFixed(3)}</b> &nbsp; ln(odds) = <b>${f2(Math.log(p/(1-p)))}</b>`}D[2]=dr}
-// 3 loss
-{const xs=lin(.01,.99,98),pp=sl('#k3','p',.02,.98,.01,.7,dr,f2);
-function dr(){const p=pp();plot('#c3',xs,[{y:xs.map(a=>-Math.log(a)),c:C.lik,n:'y=1: −ln p'},{y:xs.map(a=>-Math.log(1-a)),c:C.red,n:'y=0: −ln(1−p)'}],{y0:0,y1:4,v:[[p]]});
-$('#o3').innerHTML=`y=1: loss <b>${f2(-Math.log(p))}</b>, ∂L/∂z=p−y = <b>${f2(p-1)}</b> &nbsp; y=0: loss <b>${f2(-Math.log(1-p))}</b>, ∂L/∂z = <b>${f2(p)}</b>`}D[3]=dr}
-// data
-const X=[-2.6,1.8,-.4,2.2,-1.5,.7,-2.9,1.1,2.7,-.9,.3,-1.9,2.4,-.2,1.5,-2.2,.9,2.9,-1.2,.5],Y=[0,1,1,1,0,0,0,1,1,0,0,1,1,0,1,0,1,1,0,1],N=20,LA=.01;
-function JG(t){let j=0,a=0,b=0;for(let i=0;i<N;i++){const z=t[0]*X[i]+t[1],p=sg(z);j+=Math.log1p(Math.exp(Y[i]?-z:z));a+=(p-Y[i])*X[i];b+=p-Y[i]}return[j/N+LA*t[0]**2/2,[a/N+LA*t[0],b/N]]}
-function HM(t){let a=0,b=0,c=0;for(let i=0;i<N;i++){const p=sg(t[0]*X[i]+t[1]),q=p*(1-p);a+=q*X[i]**2;b+=q*X[i];c+=q}return[a/N+LA,b/N,c/N]}
-const nw=(t)=>{const g=JG(t)[1],[a,b,c]=HM(t),d=a*c-b*b;return[t[0]-(c*g[0]-b*g[1])/d,t[1]-(-b*g[0]+a*g[1])/d]};
-let TS=[0,-1.5],Jm;{let t=TS;for(let i=0;i<40;i++)t=nw(t);Jm=JG(t)[0]}
-const mm=(A,B)=>[[A[0][0]*B[0][0]+A[0][1]*B[1][0],A[0][0]*B[0][1]+A[0][1]*B[1][1]],[A[1][0]*B[0][0]+A[1][1]*B[1][0],A[1][0]*B[0][1]+A[1][1]*B[1][1]]];
-const NM={gd:'GD',mom:'Momentum',newton:'Newton',bfgs:'BFGS'};
-function opt(id,k,o,list,lr0,b){const lr=list.some(m=>m=='gd'||m=='mom')?sl(k,'η',.05,5,.05,lr0,()=>{},f2):0;let M;
-function rs(){M={};list.forEach(m=>M[m]={t:TS,p:[TS],v:[0,0],C:[[1,0],[0,1]]});dr()}
-function st(m){const q=M[m],[j,g]=JG(q.t);let n;
-if(m=='gd')n=[q.t[0]-lr()*g[0],q.t[1]-lr()*g[1]];
-else if(m=='mom'){q.v=[.9*q.v[0]-lr()*g[0],.9*q.v[1]-lr()*g[1]];n=[q.t[0]+q.v[0],q.t[1]+q.v[1]]}
-else if(m=='newton')n=nw(q.t);
-else{const Cm=q.C,d=[-(Cm[0][0]*g[0]+Cm[0][1]*g[1]),-(Cm[1][0]*g[0]+Cm[1][1]*g[1])];let a=1;
-while(a>1e-4&&JG([q.t[0]+a*d[0],q.t[1]+a*d[1]])[0]>j+1e-4*a*(g[0]*d[0]+g[1]*d[1]))a/=2;
-n=[q.t[0]+a*d[0],q.t[1]+a*d[1]];const g2=JG(n)[1],s=[n[0]-q.t[0],n[1]-q.t[1]],y=[g2[0]-g[0],g2[1]-g[1]],sy=s[0]*y[0]+s[1]*y[1];
-if(sy>1e-12){const r=1/sy,A=[[1-r*s[0]*y[0],-r*s[0]*y[1]],[-r*s[1]*y[0],1-r*s[1]*y[1]]],R=mm(mm(A,Cm),[[A[0][0],A[1][0]],[A[0][1],A[1][1]]]);
-q.C=[[R[0][0]+r*s[0]*s[0],R[0][1]+r*s[0]*s[1]],[R[1][0]+r*s[1]*s[0],R[1][1]+r*s[1]*s[1]]]}}
-if(isFinite(n[0])&&Math.abs(n[0])<1e3){q.t=n;q.p.push(n)}}
-function run(k){for(let i=0;i<k;i++)list.forEach(st);dr()}
-function dr(){const t=cv(id);if(!t)return;const[c,W,H]=t,x0=-1,x1=4,y0=-3,y1=3.5,K=44,X_=x=>(x-x0)/(x1-x0)*W,Y_=y=>H-(y-y0)/(y1-y0)*H;
-for(let i=0;i<K;i++)for(let j=0;j<K;j++){const J=JG([x0+(i+.5)*(x1-x0)/K,y0+(j+.5)*(y1-y0)/K])[0]-Jm,l=Math.floor(Math.log(J+.003)*2.2);
-c.fillStyle=l%2?'rgba(67,56,202,.10)':'rgba(67,56,202,.22)';c.fillRect(i*W/K,H-(j+1)*H/K,W/K+1,H/K+1)}
-c.font='12px system-ui';c.fillStyle=css('--mut');c.fillText('trục ngang: w, trục dọc: b',6,H-6);let lx=6;
-list.forEach(m=>{const q=M[m];c.strokeStyle=c.fillStyle=C[m];c.lineWidth=2;c.beginPath();q.p.forEach((a,i)=>i?c.lineTo(X_(a[0]),Y_(a[1])):c.moveTo(X_(a[0]),Y_(a[1])));c.stroke();
-q.p.forEach(a=>{c.beginPath();c.arc(X_(a[0]),Y_(a[1]),3,0,7);c.fill()});c.fillText(NM[m],lx,14);lx+=70});
-$(o).innerHTML=list.map(m=>{const q=M[m],e=JG(q.t);return`<span style="color:${C[m]}">■</span> ${NM[m]}: ${q.p.length-1} bước, J−J* = <b>${(e[0]-Jm).toExponential(1)}</b>, ‖g‖ = <b>${Math.hypot(...e[1]).toExponential(1)}</b>`}).join('<br>')}
-$('#'+b[0]).onclick=()=>run(1);$('#'+b[1]).onclick=()=>run(10);$('#'+b[2]).onclick=rs;rs();return dr}
-D[4]=opt('#c4','#k4','#o4',['gd','mom'],1,['a1','a2','a3']);D[5]=opt('#c5','#k5','#o5',['newton'],0,['b1','b2','b3']);
-D[6]=opt('#c6','#k6','#o6',['bfgs'],0,['d1','d2','d3']);D[7]=opt('#c7','#k7','#o7',['gd','mom','newton','bfgs'],1,['e1','e2','e3']);
-// 8 regularization
-{const xs=lin(-3,3,120),l=sl('#k8','λ',0,2.5,.05,1,dr,f2),a0=sl('#k8','a',-3,3,.05,.7,dr,f2);
-function dr(){const L=l();plot('#c8',xs,[{y:xs,c:C.pri||'#d9822b',n:'không phạt',dash:1},{y:xs.map(a=>a/(1+L)),c:C.lik,n:'L2'},{y:xs.map(a=>Math.sign(a)*Math.max(Math.abs(a)-L,0)),c:C.red,n:'L1'}],{y0:-3,y1:3,v:[[a0()]]});
-const a=a0();$('#o8').innerHTML=`a = <b>${f2(a)}</b> → L2: <b>${f2(a/(1+L))}</b> &nbsp; L1: <b>${f2(Math.sign(a)*Math.max(Math.abs(a)-L,0))}</b> (trục ngang: a, trục dọc: w*)`}D[8]=dr}
-// Bayes
-const G=lin(-4,8,400),dw=G[1]-G[0],ll=(w,n)=>{let l=0;for(let i=0;i<n;i++){const z=w*X[i];l-=Math.log1p(Math.exp(Y[i]?-z:z))}return l};
-function B(n,s){const L=G.map(w=>ll(w,n)),P=G.map(w=>-w*w/(2*s*s)),J=L.map((v,i)=>v+P[i]);
-const nm=a=>{const m=Math.max(...a),e=a.map(v=>Math.exp(v-m)),z=e.reduce((p,q)=>p+q)*dw;return e.map(v=>v/z)},am=a=>G[a.indexOf(Math.max(...a))],wm=am(J);
-let A=1/(s*s);for(let i=0;i<n;i++){const p=sg(wm*X[i]);A+=X[i]**2*p*(1-p)}return{lik:nm(L),pri:nm(P),pos:nm(J),mle:am(L),map:wm,A}}
-{const n=sl('#k9','n',2,20,1,8,dr),s=sl('#k9','σ',.3,10,.1,2,dr,f2);
-function dr(){const b=B(n(),s()),g=G.map(w=>Math.sqrt(b.A/6.2832)*Math.exp(-b.A*(w-b.map)**2/2));
-plot('#c9',G,[{y:b.pri,c:C.pri,n:'Prior'},{y:b.lik,c:C.lik,n:'Likelihood'},{y:b.pos,c:C.pos,n:'Posterior',fill:1},{y:g,c:C.red,n:'Laplace',dash:1}],{v:[[b.mle,C.lik],[b.map,C.pos]]});
-$('#o9').innerHTML=`w_MLE = <b>${b.mle>7.9?'→ ∞':f2(b.mle)}</b> &nbsp; w_MAP = <b>${f2(b.map)}</b> &nbsp; λ=1/(2σ²) = <b>${(1/(2*s()**2)).toFixed(3)}</b> &nbsp; sd Laplace = <b>${f2(1/Math.sqrt(b.A))}</b>`}D[9]=dr}
-// 10 predictive
-{const n=sl('#k10','n',2,20,1,4,dr),s=sl('#k10','σ',.3,10,.1,3,dr,f2),xt=sl('#k10','x*',-6,6,.1,4,dr,f2),xs=lin(-6,6,120);
-function dr(){const b=B(n(),s()),mp=xs.map(x=>sg(b.map*x)),by=xs.map(x=>G.reduce((a,w,i)=>a+sg(w*x)*b.pos[i]*dw,0));
-plot('#c10',xs,[{y:mp,c:C.red,n:'MAP: σ(w_MAP·x)'},{y:by,c:C.pos,n:'Bayesian: E[σ(w·x)]'}],{y0:0,y1:1,h:[.5],v:[[xt()]]});
-const i=Math.round((xt()+6)/.1);$('#o10').innerHTML=`Tại x* = ${f2(xt())}: MAP = <b>${f2(mp[i])}</b> &nbsp; Bayesian = <b>${f2(by[i])}</b>`}D[10]=dr}
-// nav
-let cu=0;function go(i){cu=Math.max(0,Math.min(S.length-1,i));S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;location.hash=cu+1;D[cu]&&D[cu]()}
-$('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
-addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
-addEventListener('resize',()=>D[cu]&&D[cu]());
-addEventListener('load',()=>{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});go((+location.hash.slice(1)||1)-1)});
-</script></body></html>
+<h2>2. Softmax Regression</h2>
+<div class="big"><b>Mở rộng cho bài toán nhiều lớp</b><br><span class="mut">Nội dung sẽ được bổ sung sau.</span><br><i class="tag">Sắp ra mắt</i></div>
+</main></body></html>
