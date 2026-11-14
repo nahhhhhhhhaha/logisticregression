@@ -29,7 +29,7 @@ nav{display:flex;gap:12px;align-items:center;justify-content:center;padding:10px
 @media(max-width:860px){.s{grid-template-columns:1fr;grid-auto-rows:auto}}
 </style></head><body>
 <main>
-<section class="s on"><div><p class="mut">Logistic Regression · Phần 1 / 7</p><h2>1. Linear hay Logistic?</h2>
+<section class="s on"><div><p class="mut">Logistic Regression · Phần 1 / 6</p><h2>1. Linear hay Logistic?</h2>
 <p><b>Bài toán:</b> dự đoán khả năng sinh viên đậu môn dựa trên số giờ ôn tập $X$ (1 đến 10 giờ). Nhãn $y=1$ là đậu, $y=0$ là rớt.</p>
 <p><b>Vấn đề:</b> Linear Regression $\hat p(X)=\beta_0+\beta_1X$ không bị chặn trong $[0,1]$, nên có thể cho xác suất âm ($-0.2$) hoặc lớn hơn 1 ($1.4$).</p>
 <p><b>Giải pháp:</b> biến đổi đầu ra tuyến tính bằng Sigmoid:</p>
@@ -70,7 +70,8 @@ $$J(\theta)=-\frac1n\sum_{i=1}^n\big[y_i\ln p_i+(1-y_i)\ln(1-p_i)\big]$$
 <p>Với một mẫu: nếu $y=1$ thì loss là $-\ln p$, nếu $y=0$ thì loss là $-\ln(1-p)$. Dự đoán sai mà tự tin ($p\to0$ khi $y=1$) bị phạt rất nặng.</p>
 <p class="box">Chọn $y$, kéo $p$ và quan sát loss. Thử $p=0.01$ với $y=1$.</p></div>
 <div class="v"><canvas id="c6"></canvas><div class="c" id="k6"></div><div class="b"><button id="y1" class="on">y = 1</button><button id="y0">y = 0</button></div><div class="o" id="o6"></div></div></section>
-
+</main>
+<nav><a class="nb" href="../index.html">☰ Mục lục</a><button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button></nav>
 
 <script>
 const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan2-gradient-hessian/';
@@ -94,7 +95,7 @@ if(o.t){c.fillStyle=css('--mut');c.textAlign='right';c.fillText(o.t,W-p.r,13);c.
 function sl(h,lab,mn,mx,st,v,f,fmt=x=>x){const g=$(h),l=document.createElement('label'),i=document.createElement('input'),o=document.createElement('span');l.textContent=lab;
 Object.assign(i,{type:'range',min:mn,max:mx,step:st,value:v});o.textContent=fmt(+v);i.oninput=()=>{o.textContent=fmt(+i.value);f()};g.append(l,i,o);
 const q=()=>+i.value;q.set=a=>{i.value=a;o.textContent=fmt(+i.value)};return q}
-// dữ liệu dùng chung giữa slide 1 và slide 5
+// dữ liệu dùng chung giữa slide 1 và slide 4
 const P0=()=>[1,2,3,4,5,6,7,8,9,10].map((x,i)=>[x,[0,0,0,0,1,0,1,1,1,1][i]]);let PTS=P0();
 function ols(){const n=PTS.length,mx=PTS.reduce((a,q)=>a+q[0],0)/n,my=PTS.reduce((a,q)=>a+q[1],0)/n;let a=0,b=0;PTS.forEach(([x,y])=>{a+=(x-mx)*(y-my);b+=(x-mx)**2});const s=b?a/b:0;return[my-s*mx,s]}
 function mle(){let w=0,b=0;for(let it=0;it<40;it++){let g0=1e-3*w,g1=0,a=1e-3,bb=0,c=1e-6;for(const[x,y]of PTS){const p=sg(w*x+b),q=p*(1-p)+1e-9;g0+=(p-y)*x;g1+=p-y;a+=q*x*x;bb+=q*x;c+=q}
@@ -126,7 +127,7 @@ plot('#c3a',xs,[{y:xs.map(a=>w()*a+b()),c:C.ok,n:'z = wx + b (log-odds)'},{pts:[
 plot('#c3b',zs,[{y:zs.map(sg),c:C.bad,n:'σ(z)'},{pts:[[z,s]],c:C.pos},{pts:[[-z,sg(-z)]],c:C.ok},{pts:[[0,.5]],c:C.a,r:3}],{y0:-.1,y1:1.1,h:[0,.5,1],v:[[z],[-z]]});
 plot('#c3c',zs,[{y:zs.map(a=>sg(a)*(1-sg(a))),c:C.ok,n:"σ′(z) = σ(1−σ)"},{pts:[[z,s*(1-s)]],c:C.pos}],{y0:-.05,y1:.3,v:[[z]]});
 $('#o3').innerHTML=`z = <b>${f2(z)}</b> → odds = <b>${f2(Math.exp(z))}</b> → p = <b>${f3(s)}</b> · σ(−z) = <b>${f3(sg(-z))}</b> = 1−σ(z) = <b>${f3(1-s)}</b> · σ′(z) = <b>${f3(s*(1-s))}</b> (tối đa 0.25) · p = 0.5 tại x = −b/w = <b>${w()?f2(-b()/w()):'-'}</b>`}D[2]=dr}
-// 5
+// 4
 function heat(id,f,x0,x1,y0,y1,mk){const t=cv(id);if(!t)return;const[c,W,H]=t,K=40,F=[];let mn=1e9;
 for(let i=0;i<K;i++)for(let j=0;j<K;j++){const v=f(x0+(i+.5)*(x1-x0)/K,y0+(j+.5)*(y1-y0)/K);F.push(v);mn=Math.min(mn,v)}
 F.forEach((v,k)=>{const i=Math.floor(k/K),j=k%K,l=Math.floor(Math.log(v-mn+.01)*2.2);c.fillStyle=l%2?'rgba(67,56,202,.10)':'rgba(67,56,202,.26)';c.fillRect(i*W/K,H-(j+1)*H/K,W/K+1,H/K+1)});
@@ -137,7 +138,12 @@ function dr(){const[mw,mb]=mle(),ps=PTS.map(([x,y])=>y?sg(w()*x+b()):1-sg(w()*x+
 plot('#c5a',xs,[{y:xs.map(a=>sg(w()*a+b())),c:C.bad,n:'σ(wx+b)'},{pts:ptsOf(1),c:C.ok,r:5},{pts:ptsOf(0),c:C.a,r:5}],{y0:-.1,y1:1.1,h:[0,1]});
 heat('#c5b',Jwb,0,4,-20,4,[[mw,mb,'#12998a','MLE'],[w(),b(),'#c2410c','hiện tại']]);
 $('#o5').innerHTML=`L = ∏pᵢ = <b>${ps.reduce((a,q)=>a*q,1).toExponential(2)}</b> · ℓ = ln L = <b>${f2(ll)}</b> · J = −ℓ/n = <b>${f3(-ll/ps.length)}</b><br>MLE (≈): w = <b>${f2(mw)}</b>, b = <b>${f2(mb)}</b>`}
-$('#m1').onclick=()=>{const[a,s]=mle();w.set(Math.max(0,Math.min(4,a)));b.set(Math.max(-20,Math.min(4,s)));dr()};D[4]=dr}
+$('#m1').onclick=()=>{const[a,s]=mle();w.set(Math.max(0,Math.min(4,a)));b.set(Math.max(-20,Math.min(4,s)));dr()};D[3]=dr}
+// 5
+{const ps=lin(.01,.99,98),p=sl('#k6','p',.01,.99,.01,.3,dr,f2);let Y=1;
+function dr(){const v=p(),L=Y?-Math.log(v):-Math.log(1-v);plot('#c6',ps,[{y:ps.map(a=>-Math.log(a)),c:C.ok,n:'y=1: −ln p'},{y:ps.map(a=>-Math.log(1-a)),c:C.bad,n:'y=0: −ln(1−p)'},{pts:[[v,L]],c:C.pos,r:5}],{y0:0,y1:5,v:[[v]]});
+$('#o6').innerHTML=`y = <b>${Y}</b>, p = <b>${f2(v)}</b> → loss = <b>${f3(L)}</b> ${L>2?'<b style="color:var(--bad)">(dự đoán sai và tự tin: loss lớn)</b>':L<.4?'(dự đoán tốt)':''}`}
+const sy=y=>{Y=y;$('#y1').classList.toggle('on',y==1);$('#y0').classList.toggle('on',!y);dr()};$('#y1').onclick=()=>sy(1);$('#y0').onclick=()=>sy(0);D[4]=dr}
 // điều hướng
 let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}cu=Math.max(0,i);S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#nx').textContent=cu==S.length-1?'Phần 2 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
 $('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
