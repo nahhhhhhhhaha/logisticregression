@@ -51,7 +51,9 @@ $$\mathrm{Logit}(p)=\ln\frac{p}{1-p}\in\mathbb R$$
 <p>Từ $\ln\frac{p}{1-p}=z$, lấy mũ hai vế: $\frac{p}{1-p}=e^z$, suy ra $p(1+e^z)=e^z$:</p>
 $$p=\frac{e^z}{1+e^z}=\frac{1}{1+e^{-z}}=\sigma(z)$$
 <p>Đồ thị trên cùng là đường thẳng trong không gian log-odds; đồ thị giữa là Sigmoid tương ứng. Ba tính chất:</p>
-<p><b>(1)</b> $0<\sigma(z)<1$. <b>(2)</b> $\sigma(-z)=1-\sigma(z)$ (đối xứng tâm $(0,0.5)$). <b>(3)</b> $\sigma'(z)=\sigma(z)\big(1-\sigma(z)\big)\le0.25$, đạt tối đa tại $z=0$.</p>
+<p>(1) $0<\sigma(z)<1$ </p>
+<p>(2) $\sigma(-z)=1-\sigma(z)$ (đối xứng tâm $(0,0.5)$). </p>
+<p>(3) $\sigma'(z)=\sigma(z)\big(1-\sigma(z)\big)\le0.25$, đạt tối đa tại $z=0$.</p>
 <p class="box">Kéo $x$ (hoặc $w,b$) để di chuyển $z$; chấm tím là $\sigma(z)$, chấm xanh là $\sigma(-z)$. Tính chất (3) sẽ dùng khi tính gradient ở phần 2.</p></div>
 <div class="v"><canvas id="c3a" class="xs"></canvas><canvas id="c3b" class="xs"></canvas><canvas id="c3c" class="xs"></canvas><div class="c" id="k3"></div><div class="o" id="o3"></div></div></section>
 
