@@ -18,8 +18,11 @@ main{flex:1;overflow:hidden;position:relative}
 .s>div:first-child{padding:4px 14px 4px 2px}
 .s>div::-webkit-scrollbar{width:9px}.s>div::-webkit-scrollbar-track{background:transparent}.s>div::-webkit-scrollbar-thumb{background:var(--fln);border-radius:9px;border:2px solid transparent;background-clip:padding-box}.s>div::-webkit-scrollbar-thumb:hover{background:var(--pos);background-clip:padding-box}
 .s>div:first-child>p.mut:first-child{display:inline-block;margin:0 0 .6em;padding:3px 12px;font:600 12.5px system-ui,sans-serif;letter-spacing:.04em;color:var(--pos2);background:var(--tint);border:1px solid var(--fln);border-radius:99px}
+.pl .katex-display{background:none;border:0;box-shadow:none;padding:2px 0;margin:.5em 0}
+.pl .katex-display>.katex{font-size:1.15em;-webkit-text-stroke:.25px currentColor}
 .s.two.on{display:block;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
 .s.two>div{max-width:860px;margin:0 auto;max-height:none;overflow:visible;padding:4px 14px}
+@media(min-width:861px){.s.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.s.cols>div{align-self:start}}
 .v svg{display:block;width:100%;height:auto;max-height:64vh}
 .sa{stroke:var(--mut);stroke-width:1.2;fill:none}.st{fill:var(--mut);font:12px system-ui,sans-serif}.sb{fill:var(--tint);stroke:var(--fln);stroke-width:1.5}.sv{fill:var(--ink);font:15px system-ui,sans-serif}
 h1,h2,h3,h4{color:var(--ink);font-weight:700;line-height:1.2;margin:0}
@@ -69,58 +72,28 @@ $$L(p,y)=-\big[y\log p+(1-y)\log(1-p)\big]$$
 </section>
 
 <!-- 2 -->
-<section class="s">
+<section class="s cols">
 <div>
 <p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
 <h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
-<h3>1.1. Tính $\dfrac{\partial L}{\partial w}=(p-y)\,x$</h3>
+<h3>1.1. Tính $\dfrac{\partial L}{\partial w}=(p-y)\,x$ và $\dfrac{\partial L}{\partial b}=p-y$</h3>
+<h4>Theo $w$</h4>
 <p>Sử dụng <b>Quy tắc chuỗi (Chain Rule)</b>:</p>
-$$\frac{\partial L}{\partial w}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot\frac{\partial z}{\partial w}$$
-<p>Ba đạo hàm thành phần:</p>
-$$\frac{\partial L}{\partial p}=-\frac{y}{p}+\frac{1-y}{1-p}=\frac{p-y}{p(1-p)}$$
-$$\frac{\partial p}{\partial z}=p(1-p),\qquad\frac{\partial z}{\partial w}=x$$
-</div>
-<div class="v">
-<svg viewBox="0 0 360 380" role="img" aria-label="Quy tắc chuỗi L ← p ← z ← w">
-<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--ink)"/></marker><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--bad)"/></marker></defs>
-<g class="sb"><rect x="100" y="10" width="150" height="44" rx="8"/><rect x="100" y="110" width="150" height="44" rx="8"/><rect x="100" y="210" width="150" height="44" rx="8"/><rect x="100" y="310" width="150" height="44" rx="8"/></g>
-<g class="sv" text-anchor="middle"><text x="175" y="37">w</text><text x="175" y="137">z = wᵀx + b</text><text x="175" y="237">p = σ(z)</text><text x="175" y="337">L(p, y)</text></g>
-<g style="stroke:var(--ink);stroke-width:1.8" marker-end="url(#ah)"><line x1="175" y1="54" x2="175" y2="108" marker-end="url(#ah)"/><line x1="175" y1="154" x2="175" y2="208" marker-end="url(#ah)"/><line x1="175" y1="254" x2="175" y2="308" marker-end="url(#ah)"/></g>
-<g class="st"><text x="190" y="86">∂z/∂w = x</text><text x="190" y="186">∂p/∂z = p(1−p)</text><text x="190" y="286">∂L/∂p</text></g>
-<path d="M98 332 C 20 332 20 32 98 32" fill="none" style="stroke:var(--bad);stroke-width:2;stroke-dasharray:6 4" marker-end="url(#ar)"/>
-<text x="30" y="185" text-anchor="middle" transform="rotate(-90 30 185)" style="fill:var(--bad);font:600 13px system-ui,sans-serif">Chain Rule</text>
-</svg>
-<div class="o">Hình 1: Minh họa Quy tắc chuỗi: $L\leftarrow p\leftarrow z\leftarrow w$</div>
-</div>
-</section>
-
-<!-- 3 -->
-<section class="s">
-<div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
-<h3>1.1. Tính $\dfrac{\partial L}{\partial w}=(p-y)\,x$</h3>
+<div class="pl">$$\frac{\partial L}{\partial w}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot\frac{\partial z}{\partial w}$$</div>
+<p>Các đạo hàm thành phần:</p>
+<div class="pl">$$\frac{\partial L}{\partial p}=-\frac{y}{p}+\frac{1-y}{1-p}=\frac{p-y}{p(1-p)}$$
+$$\frac{\partial p}{\partial z}=p(1-p),\qquad\frac{\partial z}{\partial w}=x$$</div>
 <p>Thay vào:</p>
 <div class="fb">$$\frac{\partial L}{\partial w}=\frac{p-y}{p(1-p)}\cdot p(1-p)\cdot x=(p-y)\,x$$</div>
-<p class="box">Kéo $z$ và chọn $y$: đường tím là $\partial L/\partial z=p-y$, đúng bằng tích hai đạo hàm đầu.</p>
 </div>
-<div class="v">
-<canvas id="c1"></canvas>
-<div class="c" id="k1"></div>
-<div class="b"><button id="y1" class="on">y = 1</button><button id="y0">y = 0</button></div>
-<div class="o" id="o1"></div>
-</div>
-</section>
-
-<!-- 4 -->
-<section class="s two">
 <div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
-<h3>1.2. Tính $\dfrac{\partial L}{\partial b}=p-y$</h3>
-<p>Vì $z=w^Tx+b\Rightarrow\dfrac{\partial z}{\partial b}=1$. Theo quy tắc chuỗi:</p>
-$$\frac{\partial L}{\partial b}=\frac{\partial L}{\partial z}\cdot\frac{\partial z}{\partial b}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot1=(p-y)$$
-<div class="fb">$$\frac{\partial L}{\partial b}=p-y$$</div>
+<h4>Theo $b$</h4>
+<p>Sử dụng <b>Quy tắc chuỗi (Chain Rule)</b>:</p>
+<div class="pl">$$\frac{\partial L}{\partial b}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot\frac{\partial z}{\partial b}$$</div>
+<p>Các đạo hàm thành phần, vì $z=w^Tx+b\Rightarrow\dfrac{\partial z}{\partial b}=1$:</p>
+<div class="pl">$$\frac{\partial L}{\partial p}=\frac{p-y}{p(1-p)},\qquad\frac{\partial p}{\partial z}=p(1-p),\qquad\frac{\partial z}{\partial b}=1$$</div>
+<p>Thay vào:</p>
+<div class="fb">$$\frac{\partial L}{\partial b}=\frac{p-y}{p(1-p)}\cdot p(1-p)\cdot1=p-y$$</div>
 </div>
 </section>
 
@@ -129,7 +102,7 @@ $$\frac{\partial L}{\partial b}=\frac{\partial L}{\partial z}\cdot\frac{\partial
 <div>
 <p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
 <h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
-<h3>1.3. Mở rộng cho toàn bộ tập dữ liệu</h3>
+<h3>1.2. Mở rộng cho toàn bộ tập dữ liệu</h3>
 <p>Hàm tổng loss cho $n$ quan sát độc lập:</p>
 $$J(w,b)=\sum_{i=1}^{n}L_i=-\sum_{i=1}^{n}\big[y_i\log p_i+(1-y_i)\log(1-p_i)\big]$$
 <p>Gradient toàn cục (đạo hàm của tổng = tổng các đạo hàm):</p>
@@ -159,10 +132,10 @@ $$\nabla_wJ=\sum_{i=1}^{n}(p_i-y_i)\,x_i$$
 </section>
 
 <!-- 7 -->
-<section class="s">
+<section class="s cols">
 <div>
 <p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>2. MA TRẬN HESSIAN</h2>
+<h2>2. MA TRẬN HESSIAN VÀ GIẢI THÍCH TÍNH LỒI</h2>
 <h3>2.1. Suy ra Hessian</h3>
 <p>Đạo hàm cấp hai theo $w$:</p>
 $$H=\frac{\partial}{\partial w}\big(\nabla_wJ\big)=\sum_{i=1}^{n}\frac{\partial}{\partial w}\big[(p_i-y_i)\,x_i\big]$$
@@ -173,25 +146,7 @@ $$H=\sum_{i=1}^{n}r_i\,x_ix_i^T=\sum_{i=1}^{n}p_i(1-p_i)\,x_ix_i^T$$
 <p>Viết gọn dưới dạng ma trận, với $X\in\mathbb{R}^{n\times d}$ có các hàng là $x_i^T$:</p>
 <div class="fb">$$H=X^TRX,\qquad R=\operatorname{diag}\big(p_1(1-p_1),\dots,p_n(1-p_n)\big)$$</div>
 </div>
-<div class="v">
-<svg viewBox="0 0 420 300" role="img" aria-label="Sigmoid và p(1-p)">
-<g class="sa"><line x1="50" y1="260" x2="400" y2="260"/><line x1="225" y1="268" x2="225" y2="28"/></g>
-<g class="st"><text x="46" y="276">−6</text><text x="133" y="276">−3</text><text x="222" y="276">0</text><text x="309" y="276">3</text><text x="397" y="276">6</text>
-<text x="215" y="264" text-anchor="end">0</text><text x="215" y="155" text-anchor="end">0.5</text><text x="215" y="46" text-anchor="end">1</text>
-<text x="400" y="292" text-anchor="end">z = wᵀx + b</text></g>
-<line x1="50" y1="205.5" x2="400" y2="205.5" style="stroke:var(--bad);stroke-width:1.5;stroke-dasharray:5 4"/>
-<path id="fs" fill="none" style="stroke:var(--pos);stroke-width:2.5"/><path id="fr" fill="none" style="stroke:var(--bad);stroke-width:2.5"/>
-<g style="font:13px system-ui,sans-serif"><text x="58" y="20" style="fill:var(--pos)">σ(z) = 1/(1+e⁻ᶻ)</text><text x="205" y="20" style="fill:var(--bad)">σ′(z) = p(1−p) ≤ 0.25</text></g>
-</svg>
-<div class="o">Hàm sigmoid và đạo hàm $p(1-p)$ — yếu tố xuất hiện trong $R$, đảm bảo $R\succ0$ và do đó $H\succeq0$.</div>
-</div>
-</section>
-
-<!-- 8 -->
-<section class="s two">
 <div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>2. GIẢI THÍCH TÍNH LỒI</h2>
 <h3>2.2. Chứng minh tính lồi (Convexity)</h3>
 <h4>Bước 1. Tính chất của ma trận $R$.</h4>
 <p>Vì xác suất dự đoán $0\lt p_i\lt1$, ta có $p_i(1-p_i)\gt0$. Do $R$ là ma trận đường chéo chứa các phần tử này:</p>
@@ -206,7 +161,7 @@ $$\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2\ge0\;\Longrightarrow\;v^THv\ge0,\quad\forall v
 </div>
 </section>
 
-<!-- 9 -->
+<!-- 8 -->
 <section class="s">
 <div>
 <p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
@@ -214,17 +169,27 @@ $$\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2\ge0\;\Longrightarrow\;v^THv\ge0,\quad\forall v
 <h4>Kết luận</h4>
 <div class="fb">$$H=X^TRX\succeq0\quad\Longrightarrow\quad J(w,b)\ \text{là hàm lồi (convex)}$$</div>
 <p>Do đó Logistic Regression với BCE có <b>một cực tiểu toàn cục duy nhất</b> (global minimum), và các thuật toán gradient (GD, Newton, L-BFGS, …) đều hội tụ về đó.</p>
-<h3>2.3. Minh họa trực quan</h3>
-<p>Hàm lồi $J(w)$ có duy nhất một cực tiểu toàn cục — hệ quả của $H\succeq0$.</p>
 </div>
 <div class="v">
-<svg viewBox="0 0 420 300" role="img" aria-label="Hàm lồi J(w)">
+<h3>2.3. Minh họa trực quan</h3>
+<svg style="max-height:34vh" viewBox="0 0 420 300" role="img" aria-label="Sigmoid và p(1-p)">
+<g class="sa"><line x1="50" y1="260" x2="400" y2="260"/><line x1="225" y1="268" x2="225" y2="28"/></g>
+<g class="st"><text x="46" y="276">−6</text><text x="133" y="276">−3</text><text x="222" y="276">0</text><text x="309" y="276">3</text><text x="397" y="276">6</text>
+<text x="215" y="264" text-anchor="end">0</text><text x="215" y="155" text-anchor="end">0.5</text><text x="215" y="46" text-anchor="end">1</text>
+<text x="400" y="292" text-anchor="end">z = wᵀx + b</text></g>
+<line x1="50" y1="205.5" x2="400" y2="205.5" style="stroke:var(--bad);stroke-width:1.5;stroke-dasharray:5 4"/>
+<path id="fs" fill="none" style="stroke:var(--pos);stroke-width:2.5"/><path id="fr" fill="none" style="stroke:var(--bad);stroke-width:2.5"/>
+<g style="font:13px system-ui,sans-serif"><text x="58" y="20" style="fill:var(--pos)">σ(z) = 1/(1+e⁻ᶻ)</text><text x="205" y="20" style="fill:var(--bad)">σ′(z) = p(1−p) ≤ 0.25</text></g>
+</svg>
+<div class="o">Hàm sigmoid và đạo hàm $p(1-p)$ — yếu tố xuất hiện trong $R$, đảm bảo $R\succ0$ và do đó $H\succeq0$.</div>
+<svg style="max-height:34vh" viewBox="0 0 420 300" role="img" aria-label="Hàm lồi J(w)">
 <g class="sa"><line x1="20" y1="270" x2="400" y2="270"/><line x1="210" y1="276" x2="210" y2="20"/></g>
 <g class="st"><text x="404" y="274">w</text><text x="216" y="18">J(w)</text></g>
 <line x1="62" y1="85.5" x2="358" y2="85.5" style="stroke:var(--mut);stroke-width:1.2;stroke-dasharray:5 4"/>
 <path id="fp" fill="none" style="stroke:var(--pos);stroke-width:2.5"/>
 <circle cx="210" cy="234.3" r="4.5" style="fill:var(--bad)"/><text x="220" y="252" style="fill:var(--bad);font:13px system-ui,sans-serif">global min</text>
 </svg>
+<div class="o">Hàm lồi $J(w)$ có duy nhất một cực tiểu toàn cục — hệ quả của $H\succeq0$.</div>
 </div>
 </section>
 
@@ -259,19 +224,11 @@ const q=()=>+i.value;q.set=a=>{i.value=a;o.textContent=fmt(+i.value)};return q}
 // dữ liệu 1 chiều dùng chung cho slide 2 và 4: [x, y]
 const DATA=[[-3,0],[-2,0],[-1,1],[.5,0],[1.5,1],[3,1]],Jf=(w,b)=>DATA.reduce((a,[x,y])=>{const z=w*x+b;return a+Math.log(1+Math.exp(z))-y*z},0);
 
-// 0: chain rule
-{let y=1;const z=sl('#k1','z',-6,6,.1,1,dr,f2),zs=lin(-6,6,120);
-function dr(){const v=z(),p=sg(v),r=p*(1-p),a=(p-y)/r;
-plot('#c1',zs,[{y:zs.map(sg),c:C.bad,n:'p = σ(z)'},{y:zs.map(t=>sg(t)*(1-sg(t))),c:C.a,n:'p(1−p)'},{y:zs.map(t=>sg(t)-y),c:C.pos,n:'∂L/∂z = p−y'},{pts:[[v,p-y]],c:C.pos}],{y0:-1,y1:1,v:[[v]],h:[0]});
-$('#o1').innerHTML=`∂L/∂p = <b>${f3(a)}</b> · ∂p/∂z = <b>${f3(r)}</b> → tích = <b>${f3(a*r)}</b> = p − y = <b>${f3(p-y)}</b>`}
-$('#y1').onclick=()=>{y=1;$('#y1').classList.add('on');$('#y0').classList.remove('on');dr()};
-$('#y0').onclick=()=>{y=0;$('#y0').classList.add('on');$('#y1').classList.remove('on');dr()};D[2]=dr}
-
 // 1: gradient trên cả tập dữ liệu
 {const xs=lin(-4,4,120),w=sl('#k2','w',-3,3,.1,1,dr,f2),b=sl('#k2','b',-3,3,.1,0,dr,f2);
 function dr(){const W=w(),B=b();let gw=0,gb=0;DATA.forEach(([x,y])=>{const e=sg(W*x+B)-y;gw+=e*x;gb+=e});
 plot('#c2',xs,[{y:xs.map(t=>sg(W*t+B)),c:C.bad,n:'p = σ(wx+b)'},{pts:DATA.filter(d=>d[1]==1),c:C.ok,r:5},{pts:DATA.filter(d=>d[1]==0),c:C.a,r:5}],{y0:0,y1:1,h:[.5]});
-$('#o2').innerHTML=`Điểm xanh: y = 1, cam: y = 0. J = <b>${f2(Jf(W,B))}</b> · ∂J/∂w = Σ(p−y)x = <b>${f2(gw)}</b> · ∂J/∂b = Σ(p−y) = <b>${f2(gb)}</b>`}D[4]=dr}
+$('#o2').innerHTML=`Điểm xanh: y = 1, cam: y = 0. J = <b>${f2(Jf(W,B))}</b> · ∂J/∂w = Σ(p−y)x = <b>${f2(gw)}</b> · ∂J/∂b = Σ(p−y) = <b>${f2(gb)}</b>`}D[2]=dr}
 
 // hình tĩnh (SVG): vẽ đường cong một lần
 const P=(f,a,b,X,Y)=>lin(a,b,120).map((t,i)=>(i?'L':'M')+X(t).toFixed(1)+' '+Y(f(t)).toFixed(1)).join('');
