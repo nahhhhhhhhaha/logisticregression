@@ -326,7 +326,7 @@ $$\partial_j|\theta_j|=\begin{cases}{\{1\}}&amp;\theta_j\gt0\\ {[-1,1]}&amp;\the
 <button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button>
 </nav>
 <script>
-const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan6-bayesian-map/',PREV='../phan4-newton-irls/';
+const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan6-map/',PREV='../phan4-newton/';
 const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
 function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
 const PAD={l:38,r:8,t:22,b:22};
