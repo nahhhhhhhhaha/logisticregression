@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phần 2: Gradient và Hessian</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eceff5;--ink:#0f1830;--mut:#5b6679;--card:#fff;--ln:#cfd6e2;--pos:#4338ca;--pos2:#312aa8;--ok:#12998a;--bad:#c2410c;--tint:#eceafe;--ftint:#e4e1ff;--fln:#9d97f2;--fink:#1c1480;--head:#e0e4f3;--glow1:rgba(67,56,202,.13);--glow2:rgba(18,153,138,.10);--dot:rgba(23,32,58,.07);--sh:0 1px 2px rgba(16,24,48,.06),0 8px 24px -10px rgba(16,24,48,.2)}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1024;--ink:#eef1fa;--mut:#a3adc4;--card:#161d3b;--ln:#2a3562;--pos:#8b87f0;--pos2:#aeabff;--tint:#232c5c;--ftint:#2b3570;--fln:#6e69d6;--fink:#ffffff;--head:#1b2450;--glow1:rgba(139,135,240,.18);--glow2:rgba(18,153,138,.14);--dot:rgba(255,255,255,.05);--sh:0 1px 2px rgba(0,0,0,.3),0 10px 28px -10px rgba(0,0,0,.6)}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{color:var(--ink);font:18px/1.55 Newsreader,helvetica,sans-serif;display:flex;flex-direction:column;
+background:radial-gradient(900px 480px at 6% -8%,var(--glow1),transparent 65%),radial-gradient(800px 460px at 98% 100%,var(--glow2),transparent 62%),radial-gradient(var(--dot) 1px,transparent 1.2px) 0 0/22px 22px,var(--bg)}
+main{flex:1;overflow:hidden;position:relative}
+.s{position:absolute;inset:0;padding:24px 5vw;display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:minmax(0,1fr);gap:32px;overflow:hidden}
+.s.on{display:grid}
+.s>div{min-height:0;max-height:100%;align-self:center;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
+.s>div:first-child{padding:4px 14px 4px 2px}
+.s>div::-webkit-scrollbar{width:9px}.s>div::-webkit-scrollbar-track{background:transparent}.s>div::-webkit-scrollbar-thumb{background:var(--fln);border-radius:9px;border:2px solid transparent;background-clip:padding-box}.s>div::-webkit-scrollbar-thumb:hover{background:var(--pos);background-clip:padding-box}
+.s>div:first-child>p.mut:first-child{display:inline-block;margin:0 0 .6em;padding:3px 12px;font:600 12.5px system-ui,sans-serif;letter-spacing:.04em;color:var(--pos2);background:var(--tint);border:1px solid var(--fln);border-radius:99px}
+.s.two.on{display:block;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
+.s.two>div{max-width:860px;margin:0 auto;max-height:none;overflow:visible;padding:4px 14px}
+.v svg{display:block;width:100%;height:auto;max-height:64vh}
+.sa{stroke:var(--mut);stroke-width:1.2;fill:none}.st{fill:var(--mut);font:12px system-ui,sans-serif}.sb{fill:var(--tint);stroke:var(--fln);stroke-width:1.5}.sv{fill:var(--ink);font:15px system-ui,sans-serif}
+h1,h2,h3,h4{color:var(--ink);font-weight:700;line-height:1.2;margin:0}
+h1{font-size:2.2rem;letter-spacing:.01em;margin:.1em 0 .45em}
+h2{font-size:1.75rem;letter-spacing:-.01em;margin:0 0 .35em}
+h3{font-size:1.3rem;margin:.1em 0 .7em}
+h4{font-size:1.1rem;margin:1em 0 .2em}
+p{margin:.5em 0}ul{margin:.4em 0;padding-left:1.4em}li{margin:.25em 0}b{font-weight:700}.mut{color:var(--mut)}
+.box{border-left:4px solid var(--pos);padding:8px 14px;background:var(--tint);border-radius:0 8px 8px 0}
+.v{background:var(--card);border:1px solid var(--ln);border-top:4px solid var(--pos);border-radius:12px;padding:14px;box-shadow:var(--sh)}
+canvas{width:100%;height:300px;display:block}canvas.sm{height:200px}canvas.xs{height:150px}canvas.cl{cursor:crosshair}
+.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:14px system-ui,sans-serif;margin-top:8px}
+.c input{width:100%;accent-color:var(--pos)}
+.o{font:14px/1.6 system-ui,sans-serif;margin-top:10px;padding-top:8px;border-top:1px dashed var(--ln);color:var(--mut)}.o b{color:var(--ink)}
+.b{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button,.nb{font:500 14px system-ui;padding:7px 13px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer;text-decoration:none;transition:border-color .12s,background .12s}
+button:hover,.nb:hover{border-color:var(--pos);background:var(--tint)}
+button.on{border-color:var(--pos);background:var(--tint);box-shadow:0 0 0 1px var(--pos);color:var(--pos2)}
+button:focus-visible,input:focus-visible,.nb:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
+nav{display:flex;gap:12px;align-items:center;justify-content:center;padding:10px;border-top:2px solid var(--ln);background:var(--card);box-shadow:0 -6px 18px -12px rgba(16,24,48,.35);font:600 14px system-ui}
+#nx{background:var(--pos);border-color:var(--pos);color:#fff}#nx:hover{background:var(--pos2);border-color:var(--pos2)}
+@media(prefers-color-scheme:dark){#nx{color:#10162b}}
+.katex{color:var(--fink);-webkit-text-stroke:.25px currentColor}
+.katex-display{overflow-x:auto;overflow-y:hidden;margin:.8em 0;padding:14px 16px;background:var(--ftint);border:1.5px solid var(--fln);border-left:6px solid var(--pos);border-radius:10px;box-shadow:var(--sh)}
+.katex-display>.katex{font-size:1.28em;-webkit-text-stroke:.45px currentColor}
+p .katex{font-size:1.08em}
+.fb{border:2.5px solid var(--pos);border-radius:12px;margin:.9em 0;overflow:hidden}
+.fb .katex-display{margin:0;border:0;border-radius:0;box-shadow:none}
+.ch{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;font:13px system-ui,sans-serif;margin-bottom:6px}
+.ch i{font-style:normal;border:1px solid var(--fln);background:var(--tint);border-radius:6px;padding:3px 9px}
+.ch s{text-decoration:none;color:var(--mut);font-size:11.5px}
+@media(max-width:860px){.s{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.s>div{max-height:none;overflow:visible;align-self:start}.s>div:first-child{padding:0}}
+</style></head>
+<body>
+<main>
+
+<!-- 1 -->
+<section class="s two on">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
+<p>$\nabla L=\left(\dfrac{\partial L}{\partial w},\dfrac{\partial L}{\partial b}\right)$. Nhắc lại thiết lập:</p>
+$$z=w^Tx+b,\qquad p=\sigma(z)=\frac{1}{1+e^{-z}}$$
+<p>và loss của một mẫu (Binary Cross-Entropy):</p>
+$$L(p,y)=-\big[y\log p+(1-y)\log(1-p)\big]$$
+</div>
+</section>
+
+<!-- 2 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
+<h3>1.1. Tính $\dfrac{\partial L}{\partial w}=(p-y)\,x$</h3>
+<p>Sử dụng <b>Quy tắc chuỗi (Chain Rule)</b>:</p>
+$$\frac{\partial L}{\partial w}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot\frac{\partial z}{\partial w}$$
+<p>Ba đạo hàm thành phần:</p>
+$$\frac{\partial L}{\partial p}=-\frac{y}{p}+\frac{1-y}{1-p}=\frac{p-y}{p(1-p)}$$
+$$\frac{\partial p}{\partial z}=p(1-p),\qquad\frac{\partial z}{\partial w}=x$$
+</div>
+<div class="v">
+<svg viewBox="0 0 360 380" role="img" aria-label="Quy tắc chuỗi L ← p ← z ← w">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--ink)"/></marker><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--bad)"/></marker></defs>
+<g class="sb"><rect x="100" y="10" width="150" height="44" rx="8"/><rect x="100" y="110" width="150" height="44" rx="8"/><rect x="100" y="210" width="150" height="44" rx="8"/><rect x="100" y="310" width="150" height="44" rx="8"/></g>
+<g class="sv" text-anchor="middle"><text x="175" y="37">w</text><text x="175" y="137">z = wᵀx + b</text><text x="175" y="237">p = σ(z)</text><text x="175" y="337">L(p, y)</text></g>
+<g style="stroke:var(--ink);stroke-width:1.8" marker-end="url(#ah)"><line x1="175" y1="54" x2="175" y2="108" marker-end="url(#ah)"/><line x1="175" y1="154" x2="175" y2="208" marker-end="url(#ah)"/><line x1="175" y1="254" x2="175" y2="308" marker-end="url(#ah)"/></g>
+<g class="st"><text x="190" y="86">∂z/∂w = x</text><text x="190" y="186">∂p/∂z = p(1−p)</text><text x="190" y="286">∂L/∂p</text></g>
+<path d="M98 332 C 20 332 20 32 98 32" fill="none" style="stroke:var(--bad);stroke-width:2;stroke-dasharray:6 4" marker-end="url(#ar)"/>
+<text x="30" y="185" text-anchor="middle" transform="rotate(-90 30 185)" style="fill:var(--bad);font:600 13px system-ui,sans-serif">Chain Rule</text>
+</svg>
+<div class="o">Hình 1: Minh họa Quy tắc chuỗi: $L\leftarrow p\leftarrow z\leftarrow w$</div>
+</div>
+</section>
+
+<!-- 3 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
+<h3>1.1. Tính $\dfrac{\partial L}{\partial w}=(p-y)\,x$</h3>
+<p>Thay vào:</p>
+<div class="fb">$$\frac{\partial L}{\partial w}=\frac{p-y}{p(1-p)}\cdot p(1-p)\cdot x=(p-y)\,x$$</div>
+<p class="box">Kéo $z$ và chọn $y$: đường tím là $\partial L/\partial z=p-y$, đúng bằng tích hai đạo hàm đầu.</p>
+</div>
+<div class="v">
+<canvas id="c1"></canvas>
+<div class="c" id="k1"></div>
+<div class="b"><button id="y1" class="on">y = 1</button><button id="y0">y = 0</button></div>
+<div class="o" id="o1"></div>
+</div>
+</section>
+
+<!-- 4 -->
+<section class="s two">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
+<h3>1.2. Tính $\dfrac{\partial L}{\partial b}=p-y$</h3>
+<p>Vì $z=w^Tx+b\Rightarrow\dfrac{\partial z}{\partial b}=1$. Theo quy tắc chuỗi:</p>
+$$\frac{\partial L}{\partial b}=\frac{\partial L}{\partial z}\cdot\frac{\partial z}{\partial b}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot1=(p-y)$$
+<div class="fb">$$\frac{\partial L}{\partial b}=p-y$$</div>
+</div>
+</section>
+
+<!-- 5 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
+<h3>1.3. Mở rộng cho toàn bộ tập dữ liệu</h3>
+<p>Hàm tổng loss cho $n$ quan sát độc lập:</p>
+$$J(w,b)=\sum_{i=1}^{n}L_i=-\sum_{i=1}^{n}\big[y_i\log p_i+(1-y_i)\log(1-p_i)\big]$$
+<p>Gradient toàn cục (đạo hàm của tổng = tổng các đạo hàm):</p>
+<h4>Theo trọng số $w$:</h4>
+$$\frac{\partial J}{\partial w}=\sum_{i=1}^{n}\frac{\partial L_i}{\partial w}=\sum_{i=1}^{n}(p_i-y_i)\,x_i$$
+<h4>Theo hệ số chặn $b$:</h4>
+$$\frac{\partial J}{\partial b}=\sum_{i=1}^{n}\frac{\partial L_i}{\partial b}=\sum_{i=1}^{n}(p_i-y_i)$$
+</div>
+<div class="v">
+<canvas id="c2"></canvas>
+<div class="c" id="k2"></div>
+<div class="o" id="o2"></div>
+</div>
+</section>
+
+<!-- 6 -->
+<section class="s two">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>2. MA TRẬN HESSIAN VÀ GIẢI THÍCH TÍNH LỒI</h2>
+<p>Mục tiêu: chứng minh hàm chi phí $J(w,b)$ là hàm <b>lồi (convex)</b> bằng cách kiểm tra ma trận Hessian $H\succeq0$</p>
+<p>Công thức cần đạt:</p>
+$$H=X^TRX,\qquad R=\operatorname{diag}\!\big(p_1(1-p_1),\,\dots,\,p_n(1-p_n)\big)$$
+<p>và từ đó suy ra $H\succeq0$. Khởi tạo từ gradient:</p>
+$$\nabla_wJ=\sum_{i=1}^{n}(p_i-y_i)\,x_i$$
+</div>
+</section>
+
+<!-- 7 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>2. MA TRẬN HESSIAN</h2>
+<h3>2.1. Suy ra Hessian</h3>
+<p>Đạo hàm cấp hai theo $w$:</p>
+$$H=\frac{\partial}{\partial w}\big(\nabla_wJ\big)=\sum_{i=1}^{n}\frac{\partial}{\partial w}\big[(p_i-y_i)\,x_i\big]$$
+<p>Vì $x_i,y_i$ không phụ thuộc vào $w$:</p>
+$$H=\sum_{i=1}^{n}x_i\left(\frac{\partial p_i}{\partial w}\right)^T$$
+<p>Mà $\dfrac{\partial p_i}{\partial w}=p_i(1-p_i)\,x_i=r_ix_i$ với $r_i=p_i(1-p_i)$, nên:</p>
+$$H=\sum_{i=1}^{n}r_i\,x_ix_i^T=\sum_{i=1}^{n}p_i(1-p_i)\,x_ix_i^T$$
+<p>Viết gọn dưới dạng ma trận, với $X\in\mathbb{R}^{n\times d}$ có các hàng là $x_i^T$:</p>
+<div class="fb">$$H=X^TRX,\qquad R=\operatorname{diag}\big(p_1(1-p_1),\dots,p_n(1-p_n)\big)$$</div>
+</div>
+<div class="v">
+<svg viewBox="0 0 420 300" role="img" aria-label="Sigmoid và p(1-p)">
+<g class="sa"><line x1="50" y1="260" x2="400" y2="260"/><line x1="225" y1="268" x2="225" y2="28"/></g>
+<g class="st"><text x="46" y="276">−6</text><text x="133" y="276">−3</text><text x="222" y="276">0</text><text x="309" y="276">3</text><text x="397" y="276">6</text>
+<text x="215" y="264" text-anchor="end">0</text><text x="215" y="155" text-anchor="end">0.5</text><text x="215" y="46" text-anchor="end">1</text>
+<text x="400" y="292" text-anchor="end">z = wᵀx + b</text></g>
+<line x1="50" y1="205.5" x2="400" y2="205.5" style="stroke:var(--bad);stroke-width:1.5;stroke-dasharray:5 4"/>
+<path id="fs" fill="none" style="stroke:var(--pos);stroke-width:2.5"/><path id="fr" fill="none" style="stroke:var(--bad);stroke-width:2.5"/>
+<g style="font:13px system-ui,sans-serif"><text x="58" y="20" style="fill:var(--pos)">σ(z) = 1/(1+e⁻ᶻ)</text><text x="205" y="20" style="fill:var(--bad)">σ′(z) = p(1−p) ≤ 0.25</text></g>
+</svg>
+<div class="o">Hàm sigmoid và đạo hàm $p(1-p)$ — yếu tố xuất hiện trong $R$, đảm bảo $R\succ0$ và do đó $H\succeq0$.</div>
+</div>
+</section>
+
+<!-- 8 -->
+<section class="s two">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>2. GIẢI THÍCH TÍNH LỒI</h2>
+<h3>2.2. Chứng minh tính lồi (Convexity)</h3>
+<h4>Bước 1. Tính chất của ma trận $R$.</h4>
+<p>Vì xác suất dự đoán $0\lt p_i\lt1$, ta có $p_i(1-p_i)\gt0$. Do $R$ là ma trận đường chéo chứa các phần tử này:</p>
+$$R\succ0.$$
+<h4>Bước 2. Xét dạng toàn phương với vector bất kỳ.</h4>
+<p>Với $v\in\mathbb{R}^{d}$ tùy ý, đặt $u=Xv$:</p>
+$$v^THv=v^T(X^TRX)v=(Xv)^TR(Xv)=u^TRu$$
+<p>Khai triển theo tổng:</p>
+$$u^TRu=\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2$$
+<p>Vì $p_i(1-p_i)\gt0$ và $u_i^2\ge0$:</p>
+$$\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2\ge0\;\Longrightarrow\;v^THv\ge0,\quad\forall v$$
+</div>
+</section>
+
+<!-- 9 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>2. GIẢI THÍCH TÍNH LỒI</h2>
+<h4>Kết luận</h4>
+<div class="fb">$$H=X^TRX\succeq0\quad\Longrightarrow\quad J(w,b)\ \text{là hàm lồi (convex)}$$</div>
+<p>Do đó Logistic Regression với BCE có <b>một cực tiểu toàn cục duy nhất</b> (global minimum), và các thuật toán gradient (GD, Newton, L-BFGS, …) đều hội tụ về đó.</p>
+<h3>2.3. Minh họa trực quan</h3>
+<p>Hàm lồi $J(w)$ có duy nhất một cực tiểu toàn cục — hệ quả của $H\succeq0$.</p>
+</div>
+<div class="v">
+<svg viewBox="0 0 420 300" role="img" aria-label="Hàm lồi J(w)">
+<g class="sa"><line x1="20" y1="270" x2="400" y2="270"/><line x1="210" y1="276" x2="210" y2="20"/></g>
+<g class="st"><text x="404" y="274">w</text><text x="216" y="18">J(w)</text></g>
+<line x1="62" y1="85.5" x2="358" y2="85.5" style="stroke:var(--mut);stroke-width:1.2;stroke-dasharray:5 4"/>
+<path id="fp" fill="none" style="stroke:var(--pos);stroke-width:2.5"/>
+<circle cx="210" cy="234.3" r="4.5" style="fill:var(--bad)"/><text x="220" y="252" style="fill:var(--bad);font:13px system-ui,sans-serif">global min</text>
+</svg>
+</div>
+</section>
+
+</main>
+<nav>
+<a class="nb" href="../index.html">☰ Mục lục</a>
+<button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button>
+</nav>
+<script>
+const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan3-gradient-descent/';
+const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
+function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
+const PAD={l:38,r:8,t:22,b:22};
+function plot(id,xs,cs,o={}){const t=cv(id);if(!t)return;const[c,W,H]=t,p=PAD,x0=o.x0??xs[0],x1=o.x1??xs.at(-1),y0=o.y0??0,y1=o.y1;
+const X=x=>p.l+(x-x0)/(x1-x0)*(W-p.l-p.r),Y=y=>H-p.b-(y-y0)/(y1-y0)*(H-p.t-p.b);
+c.font='12px system-ui';c.fillStyle=c.strokeStyle=css('--mut');c.lineWidth=1;const ax=X(Math.max(x0,Math.min(0,x1)));
+c.beginPath();c.moveTo(p.l,Y(y0));c.lineTo(W-p.r,Y(y0));c.moveTo(ax,p.t);c.lineTo(ax,H-p.b);c.stroke();
+for(let k=0;k<=4;k++){const v=x0+(x1-x0)*k/4;c.fillText(+v.toFixed(1),X(v)-9,H-6)}
+for(let k=0;k<=2;k++){const v=y0+(y1-y0)*k/2;c.fillText(+v.toFixed(1),0,Y(v)+4)}
+c.save();c.beginPath();c.rect(p.l,p.t,W-p.l-p.r,H-p.t-p.b);c.clip();
+(o.h||[]).forEach(v=>{c.setLineDash([4,4]);c.beginPath();c.moveTo(p.l,Y(v));c.lineTo(W-p.r,Y(v));c.stroke();c.setLineDash([])});
+cs.forEach(k=>{c.strokeStyle=c.fillStyle=k.c;c.lineWidth=2;c.setLineDash(k.dash?[6,4]:[]);
+if(k.pts)k.pts.forEach(q=>{c.beginPath();c.arc(X(q[0]),Y(q[1]),k.r||4,0,7);c.fill()});
+else{c.beginPath();k.y.forEach((v,i)=>i?c.lineTo(X(xs[i]),Y(v)):c.moveTo(X(xs[i]),Y(v)));c.stroke()}c.setLineDash([])});
+(o.v||[]).forEach(v=>{c.strokeStyle=v[1]||css('--mut');c.setLineDash([3,3]);c.beginPath();c.moveTo(X(v[0]),p.t);c.lineTo(X(v[0]),H-p.b);c.stroke();c.setLineDash([])});c.restore();
+let lx=p.l+6;cs.forEach(k=>{if(k.n){c.fillStyle=k.c;c.fillText(k.n,lx,13);lx+=c.measureText(k.n).width+14}});
+if(o.t){c.fillStyle=css('--mut');c.textAlign='right';c.fillText(o.t,W-p.r,13);c.textAlign='left'}}
+function sl(h,lab,mn,mx,st,v,f,fmt=x=>x){const g=$(h),l=document.createElement('label'),i=document.createElement('input'),o=document.createElement('span');l.textContent=lab;
+Object.assign(i,{type:'range',min:mn,max:mx,step:st,value:v});o.textContent=fmt(+v);i.oninput=()=>{o.textContent=fmt(+i.value);f()};g.append(l,i,o);
+const q=()=>+i.value;q.set=a=>{i.value=a;o.textContent=fmt(+i.value)};return q}
+
+// dữ liệu 1 chiều dùng chung cho slide 2 và 4: [x, y]
+const DATA=[[-3,0],[-2,0],[-1,1],[.5,0],[1.5,1],[3,1]],Jf=(w,b)=>DATA.reduce((a,[x,y])=>{const z=w*x+b;return a+Math.log(1+Math.exp(z))-y*z},0);
+
+// 0: chain rule
+{let y=1;const z=sl('#k1','z',-6,6,.1,1,dr,f2),zs=lin(-6,6,120);
+function dr(){const v=z(),p=sg(v),r=p*(1-p),a=(p-y)/r;
+plot('#c1',zs,[{y:zs.map(sg),c:C.bad,n:'p = σ(z)'},{y:zs.map(t=>sg(t)*(1-sg(t))),c:C.a,n:'p(1−p)'},{y:zs.map(t=>sg(t)-y),c:C.pos,n:'∂L/∂z = p−y'},{pts:[[v,p-y]],c:C.pos}],{y0:-1,y1:1,v:[[v]],h:[0]});
+$('#o1').innerHTML=`∂L/∂p = <b>${f3(a)}</b> · ∂p/∂z = <b>${f3(r)}</b> → tích = <b>${f3(a*r)}</b> = p − y = <b>${f3(p-y)}</b>`}
+$('#y1').onclick=()=>{y=1;$('#y1').classList.add('on');$('#y0').classList.remove('on');dr()};
+$('#y0').onclick=()=>{y=0;$('#y0').classList.add('on');$('#y1').classList.remove('on');dr()};D[2]=dr}
+
+// 1: gradient trên cả tập dữ liệu
+{const xs=lin(-4,4,120),w=sl('#k2','w',-3,3,.1,1,dr,f2),b=sl('#k2','b',-3,3,.1,0,dr,f2);
+function dr(){const W=w(),B=b();let gw=0,gb=0;DATA.forEach(([x,y])=>{const e=sg(W*x+B)-y;gw+=e*x;gb+=e});
+plot('#c2',xs,[{y:xs.map(t=>sg(W*t+B)),c:C.bad,n:'p = σ(wx+b)'},{pts:DATA.filter(d=>d[1]==1),c:C.ok,r:5},{pts:DATA.filter(d=>d[1]==0),c:C.a,r:5}],{y0:0,y1:1,h:[.5]});
+$('#o2').innerHTML=`Điểm xanh: y = 1, cam: y = 0. J = <b>${f2(Jf(W,B))}</b> · ∂J/∂w = Σ(p−y)x = <b>${f2(gw)}</b> · ∂J/∂b = Σ(p−y) = <b>${f2(gb)}</b>`}D[4]=dr}
+
+// hình tĩnh (SVG): vẽ đường cong một lần
+const P=(f,a,b,X,Y)=>lin(a,b,120).map((t,i)=>(i?'L':'M')+X(t).toFixed(1)+' '+Y(f(t)).toFixed(1)).join('');
+{const X=t=>50+(t+6)*29.17,Y=v=>260-v*218;$('#fs').setAttribute('d',P(sg,-6,6,X,Y));$('#fr').setAttribute('d',P(t=>sg(t)*(1-sg(t)),-6,6,X,Y))}
+{$('#fp').setAttribute('d',P(w=>.4*w*w+.6,-2.7,2.7,w=>210+w*59,J=>270-J*59.5))}
+
+// điều hướng
+let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}cu=Math.max(0,i);S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#nx').textContent=cu==S.length-1?'Phần 3 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
+$('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
+addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
+addEventListener('resize',()=>D[cu]&&D[cu]());
+addEventListener('load',()=>{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});go((+location.hash.slice(1)||1)-1)});
+</script>
+</body></html>
