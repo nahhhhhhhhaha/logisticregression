@@ -240,7 +240,7 @@ button,.nb{min-height:40px}
 <h3>1.3. Quan hệ giữa Newton-Raphson và Iteratively Reweighted Least Squares (IRLS)</h3>
 
 
-<p>IRLS là thuật toán chuyên biệt áp dụng phương pháp Newton để tìm ước lượng cực đại khả phong (MLE) cho mô hình Logistic Regression.</p>
+<p>IRLS là thuật toán chuyên biệt áp dụng phương pháp Newton để tìm MLE cho mô hình Logistic Regression.</p>
 <p>Biểu thức $w_{k+1}=(X^TS_kX)^{-1}X^TS_kz_k$ chính là nghiệm dạng đóng (closed-form solution) của bài toán Bình phương tối thiểu có trọng số (Weighted Least Squares - WLS) tại mỗi bước lặp:</p>
 
 <p>trong đó trọng số của mỗi mẫu $i$ là $S_{k,ii}=\mu_{k,i}(1-\mu_{k,i})$, và giá trị mục tiêu làm việc $z_{k,i}$ được biểu diễn từng thành phần:</p>
