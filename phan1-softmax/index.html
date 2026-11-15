@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark">
+<title>Softmax Phần 1: Mô hình xác suất và hàm mất mát</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:#f4f5fb;--ink:#101828;--mut:#667085;--card:#fff;--ln:#e1e5f0;--pos:#4f46e5;--pos2:#3730a3;--tint:#eef0ff;--ftint:#f3f4ff;--fln:#c9cdf4;--fink:#1b1a63;--head:#eceef9;--ok:#12998a;--bad:#c2410c;--glow1:rgba(79,70,229,.10);--glow2:rgba(20,184,166,.08);--sh:0 1px 2px rgba(16,24,40,.04),0 12px 32px -14px rgba(16,24,40,.16)}
+@media(prefers-color-scheme:dark){:root{--bg:#090d1b;--ink:#eef1fb;--mut:#9aa6c4;--card:#121932;--ln:#252f58;--pos:#8f8bff;--pos2:#b4b1ff;--tint:#1b2352;--ftint:#161e47;--fln:#3a4690;--fink:#fff;--head:#19214a;--glow1:rgba(143,139,255,.16);--glow2:rgba(20,184,166,.10);--sh:0 1px 2px rgba(0,0,0,.3),0 14px 34px -14px rgba(0,0,0,.65)}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+@supports(height:100dvh){html,body{height:100dvh}}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{color:var(--ink);font:16.5px/1.65 "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-wrap:break-word;display:flex;flex-direction:column;background:radial-gradient(900px 520px at 4% -10%,var(--glow1),transparent 65%),radial-gradient(800px 480px at 100% 105%,var(--glow2),transparent 62%),var(--bg)}
+main{flex:1;min-height:0;overflow:hidden;position:relative}
+.s{position:absolute;top:0;right:0;bottom:0;left:0;padding:28px max(5vw,env(safe-area-inset-right,0px)) 28px max(5vw,env(safe-area-inset-left,0px));display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:minmax(0,1fr);gap:40px;overflow:hidden}
+.s.on{display:grid;animation:sIn .3s ease-out}@keyframes sIn{from{opacity:0}}
+.s>div{min-width:0;min-height:0;max-height:100%;align-self:center;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
+.s>div:first-child{padding:4px 14px 4px 2px}
+.s.two.on{display:block;overflow-y:auto}
+.s.two>div{max-width:860px;margin:0 auto;max-height:none;overflow:visible;padding:4px 14px}
+@media(min-width:861px){.s.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.s.cols>div{align-self:start}}
+.s>div:first-child>p.mut:first-child{display:inline-flex;align-items:center;gap:8px;margin:0 0 .6em;padding:5px 13px;font:600 12.5px "Be Vietnam Pro",system-ui,sans-serif;color:var(--pos2);background:var(--tint);border:1px solid var(--fln);border-radius:99px}
+.s>div:first-child>p.mut:first-child::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pos)}
+h2,h3,h4{color:var(--ink);letter-spacing:-.02em;line-height:1.25;margin:0}
+h2{font-size:clamp(1.3rem,2.2vw,1.65rem);font-weight:700;margin:0 0 .35em}h3{font-size:1.15rem;font-weight:600;color:var(--pos2);margin:.1em 0 .7em}h4{font-size:1.02rem;font-weight:600;margin:1em 0 .2em}
+p{margin:.5em 0}ul{margin:.4em 0;padding-left:1.4em}li{margin:.25em 0}b{font-weight:600}.mut{color:var(--mut)}
+.box{border:1px solid var(--fln);border-left:4px solid var(--pos);background:var(--tint);border-radius:14px;padding:12px 18px}
+.v{background:var(--card);border:1px solid var(--ln);border-top:3px solid var(--pos);border-radius:20px;padding:18px;box-shadow:var(--sh)}
+canvas{width:100%;height:300px;display:block}
+.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:13.5px system-ui,sans-serif;margin-top:8px}.c input{width:100%;min-width:0;accent-color:var(--pos)}
+.o{font:13.5px/1.6 system-ui,sans-serif;margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:12px;color:var(--mut)}.o b{color:var(--ink)}
+.b{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button,.nb{font:500 13.5px "Be Vietnam Pro",system-ui,sans-serif;padding:8px 15px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:10px;cursor:pointer;text-decoration:none;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+button:hover,.nb:hover{border-color:var(--pos);background:var(--tint)}button.on{border-color:var(--pos);background:var(--tint);box-shadow:0 0 0 1px var(--pos);color:var(--pos2)}
+button:focus-visible,input:focus-visible,.nb:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
+nav{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center;padding:11px max(10px,env(safe-area-inset-right,0px)) max(11px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));border-top:1px solid var(--ln);background:var(--card);font:600 13.5px "Be Vietnam Pro",system-ui,sans-serif}
+nav #ct{min-width:64px;text-align:center;padding:5px 12px;border-radius:99px;background:var(--tint);color:var(--pos2);font-variant-numeric:tabular-nums}
+#nx{background:var(--pos);border-color:var(--pos);color:#fff;box-shadow:0 6px 16px -6px var(--pos)}#nx:hover{background:var(--pos2)}
+@media(prefers-color-scheme:dark){#nx{color:#10162b}}
+.katex{color:var(--fink);-webkit-text-stroke:.12px currentColor}
+.katex-display{overflow-x:auto;overflow-y:hidden;margin:.8em 0;padding:16px 20px;background:var(--ftint);border:1px solid var(--fln);border-left:4px solid var(--pos);border-radius:14px}
+.katex-display>.katex{font-size:1.2em;-webkit-text-stroke:.2px currentColor}
+.fb{border:1.5px solid var(--pos);border-radius:16px;margin:.9em 0;overflow:hidden;box-shadow:var(--sh)}.fb .katex-display{margin:0;border:0;border-radius:0}
+.pl .katex-display{background:none;border:0;padding:2px 0;margin:.5em 0}
+.ch{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font:13px system-ui,sans-serif;margin:.6em 0}.ch i{font-style:normal;border:1px solid var(--fln);background:var(--tint);border-radius:6px;padding:3px 9px}.ch s{text-decoration:none;color:var(--mut)}
+@media(max-width:860px){.s{grid-template-columns:1fr;grid-template-rows:none;overflow:auto;padding-top:18px;padding-bottom:18px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));gap:22px}.s>div{max-height:none;overflow:visible;align-self:start}.s>div:first-child{padding:0}canvas{height:260px}.katex-display{padding:12px 14px}.katex-display>.katex{font-size:1.1em}}
+@media(max-width:480px){body{font-size:16px}nav{gap:6px}button,.nb{padding:8px 10px;font-size:13px}nav #ct{min-width:52px;padding:5px 8px}.c{grid-template-columns:minmax(0,auto) minmax(60px,1fr) 3.6em;gap:4px 8px}}
+@media(max-height:520px){canvas{height:210px}nav{padding-top:6px}}
+@media(pointer:coarse){button,.nb{min-height:40px}.nb{display:inline-flex;align-items:center}}
+@media(prefers-reduced-motion:reduce){.s.on{animation:none}}
+table{border-collapse:separate;border-spacing:0;width:100%;border:1px solid var(--ln);border-radius:16px;overflow:hidden;background:var(--card);box-shadow:var(--sh);font-size:.93rem}
+th{background:var(--head);font-weight:600;padding:10px 14px;text-align:left}td{padding:10px 14px;border-top:1px solid var(--ln)}th+th,td+td{border-left:1px solid var(--ln)}
+.tw{max-width:100%}@media(max-width:860px){.tw{overflow-x:auto}table{min-width:520px}}
+.d1{fill:var(--tint);stroke:var(--pos);stroke-width:1.5}.d2{stroke:var(--fln);stroke-width:1.2}.d3{fill:var(--ink);font:13px system-ui,sans-serif;text-anchor:middle}.d4{stroke:var(--mut);stroke-width:1.5}.d5{fill:var(--mut);font:12px system-ui,sans-serif;text-anchor:middle}
+</style></head><body>
+<main>
+<!-- 1 -->
+<section class="s two on"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>1. MÔ HÌNH XÁC SUẤT VÀ HÀM MẤT MÁT</h2>
+<p class="mut" style="font-size:1.05rem">Từ Bernoulli đến Softmax Regression</p>
+<div class="ch"><i>Bernoulli</i><s>→</s><i>Categorical</i><s>→</s><i>Điểm số z</i><s>→</s><i>Softmax</i><s>→</s><i>Likelihood</i><s>→</s><i>Cross-Entropy</i></div>
+<p>Phần này xây dựng mô hình xác suất cho bài toán <b>nhiều lớp</b>: chọn phân phối cho nhãn, tạo điểm số tuyến tính, biến điểm số thành xác suất bằng Softmax, rồi suy ra hàm mất mát từ Likelihood.</p>
+<p class="box">Cần xem lại Logistic Regression? <a class="nb" href="../phan6-map/index.html">← Quay lại Phần 6</a></p>
+</div></section>
+<!-- 2 -->
+<section class="s cols"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>1. VẤN ĐỀ ĐƯỢC ĐƯA RA</h2>
+<h3>Logistic Regression nhị phân gồm</h3>
+<div class="ch"><i>x</i><s>→</s><i>w<sup>T</sup>x + b</i><s>→</s><i>Sigmoid</i><s>→</s><i>p</i></div>
+<ul><li>Phân phối <b>Bernoulli</b> mô hình hóa biến nhãn $Y$.</li><li>Hàm tuyến tính $w^Tx+b$ tạo ra <b>điểm số</b>.</li><li>Hàm <b>Sigmoid</b> chuyển điểm số thành xác suất.</li></ul>
+<p>Nhưng với Bernoulli, mô hình chỉ giải quyết được bài toán <b>hai nhãn</b>.</p>
+</div><div>
+<h3>Nếu bài toán có nhiều lớp thì sao?</h3>
+<p>Ví dụ: mô hình nhận diện động vật với ba lớp.</p>
+<div class="ch"><i style="border-color:#d9822b">Lớp 1: Mèo</i><i style="border-color:#12998a">Lớp 2: Chó</i><i style="border-color:#4338ca">Lớp 3: Chim</i></div>
+<p>Lúc này $Y\in\{1,2,3\}$. Bernoulli không còn phù hợp vì nó chỉ mô hình hóa biến có <b>hai</b> kết quả.</p>
+<p class="box">Cần một phân phối có thể mô hình hóa <b>nhiều kết quả loại trừ lẫn nhau</b>: đó là <b>phân phối Categorical</b>.</p>
+</div></section>
+<!-- 3 -->
+<section class="s two"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>2. BERNOULLI VÀ CATEGORICAL</h2>
+<h3>Categorical là sự mở rộng của Bernoulli</h3>
+<div class="tw"><table><thead><tr><th></th><th>Bernoulli</th><th>Categorical</th></tr></thead><tbody>
+<tr><td>Số kết quả</td><td>2</td><td>$K>2$</td></tr>
+<tr><td>Biến ngẫu nhiên</td><td>$Y\in\{0,1\}$</td><td>$Y\in\{1,\dots,K\}$</td></tr>
+<tr><td>Tham số</td><td>một xác suất $p$</td><td>$K$ xác suất $p_1,\dots,p_K$, tổng bằng 1</td></tr>
+<tr><td>Hàm biến điểm số thành xác suất</td><td>Sigmoid</td><td>Softmax (sẽ suy ra ở mục 4)</td></tr>
+<tr><td>Mô hình</td><td>Logistic Regression</td><td>Softmax Regression</td></tr></tbody></table></div>
+<p class="mut">Khi $K=2$, Categorical trở về Bernoulli.</p>
+</div></section>
+<!-- 4 -->
+<section class="s"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>2. BERNOULLI VÀ CATEGORICAL</h2>
+<h3>2.1. Phân phối Categorical là gì?</h3>
+<p>Dùng khi biến ngẫu nhiên có hơn hai kết quả: $Y\in\{1,2,\dots,K\}$, với $K$ là tổng số lớp. Định nghĩa $p_k=P(Y=k\mid x)$ và</p>
+$$\sum_{k=1}^{K}p_k=1,\qquad p_k\ge0$$
+<p>PMF: $P(Y=k)=p_k$. Trong Softmax Regression, phân phối này có điều kiện theo input:</p>
+<div class="fb">$$P(Y=k\mid X=x)=p_k(x)$$</div>
+</div><div class="v">
+<canvas id="c3" class="sm"></canvas><div class="c" id="k3"></div><div class="o" id="o3"></div>
+</div></section>
+<!-- 5 -->
+<section class="s"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>2. BERNOULLI VÀ CATEGORICAL</h2>
+<h3>2.2. Cơ chế chọn lọc và mã hóa One-Hot</h3>
+<p>Với $K$ lớp loại trừ lẫn nhau, biểu diễn nhãn bằng vector $t=(t_1,\dots,t_K)^T$, $t_k\in\{0,1\}$, $\sum_kt_k=1$. Mẫu thuộc lớp $c$ thì duy nhất $t_c=1$.</p>
+<div class="fb">$$P(Y=y\mid x)=\prod_{k=1}^{K}p_k^{\,t_k}$$</div>
+<p>Mọi thừa số có $t_k=0$ đều bằng $p_k^0=1$, nên tích chỉ còn lại $p_c$. Chọn nhãn thật để xem.</p>
+</div><div class="v">
+<canvas id="c4" class="sm"></canvas><div class="b" id="y4"></div><div class="o" id="o4"></div>
+</div></section>
+<!-- 6 -->
+<section class="s"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>3. XÂY DỰNG MÔ HÌNH XÁC SUẤT ĐA LỚP</h2>
+<p>Cần mô hình xác suất có điều kiện $P(Y=k\mid X=x;\theta)$ thỏa mãn đồng thời:</p>
+<div class="pl">$$P(Y=k\mid X=x;\theta)\ge0,\qquad\sum_{k=1}^{K}P(Y=k\mid X=x;\theta)=1$$</div>
+<h3>3.1. Ý nghĩa hình học của tham số</h3>
+<p>Với $x\in\mathbb{R}^d$: Logistic dùng một vector $w$, còn Softmax cần <b>$K$ vector trọng số</b> $w_k\in\mathbb{R}^d$, gom thành ma trận</p>
+<div class="fb">$$W=[w_1,w_2,\dots,w_K]\in\mathbb{R}^{d\times K}$$</div>
+</div><div class="v"><div id="dg"></div><p class="mut" style="text-align:center;margin:.4em 0 0;font-size:.9rem">Mỗi lớp có một vector $w_k$ riêng, nối từ mọi đặc trưng tới điểm số $z_k$.</p></div></section>
+<!-- 7 -->
+<section class="s cols"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>3. XÂY DỰNG MÔ HÌNH XÁC SUẤT ĐA LỚP</h2>
+<h3>3.2. Hàm điểm số tuyến tính</h3>
+<p>Với mỗi lớp $k$:</p>
+<div class="fb">$$z_k=w_k^Tx+b_k$$</div>
+<p>Ta thu được $K$ điểm số, gom thành vector logits:</p>
+$$z=\begin{bmatrix}z_1\\z_2\\\vdots\\z_K\end{bmatrix}\in\mathbb{R}^K$$
+</div><div>
+<h3>3.3. Biểu diễn dạng ma trận</h3>
+<p>Với $W\in\mathbb{R}^{d\times K}$ và vector bias $b=[b_1,\dots,b_K]^T\in\mathbb{R}^K$:</p>
+<div class="fb">$$z=W^Tx+b$$</div>
+<p>Với $N$ mẫu, đặt $X\in\mathbb{R}^{N\times d}$:</p>
+<div class="fb">$$Z=XW+b,\qquad Z\in\mathbb{R}^{N\times K}$$</div>
+<p class="mut">Mỗi hàng của $Z$ là vector điểm số của một mẫu.</p>
+</div></section>
+<!-- 8 -->
+<section class="s"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>3. XÂY DỰNG MÔ HÌNH XÁC SUẤT ĐA LỚP</h2>
+<h3>Từ đầu vào đến điểm số</h3>
+<p>Ví dụ minh họa với $d=2$, $K=3$ và tham số cố định. Kéo $x_1,x_2$ để thấy ba điểm số thay đổi.</p>
+<p class="box"><b>$z$ chưa phải phân phối xác suất:</b> có thể âm, và tổng không bằng 1. Cần biến đổi tiếp.</p>
+</div><div class="v">
+<canvas id="c6" class="sm"></canvas><div class="c" id="k6"></div><div class="o" id="o6"></div>
+</div></section>
+<!-- 9 -->
+<section class="s cols"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>4. SUY DẪN HÀM SOFTMAX</h2>
+<p>Ta đã có $z=(z_1,\dots,z_K)^T$ nhưng chưa phải phân phối xác suất. Cần ánh xạ</p>
+<div class="fb">$$f:\mathbb{R}^K\rightarrow\Delta^{K-1}$$</div>
+<p>với $\Delta^{K-1}$ là <b>Simplex xác suất</b>:</p>
+$$\Delta^{K-1}=\Big\{p:\ p_k\ge0,\ \sum_{k=1}^{K}p_k=1\Big\}$$
+</div><div>
+<h3>Kế hoạch hai bước</h3>
+<div class="ch"><i>z</i><s>Bước 1: hàm mũ</s><i>a_k = e<sup>z_k</sup> &gt; 0</i><s>Bước 2: chuẩn hóa</s><i>p ∈ Δ</i></div>
+<ul><li><b>Bước 1</b> tạo giá trị dương nhưng giữ nguyên thứ tự.</li><li><b>Bước 2</b> chia cho tổng để tổng bằng 1.</li></ul>
+<p class="mut">Với $K=3$, simplex là một tam giác: mỗi điểm trong tam giác là một phân phối xác suất trên ba lớp.</p>
+</div></section>
+<!-- 10 -->
+<section class="s"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>4. SUY DẪN HÀM SOFTMAX</h2>
+<h3>4.1. Bước 1: hàm mũ tạo giá trị dương</h3>
+<p>Vì sao chọn hàm mũ:</p>
+<ul><li>Luôn dương: $e^{z_k}>0$ với mọi $z_k\in\mathbb{R}$.</li><li>Đồng biến nghiêm ngặt, vì $\dfrac{d}{dz_k}e^{z_k}=e^{z_k}>0$:</li></ul>
+<div class="pl">$$z_a>z_b\iff e^{z_a}>e^{z_b}$$</div>
+<p class="mut">Điểm số cao hơn vẫn cho giá trị lớn hơn, kể cả khi $z$ âm.</p>
+</div><div class="v">
+<canvas id="c8"></canvas><div class="c" id="k8"></div><div class="o" id="o8"></div>
+</div></section>
+<!-- 11 -->
+<section class="s"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>4. SUY DẪN HÀM SOFTMAX</h2>
+<h3>4.2. Bước 2: chuẩn hóa để tổng bằng 1</h3>
+<p>Sau bước 1 có $a=(e^{z_1},\dots,e^{z_K})$, đều dương nhưng tổng chưa chắc bằng 1. Chia từng phần tử cho tổng:</p>
+<div class="fb">$$p_k=\frac{a_k}{\sum_{j=1}^{K}a_j}$$</div>
+<p>Kiểm chứng:</p>
+<div class="pl">$$\sum_{k=1}^{K}p_k=\frac{\sum_{k}a_k}{\sum_{j}a_j}=1$$</div>
+</div><div class="v">
+<canvas id="c9"></canvas><div class="c" id="k9"></div><div class="o" id="o9"></div>
+</div></section>
+<!-- 12 -->
+<section class="s"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>4. SUY DẪN HÀM SOFTMAX</h2>
+<h3>4.3. Kết hợp hai bước</h3>
+<ul><li><b>Bước 1, tạo giá trị dương:</b> $a_k=e^{z_k}$.</li><li><b>Bước 2, chuẩn hóa:</b> $p_k=a_k/\sum_ja_j$.</li></ul>
+<h4>Công thức Softmax hoàn chỉnh</h4>
+<div class="fb">$$p_k=P(Y=k\mid X=x)=\frac{e^{z_k}}{\sum_{j=1}^{K}e^{z_j}}=\frac{e^{w_k^Tx+b_k}}{\sum_{j=1}^{K}e^{w_j^Tx+b_j}}$$</div>
+</div><div class="v">
+<canvas id="c10"></canvas><div class="c" id="k10"></div><div class="o" id="o10"></div>
+</div></section>
+<!-- 13 -->
+<section class="s two"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>5. HÀM LIKELIHOOD</h2>
+<p>Cho $D=\{(x_i,y_i)\}_{i=1}^n$. Mô hình Softmax có tham số $\Theta=(W,b)$; với mỗi $x_i$ dự đoán phân phối $p_{i,k}$.</p>
+<p><b>Likelihood</b> đo mức độ phù hợp của $\Theta$ với toàn bộ nhãn đã quan sát. Giả sử các $Y_i$ độc lập có điều kiện khi biết $X$ và $\Theta$, theo quy tắc nhân xác suất:</p>
+<div class="fb">$$L(\Theta)=\prod_{i=1}^{n}P(Y_i=y_i\mid x_i;\Theta)=\prod_{i=1}^{n}p_{i,y_i}$$</div>
+<h4>Ví dụ minh họa ($n=3$)</h4>
+<div class="tw"><table><thead><tr><th>Mẫu $i$</th><th>Nhãn thật $y_i$</th><th>$p_{i,y_i}$</th></tr></thead><tbody>
+<tr><td>1</td><td>Mèo</td><td>0,70</td></tr><tr><td>2</td><td>Chó</td><td>0,80</td></tr><tr><td>3</td><td>Chim</td><td>0,60</td></tr>
+<tr><td colspan="2"><b>$L(\Theta)=0{,}70\times0{,}80\times0{,}60$</b></td><td><b>0,336</b></td></tr></tbody></table></div>
+</div></section>
+<!-- 14 -->
+<section class="s cols"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>5. HÀM LIKELIHOOD</h2>
+<h3>5.1. Biểu diễn theo One-Hot</h3>
+<p>Với nhãn One-Hot: $y_{ik}=1$ nếu $y_i=k$, ngược lại $y_{ik}=0$.</p>
+<div class="pl">$$P(Y_i=y_i\mid x_i;\Theta)=\prod_{k=1}^{K}p_{ik}^{\,y_{ik}}$$</div>
+<p>Vì chỉ có một $y_{ik}=1$, các thừa số còn lại đều bằng $p_{ik}^0=1$. Tích chỉ giữ xác suất của <b>lớp đúng</b>. Thay vào Likelihood:</p>
+<div class="fb">$$L(\Theta)=\prod_{i=1}^{n}\prod_{k=1}^{K}p_{ik}^{\,y_{ik}}$$</div>
+</div><div>
+<h3>5.2. Từ Likelihood sang Log-Likelihood</h3>
+<div class="fb">$$\ell(\Theta)=\log L(\Theta)=\sum_{i=1}^{n}\sum_{k=1}^{K}y_{ik}\log p_{ik}$$</div>
+<p>Hai tích trở thành hai tổng. Với ví dụ ở slide trước:</p>
+<div class="pl">$$\ell=\ln0{,}70+\ln0{,}80+\ln0{,}60\approx-1{,}091$$</div>
+<p class="mut">Đây là Log-Likelihood của Softmax Regression.</p>
+</div></section>
+<!-- 15 -->
+<section class="s"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>6. CROSS ENTROPY</h2>
+<h3>6.1. Từ Log-Likelihood đến Categorical Cross-Entropy</h3>
+<p>Bắt đầu từ $\ell(\Theta)=\sum_{i=1}^{N}\sum_{k=1}^{K}y_{ik}\ln p_{ik}$. Đổi dấu, chia cho $N$:</p>
+<div class="fb">$$J(\Theta)=-\frac1N\sum_{i=1}^{N}\sum_{k=1}^{K}y_{ik}\ln p_{ik}$$</div>
+<h3>6.2. Cross-Entropy của một mẫu</h3>
+<p>Mẫu $i$ thuộc lớp $c$ nghĩa là $y_{ic}=1$ và $y_{ik}=0$ với $k\ne c$:</p>
+<div class="fb">$$J_i=-\sum_{k}y_{ik}\ln p_{ik}=-\ln p_{ic}$$</div>
+</div><div class="v">
+<canvas id="c13"></canvas><div class="b" id="y13"></div><div class="c" id="k13"></div><div class="o" id="o13"></div>
+</div></section>
+<!-- 16 -->
+<section class="s cols"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>6. CROSS ENTROPY</h2>
+<h3>6.3. Từ Negative Log-Likelihood đến Cross-Entropy</h3>
+<p>Trong lý thuyết thông tin, Cross-Entropy giữa phân phối thật $p$ và phân phối ước lượng $q$:</p>
+<div class="pl">$$H(p,q)=-\sum_{k=1}^{K}p_k\ln q_k$$</div>
+<p>Nhãn thực tế dạng One-Hot: $t_k=1$ nếu $k=c$, ngược lại $0$. Để tránh nhầm ký hiệu, viết trực tiếp với phân phối dự đoán $p$:</p>
+<div class="fb">$$H(t,p)=-\sum_{k=1}^{K}t_k\ln p_k$$</div>
+</div><div>
+<p>Chỉ có một phần tử của $t$ bằng 1:</p>
+<div class="fb">$$H(t,p)=-\ln p_c$$</div>
+<p class="box">Đây chính là Cross-Entropy vừa suy ra từ Negative Log-Likelihood.</p>
+<p>Chỉ xác suất dự đoán cho <b>lớp thực tế</b> được giữ lại. Các lớp còn lại không đóng góp vào loss của mẫu đó.</p>
+<p class="mut">Với ví dụ $n=3$ ở trên: $J=\frac{1}{3}(0{,}357+0{,}223+0{,}511)\approx0{,}364$.</p>
+</div></section>
+<!-- 17 -->
+<section class="s two"><div>
+<p class="mut">Softmax Regression · Phần 1 / 2</p><p></p>
+<h2>TỔNG KẾT PHẦN 1</h2>
+<div class="ch"><i>Categorical + One-Hot</i><s>→</s><i>z = W<sup>T</sup>x + b</i><s>→</s><i>Softmax</i><s>→</s><i>Likelihood</i><s>→</s><i>Cross-Entropy</i></div>
+<div class="tw"><table><tbody>
+<tr><td><b>Mô hình</b></td><td>$z=W^Tx+b,\quad p_k=\dfrac{e^{z_k}}{\sum_je^{z_j}}$</td></tr>
+<tr><td><b>Likelihood</b></td><td>$L(\Theta)=\prod_i\prod_k p_{ik}^{\,y_{ik}}$</td></tr>
+<tr><td><b>Mất mát</b></td><td>$J(\Theta)=-\frac1N\sum_i\sum_k y_{ik}\ln p_{ik}$, mỗi mẫu $J_i=-\ln p_{ic}$</td></tr></tbody></table></div>
+<p class="box"><b>Phần 2:</b> tính Gradient và Hessian của $J$, để huấn luyện mô hình và chứng minh tính lồi.</p>
+</div></section>
+</main>
+<nav><a class="nb" href="../index.html">☰ Mục lục</a><button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button><button id="fs" title="Toàn màn hình (phím F)">⛶</button></nav>
+<script>
+if(!Array.prototype.at)Object.defineProperty(Array.prototype,'at',{value:function(n){n=Math.trunc(n)||0;if(n<0)n+=this.length;return this[n]},writable:true,configurable:true});
+const $=s=>document.querySelector(s),S=[...document.querySelectorAll('.s')],D={},NEXT='../softmax-2-gradient/index.html',PREV='../phan6-map/index.html';
+const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},COL=[C.a,C.ok,C.pos],NM=['Mèo','Chó','Chim'],css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
+const sm=z=>{const m=Math.max(...z),e=z.map(v=>Math.exp(v-m)),s=e.reduce((a,b)=>a+b);return e.map(v=>v/s)};
+function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
+function sl(h,lab,mn,mx,st,v,f,fmt=f2){const g=$(h),l=document.createElement('label'),i=document.createElement('input'),o=document.createElement('span');l.textContent=lab;Object.assign(i,{type:'range',min:mn,max:mx,step:st,value:v});o.textContent=fmt(+v);i.oninput=()=>{o.textContent=fmt(+i.value);f()};g.append(l,i,o);return()=>+i.value}
+const zs=(h,f,init,mn,mx)=>{const a=init.map((v,j)=>sl(h,'z '+NM[j],mn,mx,.1,v,f));return()=>a.map(g=>g())};
+function bars(id,P){const t=cv(id);if(!t)return;const[c,W,H]=t,pw=W/P.length,top=26,bot=26;c.font='12px system-ui';c.textAlign='center';
+P.forEach(([n,v,f,lab],i)=>{const lo=Math.min(0,...v),hi=Math.max(1e-9,...v),Y=u=>top+(hi-u)/(hi-lo)*(H-top-bot-14),bw=Math.min(46,(pw-24)/v.length-6),x0=i*pw+(pw-v.length*(bw+6)+6)/2;c.fillStyle=css('--mut');c.fillText(n,i*pw+pw/2,14);
+c.strokeStyle=css('--ln');c.beginPath();c.moveTo(i*pw+8,Y(0));c.lineTo((i+1)*pw-8,Y(0));c.stroke();
+v.forEach((u,j)=>{const x=x0+j*(bw+6);c.fillStyle=COL[j%3];c.fillRect(x,Math.min(Y(u),Y(0)),bw,Math.max(1,Math.abs(Y(u)-Y(0))));c.fillStyle=css('--ink');c.fillText(f(u),x+bw/2,u>=0?Y(u)-4:Y(u)+13);c.fillStyle=css('--mut');c.fillText(lab[j],x+bw/2,H-8)})})}
+// sơ đồ mô hình (SVG tĩnh)
+{let s='<svg viewBox="0 0 440 270" role="img" aria-label="Sơ đồ Softmax: x → z → p" style="display:block;width:100%;height:auto;max-height:52vh"><g>',Y=[55,135,215],X0=55,X1=215,X2=385;
+for(const a of Y)for(const b of Y)s+=`<line class="d2" x1="${X0+20}" y1="${a}" x2="${X1-20}" y2="${b}"/>`;
+for(const b of Y)s+=`<line class="d4" x1="${X1+20}" y1="${b}" x2="${X2-22}" y2="${b}"/>`;
+['x₁','x₂','x_d'].forEach((t,j)=>s+=`<circle class="d1" cx="${X0}" cy="${Y[j]}" r="20"/><text class="d3" x="${X0}" y="${Y[j]+5}">${t}</text>`);
+Y.forEach((y,j)=>s+=`<circle cx="${X1}" cy="${y}" r="20" fill="var(--card)" stroke="${COL[j]}" stroke-width="2"/><text class="d3" x="${X1}" y="${y+5}">z${'₁₂₃'[j]}</text><circle cx="${X2}" cy="${y}" r="22" fill="${COL[j]}"/><text x="${X2}" y="${y+5}" style="fill:#fff;font:600 13px system-ui;text-anchor:middle">p${'₁₂₃'[j]}</text><text class="d5" x="${(X1+X2)/2}" y="${y-6}">softmax</text>`);
+s+=`<text class="d5" x="${X0}" y="22">x ∈ ℝᵈ</text><text class="d5" x="${X1}" y="22">z = Wᵀx + b</text><text class="d5" x="${X2}" y="22">p ∈ Δ</text></g></svg>`;$('#dg').innerHTML=s}
+// 4: Categorical
+{const g1=sl('#k3','p Mèo',0,1,.01,.5,dr),g2=sl('#k3','p Chó',0,1,.01,.3,dr);function dr(){const a=g1(),b=Math.min(g2(),1-a),c3=Math.max(0,1-a-b);bars('#c3',[['PMF của Y',[a,b,c3],f2,NM]]);
+$('#o3').innerHTML=`p<sub>Chim</sub> = 1 − p<sub>Mèo</sub> − p<sub>Chó</sub> = <b>${f2(c3)}</b> · Σ p<sub>k</sub> = <b>${f2(a+b+c3)}</b>. Kéo hai thanh trượt: tổng luôn bằng 1, các p<sub>k</sub> ≥ 0`}D[3]=dr}
+// 5: One-hot
+{let cl=1;const P=[.2,.5,.3],yb=$('#y4');NM.forEach((n,j)=>{const b=document.createElement('button');b.textContent='Nhãn thật: '+n;b.onclick=()=>{cl=j;dr()};yb.append(b)});
+function dr(){[...yb.children].forEach((b,j)=>b.classList.toggle('on',j==cl));const t=P.map((_,j)=>+(j==cl)),fa=P.map((p,j)=>Math.pow(p,t[j]));bars('#c4',[['p (dự đoán)',P,f2,NM],['t (One-Hot)',t,f2,NM],['p<sup>t</sup> từng thừa số'.replace(/<\/?sup>/g,'ᵗ'),fa,f2,NM]]);
+$('#o4').innerHTML=`P(Y=y|x) = ${P.map((p,j)=>`${p}<sup>${t[j]}</sup>`).join(' · ')} = <b>${f2(fa.reduce((a,b)=>a*b))}</b> = p<sub>${NM[cl]}</sub>`}D[4]=dr}
+// 8: z = Wᵀx + b
+{const WM=[[1.2,-.5],[-.6,1],[-.4,-.8]],BM=[.1,0,-.1],g1=sl('#k6','x₁',-3,3,.1,1,dr),g2=sl('#k6','x₂',-3,3,.1,-1,dr);function dr(){const x=[g1(),g2()],z=WM.map((w,k)=>w[0]*x[0]+w[1]*x[1]+BM[k]);bars('#c6',[['điểm số z',z,f2,NM]]);
+$('#o6').innerHTML=z.map((v,k)=>`z<sub>${NM[k]}</sub> = ${WM[k][0]}·x₁ + ${WM[k][1]}·x₂ + ${BM[k]} = <b>${f2(v)}</b>`).join('<br>')+`<br>Σ z = <b>${f2(z.reduce((a,b)=>a+b))}</b> ≠ 1 và có thể âm`}D[7]=dr}
+// 10: hàm mũ
+{const g=zs('#k8',dr,[1,0,-1],-3,5);function dr(){const t=cv('#c8');if(!t)return;const[c,W,H]=t,z=g(),e=z.map(Math.exp),ym=Math.max(5,1.2*Math.max(...e)),l=34,r=10,tp=16,bt=22,x0=-3,x1=5,X=u=>l+(u-x0)/(x1-x0)*(W-l-r),Y=u=>H-bt-u/ym*(H-tp-bt);
+c.font='12px system-ui';c.fillStyle=c.strokeStyle=css('--mut');c.lineWidth=1;c.textAlign='left';c.beginPath();c.moveTo(l,Y(0));c.lineTo(W-r,Y(0));c.moveTo(X(0),tp);c.lineTo(X(0),Y(0));c.stroke();
+for(let u=-3;u<=5;u+=2)c.fillText(u,X(u)-4,H-6);c.fillText('e^z',4,tp+4);
+c.strokeStyle=css('--pos');c.lineWidth=2;c.beginPath();for(let i=0;i<=120;i++){const u=x0+(x1-x0)*i/120;i?c.lineTo(X(u),Y(Math.exp(u))):c.moveTo(X(u),Y(Math.exp(u)))}c.stroke();
+z.forEach((u,j)=>{c.setLineDash([3,3]);c.strokeStyle=COL[j];c.lineWidth=1;c.beginPath();c.moveTo(X(u),Y(0));c.lineTo(X(u),Y(e[j]));c.stroke();c.setLineDash([]);c.fillStyle=COL[j];c.beginPath();c.arc(X(u),Y(e[j]),5,0,7);c.fill()});
+const o=[0,1,2].sort((a,b)=>z[b]-z[a]);$('#o8').innerHTML=z.map((v,j)=>`e<sup>${f2(v)}</sup> = <b>${f2(e[j])}</b> (${NM[j]})`).join(' · ')+`<br>Mọi giá trị đều &gt; 0. Thứ tự giữ nguyên: ${o.map(j=>NM[j]).join(' &gt; ')}`}D[9]=dr}
+// 11: chuẩn hóa
+{const g=zs('#k9',dr,[1,0,-1],-3,5);function dr(){const z=g(),e=z.map(Math.exp),p=sm(z),s=e.reduce((a,b)=>a+b);bars('#c9',[['z',z,f2,NM],['a = e^z',e,f2,NM],['p = a / Σa',p,f3,NM]]);
+$('#o9').innerHTML=`Σ a = <b>${f2(s)}</b> · p = (${e.map(v=>f2(v)).join(', ')}) / ${f2(s)} → Σ p = <b>${f3(p.reduce((a,b)=>a+b))}</b>`}D[10]=dr}
+// 12: simplex
+{const g=zs('#k10',dr,[1,0,-1],-3,5);function dr(){const t=cv('#c10');if(!t)return;const[c,W,H]=t,z=g(),p=sm(z),s=Math.min(W-70,(H-70)/.866),cx=W/2,V=[[cx,30],[cx-s/2,30+s*.866],[cx+s/2,30+s*.866]],Q=[0,1].map(i=>p.reduce((a,x,k)=>a+x*V[k][i],0));
+c.font='12px system-ui';c.textAlign='center';c.globalAlpha=.5;c.fillStyle=css('--tint');c.beginPath();V.forEach((v,i)=>i?c.lineTo(v[0],v[1]):c.moveTo(v[0],v[1]));c.closePath();c.fill();c.globalAlpha=1;c.strokeStyle=css('--fln');c.lineWidth=1.5;c.stroke();
+c.strokeStyle=css('--mut');c.beginPath();c.arc(cx,30+s*.866*2/3,4,0,7);c.stroke();
+V.forEach((v,k)=>{c.strokeStyle=COL[k];c.globalAlpha=.4+.6*p[k];c.lineWidth=1.5;c.beginPath();c.moveTo(Q[0],Q[1]);c.lineTo(v[0],v[1]);c.stroke();c.globalAlpha=1;c.fillStyle=COL[k];c.beginPath();c.arc(v[0],v[1],6,0,7);c.fill();c.fillStyle=css('--ink');c.fillText(NM[k]+' '+f2(p[k]),v[0],v[1]+(k?20:-12))});
+c.fillStyle=css('--ink');c.beginPath();c.arc(Q[0],Q[1],6,0,7);c.fill();
+$('#o10').innerHTML=`p = (<b>${p.map(f3).join(', ')}</b>) nằm trong tam giác Δ² vì p<sub>k</sub> ≥ 0, Σ p<sub>k</sub> = 1. Chấm rỗng: phân phối đều (1/3 mỗi lớp)`}D[11]=dr}
+// 15: Cross-Entropy
+{let cl=0;const g=zs('#k13',dr,[1,0,-1],-3,5),yb=$('#y13');NM.forEach((n,j)=>{const b=document.createElement('button');b.textContent='Nhãn thật: '+n;b.onclick=()=>{cl=j;dr()};yb.append(b)});
+function dr(){[...yb.children].forEach((b,j)=>b.classList.toggle('on',j==cl));const t=cv('#c13');if(!t)return;const[c,W,H]=t,p=sm(g())[cl],J=-Math.log(p),l=38,r=10,tp=22,bt=24,x0=.02,X=u=>l+(Math.max(u,x0)-x0)/(1-x0)*(W-l-r),Y=u=>H-bt-u/4*(H-tp-bt);
+c.font='12px system-ui';c.fillStyle=c.strokeStyle=css('--mut');c.lineWidth=1;c.textAlign='left';c.beginPath();c.moveTo(l,Y(0));c.lineTo(W-r,Y(0));c.moveTo(l,tp);c.lineTo(l,Y(0));c.stroke();
+[0,1,2,3,4].forEach(u=>c.fillText(u,16,Y(u)+4));[0,.25,.5,.75,1].forEach(u=>c.fillText(u,X(u)-8,H-6));c.fillText('p của lớp đúng',l+6,13);c.textAlign='right';c.fillText('−ln p',W-r,13);
+c.strokeStyle=C.pos;c.lineWidth=2;c.beginPath();for(let i=0;i<=100;i++){const u=x0+(1-x0)*i/100;i?c.lineTo(X(u),Y(-Math.log(u))):c.moveTo(X(u),Y(-Math.log(u)))}c.stroke();
+c.setLineDash([3,3]);c.strokeStyle=C.bad;c.beginPath();c.moveTo(X(p),Y(0));c.lineTo(X(p),Y(Math.min(J,4)));c.stroke();c.setLineDash([]);c.fillStyle=C.bad;c.beginPath();c.arc(X(p),Y(Math.min(J,4)),5,0,7);c.fill();
+$('#o13').innerHTML=`Nhãn thật: <b>${NM[cl]}</b> · p<sub>c</sub> = <b>${f3(p)}</b> · J<sub>i</sub> = −ln p<sub>c</sub> = <b>${f3(J)}</b>. p<sub>c</sub> càng gần 1 thì loss càng gần 0; p<sub>c</sub> → 0 thì loss tăng rất nhanh`}D[14]=dr}
+// điều hướng
+let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 6':'← Trước';$('#nx').textContent=cu==S.length-1?'Softmax 2 →':'Sau →';try{history.replaceState(null,'','#'+(cu+1))}catch(e){}S[cu].scrollTop=0;D[cu]&&D[cu]()}
+const fs=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+if(!document.fullscreenEnabled)$('#fs').hidden=true;$('#fs').onclick=fs;
+$('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
+addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight'||e.key=='PageDown')go(cu+1);if(e.key=='ArrowLeft'||e.key=='PageUp')go(cu-1);if(e.key=='f'||e.key=='F')fs()});
+const rd=()=>D[cu]&&D[cu]();addEventListener('resize',rd);addEventListener('orientationchange',()=>setTimeout(rd,250));
+try{const m=matchMedia('(prefers-color-scheme:dark)');m.addEventListener?m.addEventListener('change',rd):m.addListener&&m.addListener(rd)}catch(e){}
+addEventListener('load',()=>{try{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})}catch(e){}go(Math.min(S.length-1,Math.max(0,(+location.hash.slice(1)||1)-1)))});
+</script></body></html>
