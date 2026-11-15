@@ -152,7 +152,6 @@ $$\theta^*=\arg\max_\theta L(\theta)$$
 $$\ell(\theta)=\ln\left[\prod_{i=1}^n p_i^{y_i}(1-p_i)^{1-y_i}\right]$$
 <p>Suy ra:</p>
 $$\ell(\theta)=\sum_{i=1}^n\big[y_i\ln p_i+(1-y_i)\ln(1-p_i)\big]$$
-<p>Thông thường, thuật toán tối ưu hóa được xây dựng để minimize (tối thiểu hóa) hàm Loss. Do đó chúng ta cũng sẽ chuyển từ bài toán maximize sang minimize bằng cách đổi dấu likelihood function và chia cho số lượng mẫu số liệu đầu vào.</p>
 <p>Cuối cùng ta có công thức hàm mất mát của Logistic Regression cũng chính là <b>Binary Cross-Entropy Loss</b> như sau:</p>
 <div class="fb">$$J(\theta)=-\frac1n\sum_{i=1}^n\big[y_i\ln p_i+(1-y_i)\ln(1-p_i)\big]$$</div>
 <p class="box">Chọn $y$, kéo $p$ và quan sát loss: dự đoán sai mà tự tin ($p\to0$ khi $y=1$) bị phạt rất nặng. Thử $p=0.01$ với $y=1$.</p></div>
