@@ -236,7 +236,7 @@ function dr(){const v=p(),L=Y?-Math.log(v):-Math.log(1-v);plot('#c6',ps,[{y:ps.m
 $('#o6').innerHTML=`y = <b>${Y}</b>, p = <b>${f2(v)}</b> → loss = <b>${f3(L)}</b> ${L>2?'<b style="color:var(--bad)">(dự đoán sai và tự tin: loss lớn)</b>':L<.4?'(dự đoán tốt)':''}`}
 const sy=y=>{Y=y;$('#y1').classList.toggle('on',y==1);$('#y0').classList.toggle('on',!y);dr()};$('#y1').onclick=()=>sy(1);$('#y0').onclick=()=>sy(0);D[6]=dr}
 // điều hướng
-let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}cu=Math.max(0,i);S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#nx').textContent=cu==S.length-1?'Phần 2 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
+let cu=0;function go(i){if(i>=S.length){location.href='../phan2-gradient/index.html';return}cu=Math.max(0,i);S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#nx').textContent=cu==S.length-1?'Phần 2 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
 $('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
 addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
 addEventListener('resize',()=>D[cu]&&D[cu]());
