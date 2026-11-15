@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark">
 <title>CS115: Logistic and Softmax Regression</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -26,19 +26,30 @@ a.k:hover,a.k:focus-visible{border-color:var(--pos);outline:none;box-shadow:0 0 
 .big{background:transparent;border:1.5px dashed var(--fln);border-radius:20px;padding:30px;margin-top:22px;text-align:left}
 .big b{font-size:1.15rem;font-weight:700}
 @media(max-width:560px){main{padding-top:48px}}
-</style></head><body><main>
+</style><style id="robust">
+:root{color-scheme:light dark}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word;-webkit-tap-highlight-color:transparent}
+main{padding-left:max(6vw,env(safe-area-inset-left,0px));padding-right:max(6vw,env(safe-area-inset-right,0px));padding-bottom:max(88px,calc(env(safe-area-inset-bottom,0px) + 48px))}
+.g{grid-template-columns:repeat(auto-fill,minmax(min(290px,100%),1fr))}
+.k{min-width:0}
+@media(max-width:860px){body{background-attachment:scroll}}
+@media(max-width:560px){main{padding-top:max(48px,calc(env(safe-area-inset-top,0px) + 28px))}.k,.big{padding:18px}}
+@media(pointer:coarse){a.k:hover{transform:none}}
+</style>
+</head><body><main>
 <h1>CS115: Logistic and Softmax Regression</h1>
 <p class="mut">Người trình bày: Mỹ Huyền, Minh Thy, Thành Luân, Công Minh</p>
 
 <h2>1. Logistic Regression</h2>
 <p class="mut">Sáu phần, từ xây dựng mô hình đến suy diễn Bayesian.</p>
 <div class="g">
-<a class="k" href="phan1-sigmoid/"><div class="n">PHẦN 1</div><b>Sigmoid và Loss</b><span>Bài toán → Bernoulli → Odds → Log-Odds → Sigmoid, Likelihood, Binary Cross-Entropy</span></a>
-<a class="k" href="phan2-gradient/"><div class="n">PHẦN 2</div><b>Gradient và Hessian</b><span>Đạo hàm của loss, ma trận Hessian, tính lồi</span><br></a>
-<a class="k" href="phan3-gradient-descent/"><div class="n">PHẦN 3</div><b>Gradient Descent</b><span>Batch GD, SGD, Momentum, điều kiện hội tụ</span><br></a>
-<a class="k" href="phan4-newton/"><div class="n">PHẦN 4</div><b>Newton, IRLS & Quasi-Newton</b><span>Xấp xỉ bậc hai, hội tụ bậc hai</span><br></a>
-<a class="k" href="phan5-regularization/"><div class="n">PHẦN 5</div><b>Regularization</b><span>L1, L2, subgradient</span><br></a>
-<a class="k" href="phan6-map/"><div class="n">PHẦN 6</div><b>Bayesian và MAP</b><span>Prior, Posterior, Laplace, MCMC</span><br></a>
+<a class="k" href="phan1-sigmoid/index.html"><div class="n">PHẦN 1</div><b>Sigmoid và Loss</b><span>Bài toán → Bernoulli → Odds → Log-Odds → Sigmoid, Likelihood, Binary Cross-Entropy</span></a>
+<a class="k" href="phan2-gradient/index.html"><div class="n">PHẦN 2</div><b>Gradient và Hessian</b><span>Đạo hàm của loss, ma trận Hessian, tính lồi</span><br></a>
+<a class="k" href="phan3-gradient-descent/index.html"><div class="n">PHẦN 3</div><b>Gradient Descent</b><span>Batch GD, SGD, Momentum, điều kiện hội tụ</span><br></a>
+<a class="k" href="phan4-newton/index.html"><div class="n">PHẦN 4</div><b>Newton, IRLS & Quasi-Newton</b><span>Xấp xỉ bậc hai, hội tụ bậc hai</span><br></a>
+<a class="k" href="phan5-regularization/index.html"><div class="n">PHẦN 5</div><b>Regularization</b><span>L1, L2, subgradient</span><br></a>
+<a class="k" href="phan6-map/index.html"><div class="n">PHẦN 6</div><b>Bayesian và MAP</b><span>Prior, Posterior, Laplace, MCMC</span><br></a>
 </div>
 
 <h2>2. Softmax Regression</h2>
