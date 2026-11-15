@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phần 5: Regularization</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eceff5;--ink:#0f1830;--mut:#5b6679;--card:#fff;--ln:#cfd6e2;--pos:#4338ca;--pos2:#312aa8;--ok:#12998a;--bad:#c2410c;--tint:#eceafe;--ftint:#e4e1ff;--fln:#9d97f2;--fink:#1c1480;--head:#e0e4f3;--glow1:rgba(67,56,202,.13);--glow2:rgba(18,153,138,.10);--dot:rgba(23,32,58,.07);--sh:0 1px 2px rgba(16,24,48,.06),0 8px 24px -10px rgba(16,24,48,.2)}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1024;--ink:#eef1fa;--mut:#a3adc4;--card:#161d3b;--ln:#2a3562;--pos:#8b87f0;--pos2:#aeabff;--tint:#232c5c;--ftint:#2b3570;--fln:#6e69d6;--fink:#ffffff;--head:#1b2450;--glow1:rgba(139,135,240,.18);--glow2:rgba(18,153,138,.14);--dot:rgba(255,255,255,.05);--sh:0 1px 2px rgba(0,0,0,.3),0 10px 28px -10px rgba(0,0,0,.6)}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{color:var(--ink);font:18px/1.55 Newsreader,helvetica,sans-serif;display:flex;flex-direction:column;
+background:radial-gradient(900px 480px at 6% -8%,var(--glow1),transparent 65%),radial-gradient(800px 460px at 98% 100%,var(--glow2),transparent 62%),radial-gradient(var(--dot) 1px,transparent 1.2px) 0 0/22px 22px,var(--bg)}
+main{flex:1;overflow:hidden;position:relative}
+.s{position:absolute;inset:0;padding:24px 5vw;display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:minmax(0,1fr);gap:32px;overflow:hidden}
+.s.on{display:grid}
+.s>div{min-height:0;max-height:100%;align-self:center;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
+.s>div:first-child{padding:4px 14px 4px 2px}
+.s>div::-webkit-scrollbar{width:9px}.s>div::-webkit-scrollbar-track{background:transparent}.s>div::-webkit-scrollbar-thumb{background:var(--fln);border-radius:9px;border:2px solid transparent;background-clip:padding-box}.s>div::-webkit-scrollbar-thumb:hover{background:var(--pos);background-clip:padding-box}
+.s>div:first-child>p.mut:first-child{display:inline-block;margin:0 0 .6em;padding:3px 12px;font:600 12.5px system-ui,sans-serif;letter-spacing:.04em;color:var(--pos2);background:var(--tint);border:1px solid var(--fln);border-radius:99px}
+.pl .katex-display{background:none;border:0;box-shadow:none;padding:2px 0;margin:.5em 0}
+.pl .katex-display>.katex{font-size:1.15em;-webkit-text-stroke:.25px currentColor}
+.s.two.on{display:block;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
+.s.two>div{max-width:860px;margin:0 auto;max-height:none;overflow:visible;padding:4px 14px}
+@media(min-width:861px){.s.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.s.cols>div{align-self:start}}
+.v svg{display:block;width:100%;height:auto;max-height:64vh}
+.sa{stroke:var(--mut);stroke-width:1.2;fill:none}.st{fill:var(--mut);font:12px system-ui,sans-serif}.sb{fill:var(--tint);stroke:var(--fln);stroke-width:1.5}.sv{fill:var(--ink);font:15px system-ui,sans-serif}
+h1,h2,h3,h4{color:var(--ink);font-weight:700;line-height:1.2;margin:0}
+h1{font-size:2.2rem;letter-spacing:.01em;margin:.1em 0 .45em}
+h2{font-size:1.75rem;letter-spacing:-.01em;margin:0 0 .35em}
+h3{font-size:1.3rem;margin:.1em 0 .7em}
+h4{font-size:1.1rem;margin:1em 0 .2em}
+p{margin:.5em 0}ul{margin:.4em 0;padding-left:1.4em}li{margin:.25em 0}b{font-weight:700}.mut{color:var(--mut)}
+.box{border-left:4px solid var(--pos);padding:8px 14px;background:var(--tint);border-radius:0 8px 8px 0}
+.v{background:var(--card);border:1px solid var(--ln);border-top:4px solid var(--pos);border-radius:12px;padding:14px;box-shadow:var(--sh)}
+canvas{width:100%;height:300px;display:block}canvas.sm{height:200px}canvas.xs{height:150px}canvas.cl{cursor:crosshair}
+.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:14px system-ui,sans-serif;margin-top:8px}
+.c input{width:100%;accent-color:var(--pos)}
+.o{font:14px/1.6 system-ui,sans-serif;margin-top:10px;padding-top:8px;border-top:1px dashed var(--ln);color:var(--mut)}.o b{color:var(--ink)}
+.b{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button,.nb{font:500 14px system-ui;padding:7px 13px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer;text-decoration:none;transition:border-color .12s,background .12s}
+button:hover,.nb:hover{border-color:var(--pos);background:var(--tint)}
+button.on{border-color:var(--pos);background:var(--tint);box-shadow:0 0 0 1px var(--pos);color:var(--pos2)}
+button:focus-visible,input:focus-visible,.nb:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
+nav{display:flex;gap:12px;align-items:center;justify-content:center;padding:10px;border-top:2px solid var(--ln);background:var(--card);box-shadow:0 -6px 18px -12px rgba(16,24,48,.35);font:600 14px system-ui}
+#nx{background:var(--pos);border-color:var(--pos);color:#fff}#nx:hover{background:var(--pos2);border-color:var(--pos2)}
+@media(prefers-color-scheme:dark){#nx{color:#10162b}}
+.katex{color:var(--fink);-webkit-text-stroke:.25px currentColor}
+.katex-display{overflow-x:auto;overflow-y:hidden;margin:.8em 0;padding:14px 16px;background:var(--ftint);border:1.5px solid var(--fln);border-left:6px solid var(--pos);border-radius:10px;box-shadow:var(--sh)}
+.katex-display>.katex{font-size:1.28em;-webkit-text-stroke:.45px currentColor}
+p .katex{font-size:1.08em}
+.fb{border:2.5px solid var(--pos);border-radius:12px;margin:.9em 0;overflow:hidden}
+.fb .katex-display{margin:0;border:0;border-radius:0;box-shadow:none}
+.ch{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;font:13px system-ui,sans-serif;margin-bottom:6px}
+.ch i{font-style:normal;border:1px solid var(--fln);background:var(--tint);border-radius:6px;padding:3px 9px}
+.ch s{text-decoration:none;color:var(--mut);font-size:11.5px}
+@media(max-width:860px){.s{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.s>div{max-height:none;overflow:visible;align-self:start}.s>div:first-child{padding:0}}
+</style></head>
+<body>
+<main>
+
+<!-- 0: mở đầu, nối từ Phần 4 -->
+<section class="s two on">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h1>REGULARIZATION</h1>
+<h3>Kiểm soát Overfitting trong Logistic Regression</h3>
+<p class="box">Ở các phần trước, ta tìm tham số bằng cách cực tiểu hóa loss BCE, với Gradient Descent và phương pháp Newton. Phần 5 xét trường hợp loss đó không đủ để có một nghiệm tốt, và cách thêm một thành phần phạt để kiểm soát độ lớn của hệ số.</p>
+<p><a class="nb" href="../phan4-newton-irls/">← Quay lại Phần 4</a></p>
+</div>
+</section>
+
+<!-- 1: 1. Đặt vấn đề -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>1. ĐẶT VẤN ĐỀ</h2>
+<p>Giả sử mô hình có rất nhiều features:</p>
+$$z=\theta_0+\theta_1x_1+\dots+\theta_px_p.$$
+<p>Khi số lượng features lớn, mô hình dễ học các mối quan hệ nhiễu, tương quan ngẫu nhiên. Trọng số (weights) có xu hướng tăng lên rất lớn $\Rightarrow$ Dễ bị <b>Overfitting</b> trên tập training.</p>
+<h4>Trường hợp Complete Separation</h4>
+<p>Nếu dữ liệu phân chia hoàn toàn thành 2 lớp bởi một đường quyết định, <b>MLE</b> (Maximum Likelihood Estimation) không tồn tại nghiệm hữu hạn: trọng số tăng mãi để làm Likelihood tiến về cực đại.</p>
+<p><b>Giải pháp:</b> Áp dụng <b>Regularization</b> để kiểm soát độ lớn của hệ số.</p>
+<p class="box">Ví dụ 1 chiều: 6 điểm tách hoàn toàn ($y=1$ khi $x\gt0$), mô hình $p=\sigma(wx)$. Kéo $w$: đường sigmoid dốc dần, $J_{\text{BCE}}(w)$ càng giảm nhưng không bao giờ chạm đáy.</p>
+</div>
+<div class="v">
+<canvas id="c1a" class="sm"></canvas>
+<canvas id="c1b" class="sm"></canvas>
+<div class="c" id="k1"></div>
+<div class="o" id="o1"></div>
+</div>
+</section>
+
+<!-- 2: 2. ERM và RRM -->
+<section class="s cols">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>2. EMPIRICAL RISK MINIMIZATION VÀ REGULARIZED RISK MINIMIZATION</h2>
+<h3>2.1. Empirical Risk Minimization (ERM)</h3>
+<p>Tối thiểu hóa trung bình hàm mất mát Binary Cross-Entropy (BCE):</p>
+$$R_{\text{emp}}(\theta)=-\frac{1}{n}\sum_{i=1}^{n}\big[y_i\log p_i+(1-y_i)\log(1-p_i)\big].$$
+<p>Tìm tham số:</p>
+$$\theta_{\text{ERM}}^*=\operatorname*{arg\,min}_{\theta}R_{\text{emp}}(\theta).$$
+<p>Nói cách khác, mô hình tìm bộ hệ số giúp giảm Binary Cross-Entropy trên tập training.</p>
+</div>
+<div>
+<h3>2.2. Regularized Risk Minimization (RRM)</h3>
+<p>Bổ sung một thành phần phạt để tránh overfitting:</p>
+$$R_{\text{reg}}(\theta)=R_{\text{emp}}(\theta)+\lambda\Omega(\theta).$$
+<p>Với Logistic Regression:</p>
+<div class="fb">$$J_{\text{reg}}(\theta)=J_{\text{BCE}}(\theta)+\lambda\Omega(\theta).$$</div>
+<p>Trong đó:</p>
+<ul>
+<li>BCE đo mức độ dự đoán sai.</li>
+<li>$\Omega(\theta)$ kiểm soát độ lớn của hệ số.</li>
+<li>$\lambda$ kiểm soát mức độ phạt.</li>
+</ul>
+</div>
+</section>
+
+<!-- 3: 3. Định nghĩa -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>3. ĐỊNH NGHĨA TOÁN HỌC CỦA REGULARIZATION TRONG LOGISTIC REGRESSION</h2>
+<p>Hàm mất mát ban đầu:</p>
+<div class="pl">$$J_{\text{BCE}}(\theta)=-\frac{1}{n}\sum_{i=1}^{n}\big[y_i\log p_i+(1-y_i)\log(1-p_i)\big].$$</div>
+<p>Regularization được định nghĩa bằng cách thêm một hàm phạt:</p>
+<div class="fb">$$J_{\text{reg}}(\theta)=J_{\text{BCE}}(\theta)+\lambda\Omega(\theta).$$</div>
+<p>Có hai lựa chọn phổ biến:</p>
+<h3>3.1. L1 Regularization</h3>
+<p>Hàm phạt:</p>
+<div class="pl">$$\Omega(\theta)=\sum_{j=1}^{p}|\theta_j|.$$</div>
+<p>Hàm mục tiêu đầy đủ:</p>
+<div class="pl">$$J_{L1}(\theta)=J_{\text{BCE}}(\theta)+\lambda\sum_{j=1}^{p}|\theta_j|.$$</div>
+<p><b>Đặc điểm:</b> Ép nhiều trọng số về đúng 0 $\Rightarrow$ Chọn lọc đặc trưng (Feature Selection).</p>
+<h3>3.2. L2 Regularization</h3>
+<p>Hàm phạt:</p>
+<div class="pl">$$\Omega(\theta)=\sum_{j=1}^{p}\theta_j^2.$$</div>
+<p>Hàm mục tiêu đầy đủ:</p>
+<div class="pl">$$J_{L2}(\theta)=J_{\text{BCE}}(\theta)+\lambda\sum_{j=1}^{p}\theta_j^2.$$</div>
+<p class="box">Dùng lại ví dụ ở slide 2 với một trọng số $w$. Chọn L1 hoặc L2 rồi kéo $\lambda$: $J_{\text{reg}}$ có cực tiểu hữu hạn dù dữ liệu tách hoàn toàn.</p>
+</div>
+<div class="v">
+<canvas id="c3"></canvas>
+<div class="c" id="k3"></div>
+<div class="b"><button id="m3a">L1: Ω = |w|</button><button id="m3b" class="on">L2: Ω = w²</button></div>
+<div class="o" id="o3"></div>
+</div>
+</section>
+
+<!-- 4: 4.1, 4.2 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>4. L2 REGULARIZATION TRONG LOGISTIC REGRESSION</h2>
+<h3>4.1. Xây dựng hàm mục tiêu</h3>
+<p>Bắt đầu từ hàm mất mát BCE:</p>
+<div class="pl">$$J_{\text{BCE}}(\theta)=-\frac{1}{n}\sum_{i=1}^{n}\big[y_i\log p_i+(1-y_i)\log(1-p_i)\big].$$</div>
+<p>Thêm thành phần phạt $L_2$:</p>
+<div class="fb">$$J_{L2}(\theta)=J_{\text{BCE}}(\theta)+\frac{\lambda}{2}\sum_{j=1}^{p}\theta_j^2.$$</div>
+<p><i>(Lưu ý: Thành phần hệ số chặn $\theta_0$ / intercept không đưa vào tổng phạt).</i></p>
+<h3>4.2. Tác động của L2 lên Gradient &amp; Cập nhật tham số</h3>
+<p>Tính đạo hàm riêng theo từng tham số $\theta_j$:</p>
+<p>Đạo hàm của BCE là:</p>
+<div class="pl">$$\frac{\partial J_{\text{BCE}}}{\partial\theta_j}=\frac{1}{n}\sum_{i=1}^{n}(p_i-y_i)x_{ij}.$$</div>
+<p>Đạo hàm thành phần phạt $L_2$:</p>
+<div class="pl">$$\frac{\partial}{\partial\theta_j}\left(\frac{\lambda}{2}\sum_{k=1}^{p}\theta_k^2\right)=\lambda\theta_j.$$</div>
+<p>Gradient đầy đủ:</p>
+<div class="fb">$$\frac{\partial J_{L2}}{\partial\theta_j}=\frac{1}{n}\sum_{i=1}^{n}(p_i-y_i)x_{ij}+\lambda\theta_j.$$</div>
+<p>Dạng vector:</p>
+<div class="fb">$$\nabla J_{L2}(\theta)=\nabla J_{\text{BCE}}(\theta)+\lambda\theta.$$</div>
+<p class="box">Ví dụ một trọng số $w$ (dữ liệu ở slide 2). Đường cam là gradient của BCE, đường xanh ngọc là $\lambda w$, đường chàm là tổng. Tổng cắt trục hoành tại $w^*$ hữu hạn.</p>
+</div>
+<div class="v">
+<canvas id="c4"></canvas>
+<div class="c" id="k4"></div>
+<div class="o" id="o4"></div>
+</div>
+</section>
+
+<!-- 5: 4.3 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>4. L2 REGULARIZATION TRONG LOGISTIC REGRESSION</h2>
+<h3>4.3. Quy tắc cập nhật Gradient Descent (Weight Decay)</h3>
+<div class="pl">$$\begin{aligned}\theta_j^{(t+1)}&amp;=\theta_j^{(t)}-\eta\left[\frac{1}{n}\sum_{i=1}^{n}(p_i-y_i)x_{ij}+\lambda\theta_j^{(t)}\right]\\[6pt]&amp;=(1-\eta\lambda)\theta_j^{(t)}-\frac{\eta}{n}\sum_{i=1}^{n}(p_i-y_i)x_{ij}.\end{aligned}$$</div>
+<h4>Ý nghĩa</h4>
+<p>Thành phần BCE giúp dự đoán chính xác hơn, trong khi thành phần $\lambda\theta_j$ kéo hệ số về gần 0 (<b>Weight Decay</b>), giữ lại toàn bộ features nhưng ngăn hệ số tăng quá lớn.</p>
+<p class="box">Chạy Gradient Descent từ $w=0$ trên dữ liệu tách hoàn toàn. Đường cam ($\lambda=0$): $w$ tăng mãi, chậm dần. Đường chàm: $w$ bị kéo lại và hội tụ về một giá trị hữu hạn.</p>
+</div>
+<div class="v">
+<canvas id="c5"></canvas>
+<div class="c" id="k5"></div>
+<div class="o" id="o5"></div>
+</div>
+</section>
+
+<!-- 6: 4.4 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>4. L2 REGULARIZATION TRONG LOGISTIC REGRESSION</h2>
+<h3>4.4. Tác động của L2 Regularization đến Hessian</h3>
+<p>Ma trận Hessian ban đầu của BCE:</p>
+<div class="pl">$$H_{\text{BCE}}(\theta)=\frac{1}{n}X^TWX.$$</div>
+<p>Hàm mục tiêu và Gradient khi thêm L2:</p>
+<ul>
+<li>Hàm mục tiêu: $J_{L2}(\theta)=J_{\text{BCE}}(\theta)+\frac{\lambda}{2}\theta^T\theta$.</li>
+<li>Gradient: $\nabla J_{L2}(\theta)=\nabla J_{\text{BCE}}(\theta)+\lambda\theta$.</li>
+</ul>
+<p>Biến đổi Ma trận Hessian:</p>
+<div class="fb">$$H_{L2}(\theta)=H_{\text{BCE}}(\theta)+\lambda I=\frac{1}{n}X^TWX+\lambda I,$$</div>
+<p>với $W$ là ma trận đường chéo chứa phương sai dự đoán:</p>
+<div class="pl">$$W=\operatorname{diag}\big(p_1(1-p_1),\dots,p_n(1-p_n)\big).$$</div>
+<p>Nếu không phạt hệ số chặn (Intercept $\theta_0$), ta sử dụng ma trận penalty $P=\operatorname{diag}(0,1,1,\dots,1)$:</p>
+<div class="pl">$$H_{L2}(\theta)=\frac{1}{n}X^TWX+\lambda P.$$</div>
+<h4>Ý nghĩa chuyển hóa</h4>
+<p>Việc cộng thêm $\lambda I$ nâng các giá trị riêng của ma trận Hessian lên ($\mu_i\to\mu_i+\lambda$), biến hàm mất mát từ lồi yếu thành <b>lồi mạnh</b>, đảm bảo nghiệm tối ưu là duy nhất.</p>
+<p class="box">Ví dụ ba giá trị riêng $\mu_1=0$, $\mu_2=0.3$, $\mu_3=1.5$ của $H_{\text{BCE}}$ (với $\mu_1=0$, Hessian suy biến). Kéo $\lambda$: mọi giá trị riêng cùng tăng thêm $\lambda$.</p>
+</div>
+<div class="v">
+<canvas id="c6"></canvas>
+<div class="c" id="k6"></div>
+<div class="o" id="o6"></div>
+</div>
+</section>
+
+<!-- 7: 4.5, 4.6 -->
+<section class="s cols">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>4. L2 REGULARIZATION TRONG LOGISTIC REGRESSION</h2>
+<h3>4.5. Quy tắc cập nhật của Phương pháp Newton</h3>
+$$\theta^{(t+1)}=\theta^{(t)}-H(\theta^{(t)})^{-1}\nabla J(\theta^{(t)}).$$
+<p>Áp dụng cho L2-Regularized Logistic Regression:</p>
+<div class="fb">$$\theta^{(t+1)}\equiv\theta^{(t)}-\left(\frac{1}{n}X^TWX+\lambda I\right)^{-1}\left[\frac{1}{n}X^T(p-y)+\lambda\theta\right].$$</div>
+<p><i>(Nếu không phạt intercept thì thay $I$ bằng ma trận $P$).</i></p>
+</div>
+<div>
+<h3>4.6. Tác động đồng thời của L2</h3>
+<ul>
+<li><b>Gradient:</b> Thêm $\lambda\theta\to$ Kéo các trọng số về gần 0, ngăn ngừa hiện tượng quá khớp (Overfitting) và xử lý triệt để bài toán phân tách hoàn toàn (Complete Separation).</li>
+<li><b>Hessian:</b> Thêm $\lambda I\to$ Tránh tình trạng ma trận bị suy biến hoặc gần suy biến do đa cộng tuyến.</li>
+</ul>
+</div>
+</section>
+
+<!-- 8: 5.1 -->
+<section class="s cols">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>5. L1 REGULARIZATION TRONG LOGISTIC REGRESSION</h2>
+<p>L1 có khả năng đưa một số hệ số về chính xác bằng 0, đóng vai trò là cơ sở để thực hiện <b>Feature Selection</b> (Chọn lọc đặc trưng).</p>
+<h3>5.1. Xây dựng hàm mục tiêu L1</h3>
+<p>Mô hình Logistic Regression với xác suất dự đoán:</p>
+$$p_i=\sigma(\theta^Tx_i)=\frac{1}{1+e^{-\theta^Tx_i}}.$$
+</div>
+<div>
+<p>Hàm Binary Cross-Entropy (BCE):</p>
+$$J_{\text{BCE}}(\theta)=-\frac{1}{n}\sum_{i=1}^{n}\big[y_i\log p_i+(1-y_i)\log(1-p_i)\big].$$
+<p>Hàm mục tiêu đầy đủ khi thêm L1:</p>
+<div class="fb">$$J_{L1}(\theta)=J_{\text{BCE}}(\theta)+\lambda\sum_{j=1}^{p}|\theta_j|.$$</div>
+<p><i>(Lưu ý: Chuẩn $L_1$ là tổng trị tuyệt đối, và không phạt hệ số chặn $\theta_0$).</i></p>
+</div>
+</section>
+
+<!-- 9: 5.2 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>5. L1 REGULARIZATION TRONG LOGISTIC REGRESSION</h2>
+<h3>5.2. Tính không khả vi (Non-smoothness) tại góc tọa độ</h3>
+<p>Khảo sát đạo hàm của hàm trị tuyệt đối tại $\theta=0$:</p>
+<ul>
+<li>Đạo hàm trái: $f'_{-}(0)=-1$.</li>
+<li>Đạo hàm phải: $f'_{+}(0)=1$.</li>
+<li>Vì $f'_{-}(0)\neq f'_{+}(0)\Rightarrow$ Đạo hàm $f'(0)$ không tồn tại.</li>
+</ul>
+<h4>Hệ quả trong tối ưu hóa:</h4>
+<ul>
+<li>Hàm L1 không khả vi tại vị trí hệ số bằng 0.</li>
+<li>Gradient Descent thông thường đòi hỏi hàm số phải khả vi tại mọi điểm đang xét, do đó không thể trực tiếp áp dụng đạo hàm thông thường cho L1 tại $\theta_j=0$.</li>
+</ul>
+<p class="box">Kéo $\theta$ qua 0: ở $\theta\ne0$ chỉ có một tiếp tuyến duy nhất. Tại $\theta=0$ có nhiều đường thẳng đều nằm dưới $|\theta|$ và chạm nó tại gốc.</p>
+</div>
+<div class="v">
+<canvas id="c9"></canvas>
+<div class="c" id="k9"></div>
+<div class="o" id="o9"></div>
+</div>
+</section>
+
+<!-- 10: 5.3 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 5 / 6</p>
+<h2>5. L1 REGULARIZATION TRONG LOGISTIC REGRESSION</h2>
+<h3>5.3. Giải pháp Subgradient cho L1 Regularization</h3>
+<p>Subgradient là khái niệm mở rộng của Gradient, áp dụng cho các hàm lồi nhưng không khả vi tại một số điểm.</p>
+$$\partial_j|\theta_j|=\begin{cases}{\{1\}}&amp;\theta_j\gt0\\ {[-1,1]}&amp;\theta_j=0\\ {\{-1\}}&amp;\theta_j\lt0\end{cases}$$
+<p>Điều kiện tối ưu toàn cục ($0\in\partial J_{L1}(\theta)$):</p>
+<div class="pl">$$0\in\frac{\partial J_{\text{BCE}}}{\partial\theta_j}+\lambda\,\partial_j|\theta_j|.$$</div>
+<p>Khảo sát 3 trường hợp của hệ số $\theta_j$:</p>
+<ul>
+<li>Trường hợp $\theta_j\gt0$: $\dfrac{\partial J_{\text{BCE}}}{\partial\theta_j}+\lambda=0$.</li>
+<li>Trường hợp $\theta_j\lt0$: $\dfrac{\partial J_{\text{BCE}}}{\partial\theta_j}-\lambda=0$.</li>
+<li>Trường hợp $\theta_j=0$: $\left|\dfrac{\partial J_{\text{BCE}}}{\partial\theta_j}\right|\le\lambda$.</li>
+</ul>
+<h4>Kết luận</h4>
+<p>Một hệ số $\theta_j$ sẽ đạt đúng bằng 0 tại nghiệm tối ưu nếu độ lớn Gradient của BCE tại đó không vượt quá ngưỡng $\lambda$:</p>
+<div class="fb">$$\left|\frac{\partial J_{\text{BCE}}}{\partial\theta_j}\right|\le\lambda.$$</div>
+<p class="box">Xét xấp xỉ quanh $\theta_j=0$: $\varphi(\theta)=g\theta+\lambda|\theta|$ với $g=\partial J_{\text{BCE}}/\partial\theta_j$. Kéo $g$ và $\lambda$: đáy của $\varphi$ nằm đúng tại 0 khi $|g|\le\lambda$.</p>
+</div>
+<div class="v">
+<canvas id="c10"></canvas>
+<div class="c" id="k10"></div>
+<div class="o" id="o10"></div>
+</div>
+</section>
+
+</main>
+<nav>
+<a class="nb" href="../index.html">☰ Mục lục</a>
+<button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button>
+</nav>
+<script>
+const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan6-bayesian-map/',PREV='../phan4-newton-irls/';
+const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
+function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
+const PAD={l:38,r:8,t:22,b:22};
+function plot(id,xs,cs,o={}){const t=cv(id);if(!t)return;const[c,W,H]=t,p=PAD,x0=o.x0??xs[0],x1=o.x1??xs.at(-1),y0=o.y0??0,y1=o.y1;
+const X=x=>p.l+(x-x0)/(x1-x0)*(W-p.l-p.r),Y=y=>H-p.b-(y-y0)/(y1-y0)*(H-p.t-p.b);
+c.font='12px system-ui';c.fillStyle=c.strokeStyle=css('--mut');c.lineWidth=1;const ax=X(Math.max(x0,Math.min(0,x1)));
+c.beginPath();c.moveTo(p.l,Y(y0));c.lineTo(W-p.r,Y(y0));c.moveTo(ax,p.t);c.lineTo(ax,H-p.b);c.stroke();
+for(let k=0;k<=4;k++){const v=x0+(x1-x0)*k/4;c.fillText(+v.toFixed(1),X(v)-9,H-6)}
+for(let k=0;k<=2;k++){const v=y0+(y1-y0)*k/2;c.fillText(+v.toFixed(1),0,Y(v)+4)}
+c.save();c.beginPath();c.rect(p.l,p.t,W-p.l-p.r,H-p.t-p.b);c.clip();
+(o.h||[]).forEach(v=>{c.setLineDash([4,4]);c.beginPath();c.moveTo(p.l,Y(v));c.lineTo(W-p.r,Y(v));c.stroke();c.setLineDash([])});
+cs.forEach(k=>{c.strokeStyle=c.fillStyle=k.c;c.lineWidth=2;c.setLineDash(k.dash?[6,4]:[]);
+if(k.pts)k.pts.forEach(q=>{c.beginPath();c.arc(X(q[0]),Y(q[1]),k.r||4,0,7);c.fill()});
+else{c.beginPath();k.y.forEach((v,i)=>i?c.lineTo(X(xs[i]),Y(v)):c.moveTo(X(xs[i]),Y(v)));c.stroke()}c.setLineDash([])});
+(o.v||[]).forEach(v=>{c.strokeStyle=v[1]||css('--mut');c.setLineDash([3,3]);c.beginPath();c.moveTo(X(v[0]),p.t);c.lineTo(X(v[0]),H-p.b);c.stroke();c.setLineDash([])});c.restore();
+let lx=p.l+6;cs.forEach(k=>{if(k.n){c.fillStyle=k.c;c.fillText(k.n,lx,13);lx+=c.measureText(k.n).width+14}});
+if(o.t){c.fillStyle=css('--mut');c.textAlign='right';c.fillText(o.t,W-p.r,13);c.textAlign='left'}}
+function sl(h,lab,mn,mx,st,v,f,fmt=x=>x){const g=$(h),l=document.createElement('label'),i=document.createElement('input'),o=document.createElement('span');l.textContent=lab;
+Object.assign(i,{type:'range',min:mn,max:mx,step:st,value:v});o.textContent=fmt(+v);i.oninput=()=>{o.textContent=fmt(+i.value);f()};g.append(l,i,o);
+const q=()=>+i.value;q.set=a=>{i.value=a;o.textContent=fmt(+i.value)};return q}
+
+
+const fm=x=>!isFinite(x)?'∞':Math.abs(x)<1e-9?'0':(Math.abs(x)>=1e4||Math.abs(x)<1e-3)?x.toExponential(1):x.toFixed(3);
+// dữ liệu 1 chiều tách hoàn toàn (không có intercept), mô hình p = σ(wx): dùng chung cho các slide 2–6
+const DS=[[-3,0],[-2,0],[-1,0],[1,1],[2,1],[3,1]],AX=[3,2,1,1,2,3];
+const Jb=w=>AX.reduce((a,x)=>a+Math.log(1+Math.exp(-w*x)),0)/AX.length,gb=w=>-AX.reduce((a,x)=>a+x/(1+Math.exp(w*x)),0)/AX.length;
+
+// 1. Complete separation
+{const xs=lin(-4,4,120),ws=lin(0,10,100),k=sl('#k1','w',0,10,.1,1,dr,f2);
+function dr(){const w=k();
+plot('#c1a',xs,[{y:xs.map(x=>sg(w*x)),c:C.bad,n:'p = σ(wx)'},{pts:DS.filter(d=>d[1]==1),c:C.ok,r:5},{pts:DS.filter(d=>!d[1]),c:C.a,r:5}],{y0:0,y1:1,h:[.5]});
+plot('#c1b',ws,[{y:ws.map(Jb),c:C.pos,n:'J_BCE(w)'},{pts:[[w,Jb(w)]],c:C.bad,r:5}],{y0:0,y1:.8,v:[[w]]});
+$('#o1').innerHTML=`w = <b>${f2(w)}</b> · J<sub>BCE</sub>(w) = <b>${f3(Jb(w))}</b> · J luôn giảm khi w tăng và chỉ tiến về 0 khi w → ∞ (không có nghiệm hữu hạn)`}D[1]=dr}
+
+// 3. J_reg với Ω = |w| hoặc w²
+{let m=1;const xs=lin(0,8,160),la=sl('#k3','λ',.02,1.2,.02,.1,dr,f2);
+const sw=v=>{m=v;$('#m3a').classList.toggle('on',!v);$('#m3b').classList.toggle('on',!!v);dr()};$('#m3a').onclick=()=>sw(0);$('#m3b').onclick=()=>sw(1);
+function dr(){const l=la(),Om=m?w=>w*w:w=>Math.abs(w),T=xs.map(w=>Jb(w)+l*Om(w));let i0=0;T.forEach((v,i)=>{if(v<T[i0])i0=i});const ws=xs[i0];
+plot('#c3',xs,[{y:xs.map(Jb),c:C.a,n:'J_BCE'},{y:xs.map(w=>l*Om(w)),c:C.ok,n:'λΩ(w)'},{y:T,c:C.pos,n:'J_reg'},{pts:[[ws,T[i0]]],c:C.bad,r:5}],{y0:0,y1:1.5,v:[[ws]]});
+$('#o3').innerHTML=`Ω(w) = <b>${m?'w²':'|w|'}</b> · cực tiểu của J<sub>reg</sub> tại w* = <b>${f2(ws)}</b> (hữu hạn), J<sub>reg</sub>(w*) = <b>${f3(T[i0])}</b>`}D[3]=dr}
+
+// 4.2 Gradient: BCE + λw
+{const xs=lin(0,6,120),la=sl('#k4','λ',.02,1,.02,.2,dr,f2);
+function dr(){const l=la();let lo=0,hi=20;for(let i=0;i<60;i++){const m=(lo+hi)/2;if(gb(m)+l*m<0)lo=m;else hi=m}const w=lo;
+plot('#c4',xs,[{y:xs.map(gb),c:C.a,n:'∂J_BCE/∂w'},{y:xs.map(t=>l*t),c:C.ok,n:'λw'},{y:xs.map(t=>gb(t)+l*t),c:C.pos,n:'∂J_L2/∂w'},{pts:[[w,0]],c:C.bad,r:5}],{y0:-1.2,y1:2,h:[0],v:[[w]]});
+$('#o4').innerHTML=`∂J<sub>L2</sub>/∂w = 0 tại w* = <b>${f2(w)}</b> · tại đó ∂J<sub>BCE</sub>/∂w = −λw* = <b>${f3(gb(w))}</b>`}D[4]=dr}
+
+// 4.3 Weight decay: Gradient Descent từ w = 0
+{const ts=lin(0,300,300),la=sl('#k5','λ',.02,.5,.02,.1,dr,f2),et=sl('#k5','η',.5,3,.5,1,dr,f2);
+function dr(){const l=la(),e=et(),run=x=>{let w=0;const a=[w];for(let t=0;t<300;t++){w=w-e*(gb(w)+x*w);a.push(w)}return a},a0=run(0),a1=run(l);
+plot('#c5',ts,[{y:a0,c:C.a,n:'λ = 0'},{y:a1,c:C.pos,n:'λ = '+f2(l)}],{y0:0,y1:8,t:'w sau t bước'});
+$('#o5').innerHTML=`1 − ηλ = <b>${f3(1-e*l)}</b> · sau 300 bước: w (λ = 0) = <b>${f2(a0[300])}</b> và vẫn tăng, w (λ = ${f2(l)}) = <b>${f2(a1[300])}</b>`}D[5]=dr}
+
+// 4.4 Hessian: μ_i → μ_i + λ
+{const mu=[0,.3,1.5],la=sl('#k6','λ',0,1,.05,.3,dr,f2);
+function dr(){const l=la(),t=cv('#c6');if(!t)return;const[c,W,H]=t,pl=34,top=26,bot=H-26,Y=v=>bot-v/2.6*(bot-top),gw=(W-pl-10)/3,bw=gw*.28;
+c.font='12px system-ui';c.strokeStyle=css('--mut');c.fillStyle=css('--mut');c.lineWidth=1;c.beginPath();c.moveTo(pl,top-6);c.lineTo(pl,bot);c.lineTo(W-6,bot);c.stroke();
+[0,1,2].forEach(v=>c.fillText(v,pl-16,Y(v)+4));
+mu.forEach((m,i)=>{const x0=pl+gw*i+gw*.14;
+c.fillStyle=C.a;c.fillRect(x0,Y(m),bw,bot-Y(m));c.fillStyle=C.pos;c.fillRect(x0+bw+8,Y(m+l),bw,bot-Y(m+l));
+c.fillStyle=css('--mut');c.fillText('μ'+(i+1),x0+bw-4,bot+16);c.fillText(f2(m),x0,Y(m)-4);c.fillText(f2(m+l),x0+bw+8,Y(m+l)-4)});
+c.fillStyle=C.a;c.fillText('H_BCE',pl+6,14);c.fillStyle=C.pos;c.fillText('H_L2 = H_BCE + λI',pl+62,14);
+$('#o6').innerHTML=l>0?`μ<sub>min</sub> = 0 → <b>${f2(l)}</b> (lồi mạnh) · số điều kiện: ∞ → <b>${f2((1.5+l)/l)}</b>`:`λ = 0: μ<sub>min</sub> = 0, Hessian suy biến (lồi yếu), số điều kiện ∞`}D[6]=dr}
+
+// 5.2 |θ|, tiếp tuyến và subgradient
+{const xs=lin(-2,2,160),sa=sl('#k9','θ',-20,20,1,10,dr,x=>f2(x/10));
+function dr(){const a=sa()/10,sn=Math.sign(a),cs=[{y:xs.map(Math.abs),c:C.pos,n:'|θ|'}];
+if(a!=0)cs.push({y:xs.map(x=>Math.abs(a)+sn*(x-a)),c:C.bad,n:'tiếp tuyến'});else[-1,-.5,0,.5,1].forEach((m,i)=>cs.push({y:xs.map(x=>m*x),c:C.ok,dash:1,n:i?undefined:'các đường có hệ số góc s ∈ [−1, 1]'}));
+cs.push({pts:[[a,Math.abs(a)]],c:C.a,r:5});plot('#c9',xs,cs,{y0:-2,y1:2});
+$('#o9').innerHTML=a!=0?`θ = <b>${f2(a)}</b> → f′(θ) = <b>${sn>0?'+1':'−1'}</b> (khả vi, một tiếp tuyến duy nhất)`:`f′<sub>−</sub>(0) = <b>−1</b> ≠ f′<sub>+</sub>(0) = <b>1</b> → f′(0) không tồn tại; mọi s ∈ [−1, 1] đều là subgradient tại 0`}D[9]=dr}
+
+// 5.3 φ(θ) = gθ + λ|θ|
+{const xs=lin(-2,2,160),g=sl('#k10','g',-20,20,1,5,dr,x=>f2(x/10)),la=sl('#k10','λ',0,20,1,10,dr,x=>f2(x/10));
+function dr(){const G=g()/10,l=la()/10,ok=Math.abs(G)<=l+1e-9;
+plot('#c10',xs,[{y:xs.map(t=>G*t+l*Math.abs(t)),c:C.pos,n:'φ(θ) = gθ + λ|θ|'},{pts:[[0,0]],c:ok?C.ok:C.bad,r:5}],{y0:-4,y1:4,v:[[0]]});
+$('#o10').innerHTML=`g + λ·[−1, 1] = [<b>${f2(G-l)}</b>, <b>${f2(G+l)}</b>] → ${ok?'chứa 0 (|g| ≤ λ): θ<sub>j</sub> = 0 tại nghiệm tối ưu':'không chứa 0 (|g| &gt; λ): θ<sub>j</sub> ≠ 0, dấu ngược với g'}`}D[10]=dr}
+
+// điều hướng
+let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 4':'← Trước';$('#nx').textContent=cu==S.length-1?'Phần 6 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
+$('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
+addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
+addEventListener('resize',()=>D[cu]&&D[cu]());
+addEventListener('load',()=>{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});go((+location.hash.slice(1)||1)-1)});
+</script>
+</body></html>
