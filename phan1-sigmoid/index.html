@@ -59,7 +59,7 @@ p .katex{font-size:1.08em}
 @media(max-width:860px){.s{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.s>div{max-height:none;overflow:visible;align-self:start}.s>div:first-child{padding:0}}
 </style></head><body>
 <main>
-<section class="s on"><div><p class="mut">Logistic Regression · Phần 1 / 7</p>
+<section class="s on"><div><p class="mut">Logistic Regression · Phần 1 / 6</p>
 <p></p>
 <p><h1>LOGISTIC REGRESSION</h1><h2>Tại sao sử dụng Logistic Regression thay vì Linear Regression?</h2>
 <p><b>Bài toán:</b> Một trường đại học muốn dự đoán khả năng sinh viên đậu môn dựa trên số giờ ôn tập trước kỳ thi.</p>
@@ -70,7 +70,7 @@ p .katex{font-size:1.08em}
 <div class="v"><canvas id="c1" class="cl"></canvas><div class="c" id="k1"></div>
 <div class="b"><button id="f1">Khớp Linear (bình phương tối thiểu)</button><button id="f2">Khớp Logistic (MLE)</button><button id="f3">Đặt lại điểm</button></div><div class="o" id="w1"></div><div class="o" id="o1"></div></div></section>
 
-<section class="s two"><div><p class="mut">Logistic Regression · Phần 1 / 7</p>
+<section class="s two"><div><p class="mut">Logistic Regression · Phần 1 / 6</p>
 <p></p>
 <p><h2>1. XÂY DỰNG HÀM SIGMOID</h2><h3>1.1. Bắt đầu từ phân phối Bernoulli</h3>
 <p>Giả sử chúng ta đang giải quyết một bài toán phân loại nhị phân:</p>
@@ -87,7 +87,7 @@ $$p_i=f(x_i)$$
 $$\mathbb R\to(0,1)$$
 <p class="box">Tại mỗi $p$, hai đường cho biết $P(Y=1)=p$ và $P(Y=0)=1-p$, luôn cộng lại bằng 1.</p></div></section>
 
-<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 7</p>
+<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 6</p>
 <p></p>
 <p><h2>1. XÂY DỰNG HÀM SIGMOID</h2><h3>1.2. Từ Bernoulli đến Log-Odds</h3>
 <p>Odds được định nghĩa là tỉ số giữa xác suất sự kiện xảy ra và xác suất sự kiện không xảy ra. Thay xác suất Bernoulli vào:</p>
@@ -99,7 +99,7 @@ $$\mathrm{Logit}(p)=\ln\frac{p}{1-p}\in\mathbb R$$
 <p class="box">Kéo $p$: odds bùng nổ khi $p\to1$; logit bằng 0 tại $p=0.5$ và đối xứng quanh đó.</p></div>
 <div class="v"><canvas id="c2a" class="sm"></canvas><canvas id="c2b" class="sm"></canvas><div class="c" id="k2"></div><div class="o" id="o2"></div></div></section>
 
-<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 7</p>
+<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 6</p>
 <p></p>
 <p><h2>1. XÂY DỰNG HÀM SIGMOID</h2><h3>1.3. Từ Log-Odds suy ra sigmoid</h3>
 <p>Vì Logit nhận giá trị trên toàn bộ trục số thực, ta có thể giả định nó có quan hệ tuyến tính với các biến đầu vào. Cụ thể:</p>
@@ -117,7 +117,7 @@ $$\sigma'(z)=\sigma(z)\big(1-\sigma(z)\big)$$
 <p class="box">Kéo $x$ (hoặc $w,b$) để di chuyển $z$; chấm tím là $\sigma(z)$, chấm xanh là $\sigma(-z)$.</p></div>
 <div class="v"><img class="fig" data-i="sig" width="1100" height="629" alt="Sigmoid Function (Logistic Curve)"><canvas id="c3a" class="xs"></canvas><canvas id="c3b" class="xs"></canvas><canvas id="c3c" class="xs"></canvas><div class="c" id="k3"></div><div class="o" id="o3"></div></div></section>
 
-<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 7</p>
+<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 6</p>
 <p></p>
 <p><h2>1. XÂY DỰNG HÀM SIGMOID</h2><h3>1.4. Nguyên tắc đưa ra quyết định (Decision Rule)</h3>
 <p>Để phân loại một điểm dữ liệu mới, chúng ta cần một quy tắc. Quy tắc hợp lý nhất là: <i>Chọn lớp nào có xác suất xảy ra lớn hơn.</i></p>
@@ -130,7 +130,7 @@ $$P(y=1\mid x)=P(y=0\mid x)$$
 <p class="box">Kéo $w,b$ để dời ranh giới (đường đứt dọc). Điểm bên phải ranh giới được dự đoán là đậu, bên trái là rớt.</p></div>
 <div class="v"><canvas id="cd"></canvas><div class="c" id="kd"></div><div class="o" id="od"></div></div></section>
 
-<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 7</p>
+<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 6</p>
 <p></p>
 <p><h2>2. XÂY DỰNG LOSS FUNCTION:</h2><h3>2.1. Từ Bernoulli suy ra Likelihood Function:</h3>
 <p>Vì các mẫu dữ liệu độc lập với nhau, Likelihood function $L$ chính là tích xác suất của từng mẫu:</p>
@@ -145,7 +145,7 @@ $$\theta^*=\arg\max_\theta L(\theta)$$
 <p class="box">Bản đồ màu bên phải biểu diễn mức "tệ" của $(w,b)$ (vùng sáng là tốt hơn), dấu xanh là nghiệm MLE. Dùng chung các điểm dữ liệu với slide 1. Kéo $w,b$ để đưa dấu cam về dấu xanh.</p></div>
 <div class="v"><canvas id="c5a" class="sm"></canvas><canvas id="c5b" class="sm"></canvas><div class="c" id="k5"></div><div class="b"><button id="m1">Về nghiệm MLE</button></div><div class="o" id="o5"></div></div></section>
 
-<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 7</p>
+<section class="s"><div><p class="mut">Logistic Regression · Phần 1 / 6</p>
 <p></p>
 <p><h2>2. XÂY DỰNG LOSS FUNCTION:</h2><h3>2.2. Chuyển Likelihood thành hàm Loss:</h3>
 <p>Để đơn giản hóa, chúng ta lấy logarit hai vế, ta được:</p>
