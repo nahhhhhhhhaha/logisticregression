@@ -57,7 +57,46 @@ p .katex{font-size:1.08em}
 /* hình lấy từ PDF */
 .fig{display:block;width:100%;height:auto;margin:0 0 14px;background:#fff;border:1px solid var(--ln);border-radius:8px}
 @media(max-width:860px){.s{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.s>div{max-height:none;overflow:visible;align-self:start}.s>div:first-child{padding:0}}
-</style></head><body>
+</style><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style id="modern">
+:root{--bg:#f4f5fb;--ink:#101828;--mut:#667085;--card:#fff;--ln:#e1e5f0;--pos:#4f46e5;--pos2:#3730a3;--tint:#eef0ff;--ftint:#f3f4ff;--fln:#c9cdf4;--fink:#1b1a63;--head:#eceef9;--glow1:rgba(79,70,229,.10);--glow2:rgba(20,184,166,.08);--sh:0 1px 2px rgba(16,24,40,.04),0 12px 32px -14px rgba(16,24,40,.16)}
+@media(prefers-color-scheme:dark){:root{--bg:#090d1b;--ink:#eef1fb;--mut:#9aa6c4;--card:#121932;--ln:#252f58;--pos:#8f8bff;--pos2:#b4b1ff;--tint:#1b2352;--ftint:#161e47;--fln:#3a4690;--fink:#fff;--head:#19214a;--glow1:rgba(143,139,255,.16);--glow2:rgba(20,184,166,.10);--sh:0 1px 2px rgba(0,0,0,.3),0 14px 34px -14px rgba(0,0,0,.65)}}
+body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16.5px;line-height:1.65;background:radial-gradient(900px 520px at 4% -10%,var(--glow1),transparent 65%),radial-gradient(800px 480px at 100% 105%,var(--glow2),transparent 62%),var(--bg);-webkit-font-smoothing:antialiased}
+@media(max-height:740px){body{font-size:15.5px}}
+.s{padding:28px 5vw;gap:40px}
+.s>div:first-child>p.mut:first-child{display:inline-flex;align-items:center;gap:8px;font:600 12.5px "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:0;padding:5px 13px;border-radius:99px;border:1px solid var(--fln);background:var(--tint);color:var(--pos2)}
+.s>div:first-child>p.mut:first-child::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pos)}
+h1,h2,h3,h4{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);letter-spacing:-.02em}
+h1{font-size:clamp(1.9rem,3.6vw,2.7rem);font-weight:800;line-height:1.1;margin:.2em 0 .5em;padding-bottom:.5em;position:relative}
+h1::after{content:"";position:absolute;left:0;bottom:0;width:64px;height:4px;border-radius:4px;background:var(--pos)}
+h2{font-size:clamp(1.3rem,2.2vw,1.65rem);font-weight:700;line-height:1.25}
+h3{font-size:1.15rem;font-weight:600;color:var(--pos2)}
+h4{font-size:1.02rem;font-weight:600}
+b,strong{font-weight:600}
+.box{border:1px solid var(--fln);border-left:4px solid var(--pos);background:var(--tint);border-radius:14px;padding:12px 18px}
+.v{border:1px solid var(--ln);border-top:3px solid var(--pos);border-radius:20px;padding:18px;box-shadow:var(--sh)}
+.c,.o,.ch,.flow>i,nav{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.c{font-size:13.5px}
+.o{font-size:13.5px;background:var(--bg);border:0;border-radius:12px;padding:10px 14px;margin-top:12px}
+.katex{-webkit-text-stroke:.12px currentColor}
+.katex-display{border:1px solid var(--fln);border-left:4px solid var(--pos);border-radius:14px;padding:16px 20px;box-shadow:none}
+.katex-display>.katex{-webkit-text-stroke:.2px currentColor}
+.fb{border:1.5px solid var(--pos);border-radius:16px;box-shadow:var(--sh)}
+table{border:1px solid var(--ln);border-radius:16px;box-shadow:var(--sh);font-size:.93rem}
+th{background:var(--head);font-weight:600;padding:11px 14px;border-bottom:1px solid var(--ln)}
+td{padding:12px 14px;border-top:1px solid var(--ln)}
+tbody tr:first-child td{border-top:0}
+th+th,td+td{border-left:1px solid var(--ln)}
+button,.nb{font:500 13.5px "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:8px 15px;border-radius:10px;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+button.on{box-shadow:0 0 0 1px var(--pos)}
+nav{gap:14px;padding:11px;border-top:1px solid var(--ln);background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(12px);box-shadow:none;font-size:13.5px}
+nav #ct{min-width:64px;padding:5px 12px;border-radius:99px;background:var(--tint);color:var(--pos2);font-weight:600;font-variant-numeric:tabular-nums}
+#nx{box-shadow:0 6px 16px -6px var(--pos)}
+@keyframes sIn{from{opacity:0}}
+.s.on{animation:sIn .3s ease-out}
+@media(prefers-reduced-motion:reduce){.s.on{animation:none}}
+</style>
+</head><body>
 <main>
 <section class="s on"><div><p class="mut">Logistic Regression · Phần 1 / 6</p>
 <p></p>
