@@ -212,7 +212,7 @@ $('#o4').innerHTML=`Gradient = <b>(${d.map(f3).join(', ')})</b>. Lớp đúng c�
 bars('#c8',[['Σ pᵢvᵢ²',[a],f3,['']],['(Σ pᵢvᵢ)²',[m*m],f3,['']],['vᵀH v',[q],f3,['']]]);
 $('#o8').innerHTML=`vᵀH<sub>z</sub>v = ${f3(a)} − ${f3(m*m)} = <b>${f3(q)}</b> ≥ 0. Đây là phương sai của v dưới p, nên chỉ bằng 0 khi mọi v<sub>i</sub> bằng nhau`}D[7]=dr}
 // điều hướng
-let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Softmax 1':'← Trước';$('#nx').textContent=cu==S.length-1?'Mục lục':'Sau →';try{history.replaceState(null,'','#'+(cu+1))}catch(e){}S[cu].scrollTop=0;D[cu]&&D[cu]()}
+let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 1':'← Trước';$('#nx').textContent=cu==S.length-1?'Mục lục':'Sau →';try{history.replaceState(null,'','#'+(cu+1))}catch(e){}S[cu].scrollTop=0;D[cu]&&D[cu]()}
 const fs=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
 if(!document.fullscreenEnabled)$('#fs').hidden=true;$('#fs').onclick=fs;
 $('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
