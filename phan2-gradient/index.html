@@ -69,6 +69,12 @@ $$z=w^Tx+b,\qquad p=\sigma(z)=\frac{1}{1+e^{-z}}$$
 <p>và loss của một mẫu (Binary Cross-Entropy):</p>
 $$L(p,y)=-\big[y\log p+(1-y)\log(1-p)\big]$$
 </div>
+<div>
+<h4>Nối tiếp từ Phần 1</h4>
+<p>Ở Phần 1, ta đã xây dựng hàm sigmoid $p=\sigma(z)$ và chuyển Likelihood thành hàm loss Binary Cross-Entropy $L(p,y)$.</p>
+<p>Để huấn luyện mô hình, ta cần tìm $w,b$ làm loss nhỏ nhất. Vì vậy Phần 2 bắt đầu từ chính hàm loss đó, tính gradient và Hessian của nó.</p>
+<p class="box">Cần xem lại sigmoid hoặc cách xây dựng loss? <a class="nb" href="../phan1-sigmoid/">← Quay lại Phần 1</a></p>
+</div>
 </section>
 
 <!-- 2 -->
@@ -199,7 +205,7 @@ $$\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2\ge0\;\Longrightarrow\;v^THv\ge0,\quad\forall v
 <button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button>
 </nav>
 <script>
-const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan3-gradient-descent/';
+const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan3-gradient-descent/',PREV='../phan1-sigmoid/';
 const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
 function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
 const PAD={l:38,r:8,t:22,b:22};
@@ -236,7 +242,7 @@ const P=(f,a,b,X,Y)=>lin(a,b,120).map((t,i)=>(i?'L':'M')+X(t).toFixed(1)+' '+Y(f
 {$('#fp').setAttribute('d',P(w=>.4*w*w+.6,-2.7,2.7,w=>210+w*59,J=>270-J*59.5))}
 
 // điều hướng
-let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}cu=Math.max(0,i);S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#nx').textContent=cu==S.length-1?'Phần 3 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
+let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 1':'← Trước';$('#nx').textContent=cu==S.length-1?'Phần 3 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
 $('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
 addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
 addEventListener('resize',()=>D[cu]&&D[cu]());
