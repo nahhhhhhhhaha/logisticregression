@@ -189,7 +189,7 @@ nav #ct{min-width:64px;text-align:center;padding:5px 12px;border-radius:99px;bac
 <nav><a class="nb" href="../index.html">☰ Mục lục</a><button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button><button id="fs" title="Toàn màn hình (phím F)">⛶</button></nav>
 <script>
 if(!Array.prototype.at)Object.defineProperty(Array.prototype,'at',{value:function(n){n=Math.trunc(n)||0;if(n<0)n+=this.length;return this[n]},writable:true,configurable:true});
-const $=s=>document.querySelector(s),S=[...document.querySelectorAll('.s')],D={},NEXT='../index.html',PREV='../softmax-1-mo-hinh/index.html';
+const $=s=>document.querySelector(s),S=[...document.querySelectorAll('.s')],D={},NEXT='../index.html',PREV='../phan1-softmax/index.html';
 const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},COL=[C.a,C.ok,C.pos],NM=['Mèo','Chó','Chim'],css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
 const sm=z=>{const m=Math.max(...z),e=z.map(v=>Math.exp(v-m)),s=e.reduce((a,b)=>a+b);return e.map(v=>v/s)};
 function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
