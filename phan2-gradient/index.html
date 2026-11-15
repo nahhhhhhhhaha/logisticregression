@@ -11,7 +11,414 @@
 *{box-sizing:border-box}html,body{height:100%;margin:0}
 body{color:var(--ink);font:18px/1.55 Newsreader,helvetica,sans-serif;display:flex;flex-direction:column;
 background:radial-gradient(900px 480px at 6% -8%,var(--glow1),transparent 65%),radial-gradient(800px 460px at 98% 100%,var(--glow2),transparent 62%),radial-gradient(var(--dot) 1px,transparent 1.2px) 0 0/22px 22px,var(--bg)}
+main{flex:1;overflow:hidden;position:relative}<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark">
+<title>Phần 2: Gradient và Hessian</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eceff5;--ink:#0f1830;--mut:#5b6679;--card:#fff;--ln:#cfd6e2;--pos:#4338ca;--pos2:#312aa8;--ok:#12998a;--bad:#c2410c;--tint:#eceafe;--ftint:#e4e1ff;--fln:#9d97f2;--fink:#1c1480;--head:#e0e4f3;--glow1:rgba(67,56,202,.13);--glow2:rgba(18,153,138,.10);--dot:rgba(23,32,58,.07);--sh:0 1px 2px rgba(16,24,48,.06),0 8px 24px -10px rgba(16,24,48,.2)}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1024;--ink:#eef1fa;--mut:#a3adc4;--card:#161d3b;--ln:#2a3562;--pos:#8b87f0;--pos2:#aeabff;--tint:#232c5c;--ftint:#2b3570;--fln:#6e69d6;--fink:#ffffff;--head:#1b2450;--glow1:rgba(139,135,240,.18);--glow2:rgba(18,153,138,.14);--dot:rgba(255,255,255,.05);--sh:0 1px 2px rgba(0,0,0,.3),0 10px 28px -10px rgba(0,0,0,.6)}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{color:var(--ink);font:18px/1.55 Newsreader,helvetica,sans-serif;display:flex;flex-direction:column;
+background:radial-gradient(900px 480px at 6% -8%,var(--glow1),transparent 65%),radial-gradient(800px 460px at 98% 100%,var(--glow2),transparent 62%),radial-gradient(var(--dot) 1px,transparent 1.2px) 0 0/22px 22px,var(--bg)}
 main{flex:1;overflow:hidden;position:relative}
+.s{position:absolute;inset:0;padding:24px 5vw;display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:minmax(0,1fr);gap:32px;overflow:hidden}
+.s.on{display:grid}
+.s>div{min-height:0;max-height:100%;align-self:center;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
+.s>div:first-child{padding:4px 14px 4px 2px}
+.s>div::-webkit-scrollbar{width:9px}.s>div::-webkit-scrollbar-track{background:transparent}.s>div::-webkit-scrollbar-thumb{background:var(--fln);border-radius:9px;border:2px solid transparent;background-clip:padding-box}.s>div::-webkit-scrollbar-thumb:hover{background:var(--pos);background-clip:padding-box}
+.s>div:first-child>p.mut:first-child{display:inline-block;margin:0 0 .6em;padding:3px 12px;font:600 12.5px system-ui,sans-serif;letter-spacing:.04em;color:var(--pos2);background:var(--tint);border:1px solid var(--fln);border-radius:99px}
+.pl .katex-display{background:none;border:0;box-shadow:none;padding:2px 0;margin:.5em 0}
+.pl .katex-display>.katex{font-size:1.15em;-webkit-text-stroke:.25px currentColor}
+.s.two.on{display:block;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
+.s.two>div{max-width:860px;margin:0 auto;max-height:none;overflow:visible;padding:4px 14px}
+@media(min-width:861px){.s.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.s.cols>div{align-self:start}}
+.v svg{display:block;width:100%;height:auto;max-height:64vh}
+.sa{stroke:var(--mut);stroke-width:1.2;fill:none}.st{fill:var(--mut);font:12px system-ui,sans-serif}.sb{fill:var(--tint);stroke:var(--fln);stroke-width:1.5}.sv{fill:var(--ink);font:15px system-ui,sans-serif}
+h1,h2,h3,h4{color:var(--ink);font-weight:700;line-height:1.2;margin:0}
+h1{font-size:2.2rem;letter-spacing:.01em;margin:.1em 0 .45em}
+h2{font-size:1.75rem;letter-spacing:-.01em;margin:0 0 .35em}
+h3{font-size:1.3rem;margin:.1em 0 .7em}
+h4{font-size:1.1rem;margin:1em 0 .2em}
+p{margin:.5em 0}ul{margin:.4em 0;padding-left:1.4em}li{margin:.25em 0}b{font-weight:700}.mut{color:var(--mut)}
+.box{border-left:4px solid var(--pos);padding:8px 14px;background:var(--tint);border-radius:0 8px 8px 0}
+.v{background:var(--card);border:1px solid var(--ln);border-top:4px solid var(--pos);border-radius:12px;padding:14px;box-shadow:var(--sh)}
+canvas{width:100%;height:300px;display:block}canvas.sm{height:200px}canvas.xs{height:150px}canvas.cl{cursor:crosshair}
+.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:14px system-ui,sans-serif;margin-top:8px}
+.c input{width:100%;accent-color:var(--pos)}
+.o{font:14px/1.6 system-ui,sans-serif;margin-top:10px;padding-top:8px;border-top:1px dashed var(--ln);color:var(--mut)}.o b{color:var(--ink)}
+.b{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button,.nb{font:500 14px system-ui;padding:7px 13px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer;text-decoration:none;transition:border-color .12s,background .12s}
+button:hover,.nb:hover{border-color:var(--pos);background:var(--tint)}
+button.on{border-color:var(--pos);background:var(--tint);box-shadow:0 0 0 1px var(--pos);color:var(--pos2)}
+button:focus-visible,input:focus-visible,.nb:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
+nav{display:flex;gap:12px;align-items:center;justify-content:center;padding:10px;border-top:2px solid var(--ln);background:var(--card);box-shadow:0 -6px 18px -12px rgba(16,24,48,.35);font:600 14px system-ui}
+#nx{background:var(--pos);border-color:var(--pos);color:#fff}#nx:hover{background:var(--pos2);border-color:var(--pos2)}
+@media(prefers-color-scheme:dark){#nx{color:#10162b}}
+.katex{color:var(--fink);-webkit-text-stroke:.25px currentColor}
+.katex-display{overflow-x:auto;overflow-y:hidden;margin:.8em 0;padding:14px 16px;background:var(--ftint);border:1.5px solid var(--fln);border-left:6px solid var(--pos);border-radius:10px;box-shadow:var(--sh)}
+.katex-display>.katex{font-size:1.28em;-webkit-text-stroke:.45px currentColor}
+p .katex{font-size:1.08em}
+.fb{border:2.5px solid var(--pos);border-radius:12px;margin:.9em 0;overflow:hidden}
+.fb .katex-display{margin:0;border:0;border-radius:0;box-shadow:none}
+.ch{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;font:13px system-ui,sans-serif;margin-bottom:6px}
+.ch i{font-style:normal;border:1px solid var(--fln);background:var(--tint);border-radius:6px;padding:3px 9px}
+.ch s{text-decoration:none;color:var(--mut);font-size:11.5px}
+@media(max-width:860px){.s{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.s>div{max-height:none;overflow:visible;align-self:start}.s>div:first-child{padding:0}}
+</style><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style id="modern">
+:root{--bg:#f4f5fb;--ink:#101828;--mut:#667085;--card:#fff;--ln:#e1e5f0;--pos:#4f46e5;--pos2:#3730a3;--tint:#eef0ff;--ftint:#f3f4ff;--fln:#c9cdf4;--fink:#1b1a63;--head:#eceef9;--glow1:rgba(79,70,229,.10);--glow2:rgba(20,184,166,.08);--sh:0 1px 2px rgba(16,24,40,.04),0 12px 32px -14px rgba(16,24,40,.16)}
+@media(prefers-color-scheme:dark){:root{--bg:#090d1b;--ink:#eef1fb;--mut:#9aa6c4;--card:#121932;--ln:#252f58;--pos:#8f8bff;--pos2:#b4b1ff;--tint:#1b2352;--ftint:#161e47;--fln:#3a4690;--fink:#fff;--head:#19214a;--glow1:rgba(143,139,255,.16);--glow2:rgba(20,184,166,.10);--sh:0 1px 2px rgba(0,0,0,.3),0 14px 34px -14px rgba(0,0,0,.65)}}
+body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16.5px;line-height:1.65;background:radial-gradient(900px 520px at 4% -10%,var(--glow1),transparent 65%),radial-gradient(800px 480px at 100% 105%,var(--glow2),transparent 62%),var(--bg);-webkit-font-smoothing:antialiased}
+@media(max-height:740px){body{font-size:15.5px}}
+.s{padding:28px 5vw;gap:40px}
+.s>div:first-child>p.mut:first-child{display:inline-flex;align-items:center;gap:8px;font:600 12.5px "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:0;padding:5px 13px;border-radius:99px;border:1px solid var(--fln);background:var(--tint);color:var(--pos2)}
+.s>div:first-child>p.mut:first-child::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pos)}
+h1,h2,h3,h4{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);letter-spacing:-.02em}
+h1{font-size:clamp(1.9rem,3.6vw,2.7rem);font-weight:800;line-height:1.1;margin:.2em 0 .5em;padding-bottom:.5em;position:relative}
+h1::after{content:"";position:absolute;left:0;bottom:0;width:64px;height:4px;border-radius:4px;background:var(--pos)}
+h2{font-size:clamp(1.3rem,2.2vw,1.65rem);font-weight:700;line-height:1.25}
+h3{font-size:1.15rem;font-weight:600;color:var(--pos2)}
+h4{font-size:1.02rem;font-weight:600}
+b,strong{font-weight:600}
+.box{border:1px solid var(--fln);border-left:4px solid var(--pos);background:var(--tint);border-radius:14px;padding:12px 18px}
+.v{border:1px solid var(--ln);border-top:3px solid var(--pos);border-radius:20px;padding:18px;box-shadow:var(--sh)}
+.c,.o,.ch,.flow>i,nav{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.c{font-size:13.5px}
+.o{font-size:13.5px;background:var(--bg);border:0;border-radius:12px;padding:10px 14px;margin-top:12px}
+.katex{-webkit-text-stroke:.12px currentColor}
+.katex-display{border:1px solid var(--fln);border-left:4px solid var(--pos);border-radius:14px;padding:16px 20px;box-shadow:none}
+.katex-display>.katex{-webkit-text-stroke:.2px currentColor}
+.fb{border:1.5px solid var(--pos);border-radius:16px;box-shadow:var(--sh)}
+table{border:1px solid var(--ln);border-radius:16px;box-shadow:var(--sh);font-size:.93rem}
+th{background:var(--head);font-weight:600;padding:11px 14px;border-bottom:1px solid var(--ln)}
+td{padding:12px 14px;border-top:1px solid var(--ln)}
+tbody tr:first-child td{border-top:0}
+th+th,td+td{border-left:1px solid var(--ln)}
+button,.nb{font:500 13.5px "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:8px 15px;border-radius:10px;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+button.on{box-shadow:0 0 0 1px var(--pos)}
+nav{gap:14px;padding:11px;border-top:1px solid var(--ln);background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(12px);box-shadow:none;font-size:13.5px}
+nav #ct{min-width:64px;padding:5px 12px;border-radius:99px;background:var(--tint);color:var(--pos2);font-weight:600;font-variant-numeric:tabular-nums}
+#nx{box-shadow:0 6px 16px -6px var(--pos)}
+@keyframes sIn{from{opacity:0}}
+.s.on{animation:sIn .3s ease-out}
+@media(prefers-reduced-motion:reduce){.s.on{animation:none}}
+</style>
+<style id="robust">
+:root{color-scheme:light dark}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word;-webkit-tap-highlight-color:transparent}
+img,svg,video{max-width:100%}img{height:auto}
+@supports(height:100dvh){html,body{height:100dvh}}
+main{min-height:0}
+.s{top:0;right:0;bottom:0;left:0;padding-left:max(5vw,env(safe-area-inset-left,0px));padding-right:max(5vw,env(safe-area-inset-right,0px))}
+.s>div{min-width:0}
+.c input{min-width:0}
+nav{flex-wrap:wrap;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));padding-bottom:max(11px,env(safe-area-inset-bottom,0px))}
+.tw{max-width:100%}
+@media(max-width:860px){
+.s{padding-top:18px;padding-bottom:18px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));gap:22px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+canvas{height:260px}
+.katex-display{padding:12px 14px}
+.katex-display>.katex{font-size:1.12em}
+}
+@media(max-width:480px){
+body{font-size:16px}
+nav{gap:6px}
+button,.nb{padding:8px 10px;font-size:13px}
+nav #ct{min-width:52px;padding:5px 8px}
+.c{grid-template-columns:minmax(0,auto) minmax(60px,1fr) 3.6em;gap:4px 8px}
+}
+@media(max-height:520px){
+canvas{height:210px}canvas.sm{height:170px}canvas.xs{height:130px}
+nav{padding-top:6px}
+}
+@media(pointer:coarse){
+button,.nb{min-height:40px}
+.nb{display:inline-flex;align-items:center}
+}
+</style>
+</head>
+<body>
+<main>
+
+<!-- 1 -->
+<section class="s two on">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
+<p>$\nabla L=\left(\dfrac{\partial L}{\partial w},\dfrac{\partial L}{\partial b}\right)$. Nhắc lại thiết lập:</p>
+$$z=w^Tx+b,\qquad p=\sigma(z)=\frac{1}{1+e^{-z}}$$
+<p>và loss của một mẫu (Binary Cross-Entropy):</p>
+$$L(p,y)=-\big[y\log p+(1-y)\log(1-p)\big]$$
+</div>
+<div>
+<h4>Nối tiếp từ Phần 1</h4>
+<p>Ở Phần 1, ta đã xây dựng hàm sigmoid $p=\sigma(z)$ và chuyển Likelihood thành hàm loss Binary Cross-Entropy $L(p,y)$.</p>
+<p>Để huấn luyện mô hình, ta cần tìm $w,b$ làm loss nhỏ nhất. Vì vậy Phần 2 bắt đầu từ chính hàm loss đó, tính gradient và Hessian của nó.</p>
+<p class="box">Cần xem lại sigmoid hoặc cách xây dựng loss? <a class="nb" href="../phan1-sigmoid/index.html">← Quay lại Phần 1</a></p>
+</div>
+</section>
+
+<!-- 2 -->
+<section class="s cols">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
+<h3>1.1. Tính $\dfrac{\partial L}{\partial w}=(p-y)\,x$ và $\dfrac{\partial L}{\partial b}=p-y$</h3>
+<h4>Theo $w$</h4>
+<p>Sử dụng <b>Quy tắc chuỗi (Chain Rule)</b>:</p>
+<div class="pl">$$\frac{\partial L}{\partial w}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot\frac{\partial z}{\partial w}$$</div>
+<p>Các đạo hàm thành phần:</p>
+<div class="pl">$$\frac{\partial L}{\partial p}=-\frac{y}{p}+\frac{1-y}{1-p}=\frac{p-y}{p(1-p)}$$
+$$\frac{\partial p}{\partial z}=p(1-p),\qquad\frac{\partial z}{\partial w}=x$$</div>
+<p>Thay vào:</p>
+<div class="fb">$$\frac{\partial L}{\partial w}=\frac{p-y}{p(1-p)}\cdot p(1-p)\cdot x=(p-y)\,x$$</div>
+</div>
+<div>
+<h4>Theo $b$</h4>
+<p>Sử dụng <b>Quy tắc chuỗi (Chain Rule)</b>:</p>
+<div class="pl">$$\frac{\partial L}{\partial b}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot\frac{\partial z}{\partial b}$$</div>
+<p>Các đạo hàm thành phần, vì $z=w^Tx+b\Rightarrow\dfrac{\partial z}{\partial b}=1$:</p>
+<div class="pl">$$\frac{\partial L}{\partial p}=\frac{p-y}{p(1-p)},\qquad\frac{\partial p}{\partial z}=p(1-p),\qquad\frac{\partial z}{\partial b}=1$$</div>
+<p>Thay vào:</p>
+<div class="fb">$$\frac{\partial L}{\partial b}=\frac{p-y}{p(1-p)}\cdot p(1-p)\cdot1=p-y$$</div>
+</div>
+</section>
+
+<!-- 5 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
+<h3>1.2. Mở rộng cho toàn bộ tập dữ liệu</h3>
+<p>Hàm tổng loss cho $n$ quan sát độc lập:</p>
+$$J(w,b)=\sum_{i=1}^{n}L_i=-\sum_{i=1}^{n}\big[y_i\log p_i+(1-y_i)\log(1-p_i)\big]$$
+<p>Gradient toàn cục (đạo hàm của tổng = tổng các đạo hàm):</p>
+<h4>Theo trọng số $w$:</h4>
+$$\frac{\partial J}{\partial w}=\sum_{i=1}^{n}\frac{\partial L_i}{\partial w}=\sum_{i=1}^{n}(p_i-y_i)\,x_i$$
+<h4>Theo hệ số chặn $b$:</h4>
+$$\frac{\partial J}{\partial b}=\sum_{i=1}^{n}\frac{\partial L_i}{\partial b}=\sum_{i=1}^{n}(p_i-y_i)$$
+</div>
+<div class="v">
+<canvas id="c2"></canvas>
+<div class="c" id="k2"></div>
+<div class="o" id="o2"></div>
+</div>
+</section>
+
+<!-- 6 -->
+<section class="s two">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>2. MA TRẬN HESSIAN VÀ GIẢI THÍCH TÍNH LỒI</h2>
+<p>Mục tiêu: chứng minh hàm chi phí $J(w,b)$ là hàm <b>lồi (convex)</b> bằng cách kiểm tra ma trận Hessian $H\succeq0$</p>
+<p>Công thức cần đạt:</p>
+$$H=X^TRX,\qquad R=\operatorname{diag}\!\big(p_1(1-p_1),\,\dots,\,p_n(1-p_n)\big)$$
+<p>và từ đó suy ra $H\succeq0$. Khởi tạo từ gradient:</p>
+$$\nabla_wJ=\sum_{i=1}^{n}(p_i-y_i)\,x_i$$
+</div>
+</section>
+
+<!-- 7 -->
+<section class="s cols">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>2. MA TRẬN HESSIAN VÀ GIẢI THÍCH TÍNH LỒI</h2>
+<h3>2.1. Suy ra Hessian</h3>
+<p>Đạo hàm cấp hai theo $w$:</p>
+$$H=\frac{\partial}{\partial w}\big(\nabla_wJ\big)=\sum_{i=1}^{n}\frac{\partial}{\partial w}\big[(p_i-y_i)\,x_i\big]$$
+<p>Vì $x_i,y_i$ không phụ thuộc vào $w$:</p>
+$$H=\sum_{i=1}^{n}x_i\left(\frac{\partial p_i}{\partial w}\right)^T$$
+<p>Mà $\dfrac{\partial p_i}{\partial w}=p_i(1-p_i)\,x_i=r_ix_i$ với $r_i=p_i(1-p_i)$, nên:</p>
+$$H=\sum_{i=1}^{n}r_i\,x_ix_i^T=\sum_{i=1}^{n}p_i(1-p_i)\,x_ix_i^T$$
+<p>Viết gọn dưới dạng ma trận, với $X\in\mathbb{R}^{n\times d}$ có các hàng là $x_i^T$:</p>
+<div class="fb">$$H=X^TRX,\qquad R=\operatorname{diag}\big(p_1(1-p_1),\dots,p_n(1-p_n)\big)$$</div>
+</div>
+<div>
+<h3>2.2. Chứng minh tính lồi (Convexity)</h3>
+<h4>Bước 1. Tính chất của ma trận $R$.</h4>
+<p>Vì xác suất dự đoán $0\lt p_i\lt1$, ta có $p_i(1-p_i)\gt0$. Do $R$ là ma trận đường chéo chứa các phần tử này:</p>
+$$R\succ0.$$
+<h4>Bước 2. Xét dạng toàn phương với vector bất kỳ.</h4>
+<p>Với $v\in\mathbb{R}^{d}$ tùy ý, đặt $u=Xv$:</p>
+$$v^THv=v^T(X^TRX)v=(Xv)^TR(Xv)=u^TRu$$
+<p>Khai triển theo tổng:</p>
+$$u^TRu=\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2$$
+<p>Vì $p_i(1-p_i)\gt0$ và $u_i^2\ge0$:</p>
+$$\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2\ge0\;\Longrightarrow\;v^THv\ge0,\quad\forall v$$
+</div>
+</section>
+
+<!-- 8 -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>2. GIẢI THÍCH TÍNH LỒI</h2>
+<h4>Kết luận</h4>
+<div class="fb">$$H=X^TRX\succeq0\Longrightarrow J(w,b)\ \text{là hàm lồi}$$</div>
+<p>Do đó Logistic Regression với BCE có <b>một cực tiểu toàn cục duy nhất</b> (global minimum), và các thuật toán gradient (GD, Newton, L-BFGS, …) đều hội tụ về đó.</p>
+</div>
+<div class="v">
+<h3>2.3. Minh họa trực quan</h3>
+<svg style="max-height:34vh" viewBox="0 0 420 300" role="img" aria-label="Sigmoid và p(1-p)">
+<g class="sa"><line x1="50" y1="260" x2="400" y2="260"/><line x1="225" y1="268" x2="225" y2="28"/></g>
+<g class="st"><text x="46" y="276">−6</text><text x="133" y="276">−3</text><text x="222" y="276">0</text><text x="309" y="276">3</text><text x="397" y="276">6</text>
+<text x="215" y="264" text-anchor="end">0</text><text x="215" y="155" text-anchor="end">0.5</text><text x="215" y="46" text-anchor="end">1</text>
+<text x="400" y="292" text-anchor="end">z = wᵀx + b</text></g>
+<line x1="50" y1="205.5" x2="400" y2="205.5" style="stroke:var(--bad);stroke-width:1.5;stroke-dasharray:5 4"/>
+<path id="fs" fill="none" style="stroke:var(--pos);stroke-width:2.5"/><path id="fr" fill="none" style="stroke:var(--bad);stroke-width:2.5"/>
+<g style="font:13px system-ui,sans-serif"><text x="58" y="20" style="fill:var(--pos)">σ(z) = 1/(1+e⁻ᶻ)</text><text x="205" y="20" style="fill:var(--bad)">σ′(z) = p(1−p) ≤ 0.25</text></g>
+</svg>
+<div class="o">Hàm sigmoid và đạo hàm $p(1-p)$ — yếu tố xuất hiện trong $R$, đảm bảo $R\succ0$ và do đó $H\succeq0$.</div>
+<svg style="max-height:34vh" viewBox="0 0 420 300" role="img" aria-label="Hàm lồi J(w)">
+<g class="sa"><line x1="20" y1="270" x2="400" y2="270"/><line x1="210" y1="276" x2="210" y2="20"/></g>
+<g class="st"><text x="404" y="274">w</text><text x="216" y="18">J(w)</text></g>
+<line x1="62" y1="85.5" x2="358" y2="85.5" style="stroke:var(--mut);stroke-width:1.2;stroke-dasharray:5 4"/>
+<path id="fp" fill="none" style="stroke:var(--pos);stroke-width:2.5"/>
+<circle cx="210" cy="234.3" r="4.5" style="fill:var(--bad)"/><text x="220" y="252" style="fill:var(--bad);font:13px system-ui,sans-serif">global min</text>
+</svg>
+<div class="o">Hàm lồi $J(w)$ có duy nhất một cực tiểu toàn cục — hệ quả của $H\succeq0$.</div>
+</div>
+</section>
+
+<!-- BỔ SUNG: điều kiện nghiệm tối ưu -->
+<section class="s cols">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>3. ĐIỀU KIỆN ĐỂ TÌM NGHIỆM TỐI ƯU</h2>
+<p>Mục tiêu của Logistic Regression là tìm vector tham số $w^*$ và bias $b^*$ sao cho hàm chi phí nhỏ nhất:</p>
+<div class="fb">$$(w^*,b^*)=\operatorname*{arg\,min}_{w,b}J(w,b)$$</div>
+</div>
+<div>
+<h3>Linear Regression giải được trực tiếp</h3>
+<p>Lấy đạo hàm hàm mất mát rồi giải phương trình gradient bằng 0, ta được <b>Normal Equation</b>:</p>
+<div class="fb">$$w^*=(X^TX)^{-1}X^Ty$$</div>
+<p class="box">Với Logistic Regression, quá trình này <b>không thể thực hiện theo cách tương tự</b>. Hai slide tiếp theo giải thích lý do.</p>
+</div>
+</section>
+<!-- BỔ SUNG: hệ gradient bằng 0 -->
+<section class="s cols">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>4. THIẾT LẬP HỆ PHƯƠNG TRÌNH GRADIENT BẰNG 0</h2>
+<p>Hàm chi phí Logistic Regression trên toàn bộ tập dữ liệu:</p>
+<div class="fb">$$J(w,b)=-\sum_{i=1}^{n}\big[y_i\ln p_i+(1-y_i)\ln(1-p_i)\big]$$</div>
+<p>với $p_i=\sigma(w^Tx_i+b)$ và $\sigma(z)=\dfrac{1}{1+e^{-z}}$. Để tìm cực tiểu, cần giải hệ</p>
+<div class="pl">$$\nabla J(w,b)=0$$</div>
+</div>
+<div>
+<h4>Cụ thể, theo $w$ và theo $b$</h4>
+<div class="pl">$$\frac{\partial J}{\partial w}=\sum_{i=1}^{n}(p_i-y_i)\,x_i=0,\qquad\frac{\partial J}{\partial b}=\sum_{i=1}^{n}(p_i-y_i)=0$$</div>
+<h4>Thay $p_i$ vào hệ phương trình</h4>
+<div class="fb">$$\sum_{i=1}^{n}\left[\frac{1}{1+e^{-(w^Tx_i+b)}}-y_i\right]x_i=0$$</div>
+<p>Đây là hệ phương trình <b>phi tuyến</b> theo $w$ và $b$, vì các biến cần tìm nằm bên trong hàm Sigmoid.</p>
+</div>
+</section>
+<!-- BỔ SUNG: vì sao không có nghiệm đóng -->
+<section class="s two">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>5. VÌ SAO KHÔNG THỂ TÌM NGHIỆM ĐÓNG?</h2>
+<p>Khác với Linear Regression, hệ gradient của Logistic Regression chứa hàm mũ thông qua Sigmoid:</p>
+<div class="pl">$$p_i=\frac{1}{1+e^{-(w^Tx_i+b)}}$$</div>
+<p>Khi giải $\nabla J(w,b)=0$, ta phải giải <b>đồng thời</b> một hệ phương trình phi tuyến, mỗi phương trình là tổng của nhiều hàm Sigmoid.</p>
+<h3>Kết luận cốt lõi</h3>
+<p class="box">Trong trường hợp tổng quát, <b>không tồn tại công thức đại số tường minh</b> biểu diễn trực tiếp nghiệm tối ưu $w^*,b^*$ theo dữ liệu $X$ và nhãn $y$.<br>Nói cách khác, ta không thể biến đổi hệ trên thành một công thức giống Normal Equation để tính thẳng nghiệm.</p>
+<p class="mut"><b>Lưu ý:</b> điều này không có nghĩa mọi bài toán Logistic Regression đều không có nghiệm hữu hạn hay không giải chính xác được. Một số trường hợp đặc biệt tìm được nghiệm, nhưng không có công thức nghiệm đóng tổng quát cho dữ liệu bất kỳ.</p>
+</div>
+</section>
+<!-- BỔ SUNG: kết luận, tối ưu số -->
+<section class="s">
+<div>
+<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
+<h2>6. KẾT LUẬN: CẦN PHƯƠNG PHÁP TỐI ƯU SỐ</h2>
+<p>Dù không có nghiệm đóng, hàm chi phí là <b>hàm lồi</b> vì Hessian đã được chứng minh nửa xác định dương:</p>
+<div class="pl">$$H=X^TRX\succeq0$$</div>
+<p>Do đó mọi cực tiểu địa phương đều là cực tiểu toàn cục. Thay vì giải hệ phi tuyến, ta dùng thuật toán số để tìm nghiệm gần đúng, phổ biến nhất là <b>Gradient Descent</b>:</p>
+<div class="fb">$$\begin{aligned}w^{(t+1)}&=w^{(t)}-\alpha\,\nabla_wJ\big(w^{(t)},b^{(t)}\big)\\b^{(t+1)}&=b^{(t)}-\alpha\,\frac{\partial J}{\partial b}\big(w^{(t)},b^{(t)}\big)\end{aligned}$$</div>
+<ul><li>$\alpha$: Learning Rate (tốc độ học).</li><li>$\nabla_wJ$: gradient theo trọng số; $\partial J/\partial b$: gradient theo bias.</li></ul>
+<p>Lặp lại đến khi gradient đủ nhỏ hoặc $J$ gần như không còn giảm.</p>
+</div>
+<div class="v">
+<h3>Minh họa: Gradient Descent tìm nghiệm</h3>
+<canvas id="c9"></canvas><div class="b" id="b9"></div><div class="c" id="k9"></div><div class="o" id="o9"></div>
+</div>
+</section>
+</main>
+<nav>
+<a class="nb" href="../index.html">☰ Mục lục</a>
+<button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button>
+</nav>
+<script>
+if(!Array.prototype.at)Object.defineProperty(Array.prototype,'at',{value:function(n){n=Math.trunc(n)||0;if(n<0)n+=this.length;return this[n]},writable:true,configurable:true});
+const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan3-gradient-descent/index.html',PREV='../phan1-sigmoid/index.html';
+const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
+function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
+const PAD={l:38,r:8,t:22,b:22};
+function plot(id,xs,cs,o={}){const t=cv(id);if(!t)return;const[c,W,H]=t,p=PAD,x0=o.x0??xs[0],x1=o.x1??xs.at(-1),y0=o.y0??0,y1=o.y1;
+const X=x=>p.l+(x-x0)/(x1-x0)*(W-p.l-p.r),Y=y=>H-p.b-(y-y0)/(y1-y0)*(H-p.t-p.b);
+c.font='12px system-ui';c.fillStyle=c.strokeStyle=css('--mut');c.lineWidth=1;const ax=X(Math.max(x0,Math.min(0,x1)));
+c.beginPath();c.moveTo(p.l,Y(y0));c.lineTo(W-p.r,Y(y0));c.moveTo(ax,p.t);c.lineTo(ax,H-p.b);c.stroke();
+for(let k=0;k<=4;k++){const v=x0+(x1-x0)*k/4;c.fillText(+v.toFixed(1),X(v)-9,H-6)}
+for(let k=0;k<=2;k++){const v=y0+(y1-y0)*k/2;c.fillText(+v.toFixed(1),0,Y(v)+4)}
+c.save();c.beginPath();c.rect(p.l,p.t,W-p.l-p.r,H-p.t-p.b);c.clip();
+(o.h||[]).forEach(v=>{c.setLineDash([4,4]);c.beginPath();c.moveTo(p.l,Y(v));c.lineTo(W-p.r,Y(v));c.stroke();c.setLineDash([])});
+cs.forEach(k=>{c.strokeStyle=c.fillStyle=k.c;c.lineWidth=2;c.setLineDash(k.dash?[6,4]:[]);
+if(k.pts)k.pts.forEach(q=>{c.beginPath();c.arc(X(q[0]),Y(q[1]),k.r||4,0,7);c.fill()});
+else{c.beginPath();k.y.forEach((v,i)=>i?c.lineTo(X(xs[i]),Y(v)):c.moveTo(X(xs[i]),Y(v)));c.stroke()}c.setLineDash([])});
+(o.v||[]).forEach(v=>{c.strokeStyle=v[1]||css('--mut');c.setLineDash([3,3]);c.beginPath();c.moveTo(X(v[0]),p.t);c.lineTo(X(v[0]),H-p.b);c.stroke();c.setLineDash([])});c.restore();
+let lx=p.l+6;cs.forEach(k=>{if(k.n){c.fillStyle=k.c;c.fillText(k.n,lx,13);lx+=c.measureText(k.n).width+14}});
+if(o.t){c.fillStyle=css('--mut');c.textAlign='right';c.fillText(o.t,W-p.r,13);c.textAlign='left'}}
+function sl(h,lab,mn,mx,st,v,f,fmt=x=>x){const g=$(h),l=document.createElement('label'),i=document.createElement('input'),o=document.createElement('span');l.textContent=lab;
+Object.assign(i,{type:'range',min:mn,max:mx,step:st,value:v});o.textContent=fmt(+v);i.oninput=()=>{o.textContent=fmt(+i.value);f()};g.append(l,i,o);
+const q=()=>+i.value;q.set=a=>{i.value=a;o.textContent=fmt(+i.value)};return q}
+
+// dữ liệu 1 chiều dùng chung cho slide 2 và 4: [x, y]
+const DATA=[[-3,0],[-2,0],[-1,1],[.5,0],[1.5,1],[3,1]],Jf=(w,b)=>DATA.reduce((a,[x,y])=>{const z=w*x+b;return a+Math.log(1+Math.exp(z))-y*z},0);
+
+// 1: gradient trên cả tập dữ liệu
+{const xs=lin(-4,4,120),w=sl('#k2','w',-3,3,.1,1,dr,f2),b=sl('#k2','b',-3,3,.1,0,dr,f2);
+function dr(){const W=w(),B=b();let gw=0,gb=0;DATA.forEach(([x,y])=>{const e=sg(W*x+B)-y;gw+=e*x;gb+=e});
+plot('#c2',xs,[{y:xs.map(t=>sg(W*t+B)),c:C.bad,n:'p = σ(wx+b)'},{pts:DATA.filter(d=>d[1]==1),c:C.ok,r:5},{pts:DATA.filter(d=>d[1]==0),c:C.a,r:5}],{y0:0,y1:1,h:[.5]});
+$('#o2').innerHTML=`Điểm xanh: y = 1, cam: y = 0. J = <b>${f2(Jf(W,B))}</b> · ∂J/∂w = Σ(p−y)x = <b>${f2(gw)}</b> · ∂J/∂b = Σ(p−y) = <b>${f2(gb)}</b>`}D[2]=dr}
+
+// hình tĩnh (SVG): vẽ đường cong một lần
+const P=(f,a,b,X,Y)=>lin(a,b,120).map((t,i)=>(i?'L':'M')+X(t).toFixed(1)+' '+Y(f(t)).toFixed(1)).join('');
+{const X=t=>50+(t+6)*29.17,Y=v=>260-v*218;$('#fs').setAttribute('d',P(sg,-6,6,X,Y));$('#fr').setAttribute('d',P(t=>sg(t)*(1-sg(t)),-6,6,X,Y))}
+{$('#fp').setAttribute('d',P(w=>.4*w*w+.6,-2.7,2.7,w=>210+w*59,J=>270-J*59.5))}
+
+// BỔ SUNG: Gradient Descent trên J(w), cố định b = 0 để vẽ được
+{const ws=lin(-3,5,160),J0=w=>Jf(w,0),gr=w=>DATA.reduce((a,[x,y])=>a+(sg(w*x)-y)*x,0),y1=Math.ceil(Math.max(...ws.map(J0)));
+let w=-2.5,t=0,tr=[[w,J0(w)]];const al=sl('#k9','α',.02,.6,.01,.2,dr,f2);
+const bt=(n,f)=>{const b=document.createElement('button');b.textContent=n;b.onclick=f;$('#b9').append(b)};
+function st(){const g=gr(w);w-=al()*g;t++;if(!isFinite(w)||Math.abs(w)>1e3){rs();return}tr.push([w,J0(w)]);if(tr.length>300)tr.shift()}
+function rs(){w=-2.5;t=0;tr=[[w,J0(w)]];dr()}
+bt('Bước tiếp',()=>{st();dr()});bt('Chạy 10 bước',()=>{for(let i=0;i<10;i++)st();dr()});bt('Đặt lại',rs);
+function dr(){const g=gr(w);plot('#c9',ws,[{y:ws.map(J0),c:C.pos,n:'J(w), b = 0'},{pts:tr,c:C.bad,r:3},{pts:[tr[tr.length-1]],c:C.a,r:6}],{x0:-3,x1:5,y0:0,y1});
+$('#o9').innerHTML=`t = <b>${t}</b> · w = <b>${f3(w)}</b> · J = <b>${f3(J0(w))}</b> · ∂J/∂w = <b>${f3(g)}</b>. `+(Math.abs(g)<1e-3?'Gradient ≈ 0: đã hội tụ.':'Gradient còn lớn: tiếp tục cập nhật. α quá lớn thì w dao động quanh cực tiểu.')}D[9]=dr}
+
+// điều hướng
+let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 1':'← Trước';$('#nx').textContent=cu==S.length-1?'Phần 3 →':'Sau →';try{history.replaceState(null,'','#'+(cu+1))}catch(e){}if(S[cu])S[cu].scrollTop=0;D[cu]&&D[cu]()}
+$('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
+addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
+addEventListener('resize',()=>D[cu]&&D[cu]());
+addEventListener('load',()=>{try{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})}catch(e){}go((+location.hash.slice(1)||1)-1)});
+</script>
+<script>
+(function(){
+document.querySelectorAll('table').forEach(function(t){if(t.closest('.tw,.wide'))return;var w=document.createElement('div');w.className='tw';t.parentNode.insertBefore(w,t);w.appendChild(t)});
+function rd(){try{dispatchEvent(new Event('resize'))}catch(e){}}
+try{var m=matchMedia('(prefers-color-scheme:dark)');if(m.addEventListener)m.addEventListener('change',rd);else if(m.addListener)m.addListener(rd)}catch(e){}
+addEventListener('orientationchange',function(){setTimeout(rd,250)});
+})();
+</script>
+</body></html>
+
 .s{position:absolute;inset:0;padding:24px 5vw;display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:minmax(0,1fr);gap:32px;overflow:hidden}
 .s.on{display:grid}
 .s>div{min-height:0;max-height:100%;align-self:center;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
