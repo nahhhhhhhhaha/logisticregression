@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark">
 <title>Phần 6: Từ MLE đến Bayesian Inference</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
@@ -93,6 +93,41 @@ nav #ct{min-width:64px;padding:5px 12px;border-radius:99px;background:var(--tint
 @keyframes sIn{from{opacity:0}}
 .s.on{animation:sIn .3s ease-out}
 @media(prefers-reduced-motion:reduce){.s.on{animation:none}}
+</style>
+<style id="robust">
+:root{color-scheme:light dark}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-wrap:break-word;-webkit-tap-highlight-color:transparent}
+img,svg,video{max-width:100%}img{height:auto}
+@supports(height:100dvh){html,body{height:100dvh}}
+main{min-height:0}
+.s{top:0;right:0;bottom:0;left:0;padding-left:max(5vw,env(safe-area-inset-left,0px));padding-right:max(5vw,env(safe-area-inset-right,0px))}
+.s>div{min-width:0}
+.c input{min-width:0}
+nav{flex-wrap:wrap;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));padding-bottom:max(11px,env(safe-area-inset-bottom,0px))}
+.tw{max-width:100%}
+@media(max-width:860px){
+.s{padding-top:18px;padding-bottom:18px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));gap:22px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+canvas{height:260px}
+.katex-display{padding:12px 14px}
+.katex-display>.katex{font-size:1.12em}
+}
+@media(max-width:480px){
+body{font-size:16px}
+nav{gap:6px}
+button,.nb{padding:8px 10px;font-size:13px}
+nav #ct{min-width:52px;padding:5px 8px}
+.c{grid-template-columns:minmax(0,auto) minmax(60px,1fr) 3.6em;gap:4px 8px}
+}
+@media(max-height:520px){
+canvas{height:210px}canvas.sm{height:170px}canvas.xs{height:130px}
+nav{padding-top:6px}
+}
+@media(pointer:coarse){
+button,.nb{min-height:40px}
+.nb{display:inline-flex;align-items:center}
+}
 </style>
 </head>
 <body>
@@ -290,6 +325,7 @@ $$w^{(m)}\sim\mathcal{N}\!\left(w_{\mathrm{MAP}},\ \Sigma\right).$$
 <button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button>
 </nav>
 <script>
+if(!Array.prototype.at)Object.defineProperty(Array.prototype,'at',{value:function(n){n=Math.trunc(n)||0;if(n<0)n+=this.length;return this[n]},writable:true,configurable:true});
 const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../index.html';
 const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
 function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
@@ -333,11 +369,19 @@ plot('#c7',xs,[{y:a,c:C.bad,n:'σ(w_MAP·x*)'},{y:b,c:C.ok,n:'E[σ(w·x*)]'},{pt
 $('#o7').innerHTML=`Posterior w ~ N(w<sub>MAP</sub>, s²), x* = <b>${f2(xv)}</b>: MAP → <b>${f3(pa)}</b>, Bayesian → <b>${f3(pb)}</b>. Càng không chắc chắn (s lớn), dự đoán Bayesian càng gần 0,5`}D[6]=dr}
 
 // điều hướng
-let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}cu=Math.max(0,i);S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#nx').textContent=cu==S.length-1?'Mục lục':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
+let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}cu=Math.max(0,i);S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#nx').textContent=cu==S.length-1?'Mục lục':'Sau →';try{history.replaceState(null,'','#'+(cu+1))}catch(e){}if(S[cu])S[cu].scrollTop=0;D[cu]&&D[cu]()}
 $('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
 addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
 addEventListener('resize',()=>D[cu]&&D[cu]());
-addEventListener('load',()=>{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});go((+location.hash.slice(1)||1)-1)});
+addEventListener('load',()=>{try{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})}catch(e){}go((+location.hash.slice(1)||1)-1)});
+</script>
+<script>
+(function(){
+document.querySelectorAll('table').forEach(function(t){if(t.closest('.tw,.wide'))return;var w=document.createElement('div');w.className='tw';t.parentNode.insertBefore(w,t);w.appendChild(t)});
+function rd(){try{dispatchEvent(new Event('resize'))}catch(e){}}
+try{var m=matchMedia('(prefers-color-scheme:dark)');if(m.addEventListener)m.addEventListener('change',rd);else if(m.addListener)m.addListener(rd)}catch(e){}
+addEventListener('orientationchange',function(){setTimeout(rd,250)});
+})();
 </script>
 </body></html>
 
