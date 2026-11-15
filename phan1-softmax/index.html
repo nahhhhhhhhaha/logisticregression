@@ -326,7 +326,7 @@ c.strokeStyle=C.pos;c.lineWidth=2;c.beginPath();for(let i=0;i<=100;i++){const u=
 c.setLineDash([3,3]);c.strokeStyle=C.bad;c.beginPath();c.moveTo(X(p),Y(0));c.lineTo(X(p),Y(Math.min(J,4)));c.stroke();c.setLineDash([]);c.fillStyle=C.bad;c.beginPath();c.arc(X(p),Y(Math.min(J,4)),5,0,7);c.fill();
 $('#o13').innerHTML=`Nhãn thật: <b>${NM[cl]}</b> · p<sub>c</sub> = <b>${f3(p)}</b> · J<sub>i</sub> = −ln p<sub>c</sub> = <b>${f3(J)}</b>. p<sub>c</sub> càng gần 1 thì loss càng gần 0; p<sub>c</sub> → 0 thì loss tăng rất nhanh`}D[14]=dr}
 // điều hướng
-let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 6':'← Trước';$('#nx').textContent=cu==S.length-1?'Softmax 2 →':'Sau →';try{history.replaceState(null,'','#'+(cu+1))}catch(e){}S[cu].scrollTop=0;D[cu]&&D[cu]()}
+let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 6':'← Trước';$('#nx').textContent=cu==S.length-1?'Phần 2 →':'Sau →';try{history.replaceState(null,'','#'+(cu+1))}catch(e){}S[cu].scrollTop=0;D[cu]&&D[cu]()}
 const fs=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
 if(!document.fullscreenEnabled)$('#fs').hidden=true;$('#fs').onclick=fs;
 $('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
