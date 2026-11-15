@@ -273,37 +273,27 @@ $$\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2\ge0\;\Longrightarrow\;v^THv\ge0,\quad\forall v
 </div>
 </section>
 
-<!-- BỔ SUNG: điều kiện nghiệm tối ưu -->
+<!-- BỔ SUNG: điều kiện nghiệm tối ưu + hệ gradient bằng 0 (gộp) -->
 <section class="s cols">
 <div>
 <p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
 <h2>3. ĐIỀU KIỆN ĐỂ TÌM NGHIỆM TỐI ƯU</h2>
-<p>Mục tiêu của Logistic Regression là tìm vector tham số $w^*$ và bias $b^*$ sao cho hàm chi phí nhỏ nhất:</p>
+<p>Mục tiêu: tìm $w^*$ và $b^*$ sao cho hàm chi phí nhỏ nhất:</p>
 <div class="fb">$$(w^*,b^*)=\operatorname*{arg\,min}_{w,b}J(w,b)$$</div>
-</div>
-<div>
-<h3>Linear Regression giải được trực tiếp</h3>
-<p>Lấy đạo hàm hàm mất mát rồi giải phương trình gradient bằng 0, ta được <b>Normal Equation</b>:</p>
+<h4>Linear Regression giải được trực tiếp</h4>
+<p>Lấy đạo hàm hàm mất mát rồi giải gradient bằng 0, ta được <b>Normal Equation</b>:</p>
 <div class="fb">$$w^*=(X^TX)^{-1}X^Ty$$</div>
-<p class="box">Với Logistic Regression, quá trình này <b>không thể thực hiện theo cách tương tự</b>. Hai slide tiếp theo giải thích lý do.</p>
+<p class="box">Với Logistic Regression, quá trình này <b>không thể thực hiện theo cách tương tự</b>. Cột bên cạnh cho thấy lý do.</p>
 </div>
-</section>
-<!-- BỔ SUNG: hệ gradient bằng 0 -->
-<section class="s cols">
 <div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>4. THIẾT LẬP HỆ PHƯƠNG TRÌNH GRADIENT BẰNG 0</h2>
-<p>Hàm chi phí Logistic Regression trên toàn bộ tập dữ liệu:</p>
+<p class="mut" aria-hidden="true" style="visibility:hidden;display:inline-flex;margin:0 0 .6em;padding:5px 13px;font:600 12.5px 'Be Vietnam Pro',system-ui,sans-serif;border:1px solid transparent">·</p><p></p>
+<h2>4. THIẾT LẬP HỆ GRADIENT BẰNG 0</h2>
+<p>Với $p_i=\sigma(w^Tx_i+b)$, $\sigma(z)=\dfrac{1}{1+e^{-z}}$, hàm chi phí trên toàn bộ dữ liệu:</p>
 <div class="fb">$$J(w,b)=-\sum_{i=1}^{n}\big[y_i\ln p_i+(1-y_i)\ln(1-p_i)\big]$$</div>
-<p>với $p_i=\sigma(w^Tx_i+b)$ và $\sigma(z)=\dfrac{1}{1+e^{-z}}$. Để tìm cực tiểu, cần giải hệ</p>
-<div class="pl">$$\nabla J(w,b)=0$$</div>
-</div>
-<div>
-<h4>Cụ thể, theo $w$ và theo $b$</h4>
+<h4>Cần giải $\nabla J(w,b)=0$, tức là</h4>
 <div class="pl">$$\frac{\partial J}{\partial w}=\sum_{i=1}^{n}(p_i-y_i)\,x_i=0,\qquad\frac{\partial J}{\partial b}=\sum_{i=1}^{n}(p_i-y_i)=0$$</div>
-<h4>Thay $p_i$ vào hệ phương trình</h4>
+<p>Thay $p_i$ vào, ta được hệ <b>phi tuyến</b> theo $w,b$ vì các biến nằm bên trong hàm Sigmoid:</p>
 <div class="fb">$$\sum_{i=1}^{n}\left[\frac{1}{1+e^{-(w^Tx_i+b)}}-y_i\right]x_i=0$$</div>
-<p>Đây là hệ phương trình <b>phi tuyến</b> theo $w$ và $b$, vì các biến cần tìm nằm bên trong hàm Sigmoid.</p>
 </div>
 </section>
 <!-- BỔ SUNG: vì sao không có nghiệm đóng -->
@@ -387,7 +377,7 @@ function st(){const g=gr(w);w-=al()*g;t++;if(!isFinite(w)||Math.abs(w)>1e3){rs()
 function rs(){w=-2.5;t=0;tr=[[w,J0(w)]];dr()}
 bt('Bước tiếp',()=>{st();dr()});bt('Chạy 10 bước',()=>{for(let i=0;i<10;i++)st();dr()});bt('Đặt lại',rs);
 function dr(){const g=gr(w);plot('#c9',ws,[{y:ws.map(J0),c:C.pos,n:'J(w), b = 0'},{pts:tr,c:C.bad,r:3},{pts:[tr[tr.length-1]],c:C.a,r:6}],{x0:-3,x1:5,y0:0,y1});
-$('#o9').innerHTML=`t = <b>${t}</b> · w = <b>${f3(w)}</b> · J = <b>${f3(J0(w))}</b> · ∂J/∂w = <b>${f3(g)}</b>. `+(Math.abs(g)<1e-3?'Gradient ≈ 0: đã hội tụ.':'Gradient còn lớn: tiếp tục cập nhật. α quá lớn thì w dao động quanh cực tiểu.')}D[9]=dr}
+$('#o9').innerHTML=`t = <b>${t}</b> · w = <b>${f3(w)}</b> · J = <b>${f3(J0(w))}</b> · ∂J/∂w = <b>${f3(g)}</b>. `+(Math.abs(g)<1e-3?'Gradient ≈ 0: đã hội tụ.':'Gradient còn lớn: tiếp tục cập nhật. α quá lớn thì w dao động quanh cực tiểu.')}D[8]=dr}
 
 // điều hướng
 let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 1':'← Trước';$('#nx').textContent=cu==S.length-1?'Phần 3 →':'Sau →';try{history.replaceState(null,'','#'+(cu+1))}catch(e){}if(S[cu])S[cu].scrollTop=0;D[cu]&&D[cu]()}
