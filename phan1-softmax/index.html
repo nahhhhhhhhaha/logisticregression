@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Softmax Regression – Phần 1: Hàm Softmax và Loss Function</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&display=swap">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --navy:#0b2447;--blue:#1f5fd6;--sky:#e8f0fc;--ink:#16233b;--mute:#5b6b85;--line:#d5deee;--red:#d6453d;--bg:#fff;
+  --top:44px;--bot:50px;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;height:100dvh;overflow:hidden}
+body{font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+header{position:fixed;top:0;left:0;right:0;height:var(--top);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,32px);font-size:13px;color:var(--mute);z-index:5;background:#fff}
+header a{color:var(--navy);text-decoration:none;font-weight:500}
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--blue);transition:width .25s;z-index:6}
+
+.slide{
+  display:none;
+  position:fixed;
+  inset:var(--top) 0 var(--bot) 0;
+  padding:clamp(10px,2.2vh,28px) clamp(16px,6vw,96px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  flex-direction:column;
+  justify-content:safe center;
+  gap:clamp(8px,1.7vh,18px);
+}
+.slide.active{display:flex}
+.slide > *{max-width:1200px;width:100%;margin-inline:auto}
+
+h1{font-size:clamp(28px,min(6vw,8.5vh),64px);font-weight:800;color:var(--navy);line-height:1.1;letter-spacing:-.02em}
+h2{font-size:clamp(20px,min(3.2vw,4.5vh),36px);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.01em}
+h3{font-size:clamp(15px,min(2vw,2.7vh),22px);font-weight:700;color:var(--navy);line-height:1.25}
+p,li{font-size:clamp(14px,min(1.75vw,2.5vh),20px);line-height:1.45}
+ul{padding-left:1.25em}
+.sub{color:var(--mute);font-size:clamp(13px,min(1.55vw,2.2vh),18px)}
+.nw{white-space:nowrap}
+
+.cover{background:var(--navy);color:#fff}
+.cover h1,.cover .sub{color:#fff}.cover .sub{opacity:.75}
+.big{font-size:clamp(17px,min(2.4vw,3.4vh),28px)}
+
+.eq{font-size:clamp(14px,min(1.95vw,2.7vh),23px);text-align:center;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.katex-display{margin:0.22em 0 !important}
+.katex{font-size:1.05em}
+
+.row{display:flex;gap:clamp(12px,2.5vw,32px);align-items:center;flex-wrap:wrap}
+.row>*{flex:1 1 260px;min-width:0}
+
+.box{background:var(--sky);border-left:4px solid var(--blue);padding:clamp(8px,1.3vh,13px) clamp(12px,2vw,18px);border-radius:4px}
+.bad{background:#fdeceb;border-color:var(--red)}
+
+.chain{display:flex;align-items:stretch;gap:clamp(6px,1vw,10px);flex-wrap:wrap;justify-content:center}
+.chain div{background:var(--sky);border-radius:6px;padding:clamp(8px,1.2vh,12px) clamp(8px,1.2vw,14px);text-align:center;flex:1 1 115px;min-width:105px;display:flex;flex-direction:column;justify-content:center;font-size:clamp(13px,min(1.6vw,2.2vh),18px)}
+.chain small{display:block;color:var(--mute);font-size:clamp(11px,min(1.3vw,1.8vh),13px);margin-top:4px}
+.chain .ar{background:none;flex:0 0 auto;min-width:0;font-size:clamp(18px,2.2vw,24px);color:var(--blue);padding:0;justify-content:center}
+
+svg{width:100%;height:auto;display:block;max-height:min(36vh,280px)}
+svg text{font-family:inherit;font-size:12px;fill:var(--mute)}
+
+.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;font-size:clamp(13px,1.65vw,17px)}
+.ctl output{font-variant-numeric:tabular-nums;min-width:44px;text-align:right;color:var(--navy);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--blue)}
+
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:clamp(12px,min(1.48vw,2vh),16.5px)}
+th,td{padding:clamp(5px,0.85vh,8px) 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+th{background:var(--navy);color:#fff;font-weight:500}
+
+.cb{color:var(--blue)}.cr{color:var(--red)}
+
+nav{position:fixed;bottom:0;left:0;right:0;height:var(--bot);display:flex;align-items:center;justify-content:center;gap:18px;background:#fff;border-top:1px solid var(--line);z-index:5;font-size:14px;color:var(--mute)}
+nav button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;width:42px;height:34px;font-size:17px;cursor:pointer}
+nav button:hover{background:var(--sky)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<header><a href="../index.html">← Mục lục</a><span>Softmax Regression · 1. Hàm softmax và loss function</span></header>
+
+<!-- 1: Cover -->
+<section class="slide cover">
+  <h1>Softmax Regression</h1>
+  <p class="big sub">Phần 1 · Hàm softmax và loss function</p>
+  <p class="sub">Mở rộng Logistic Regression từ phân loại nhị phân sang <span class="nw">K lớp</span></p>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <h2>1. Đặt vấn đề: Phân loại nhiều hơn 2 lớp</h2>
+  <p>Ví dụ nhận diện 3 loại: <b>Mèo</b> (lớp 1), <b>Chó</b> (lớp 2), <b>Chim</b> (lớp 3) → \(y \in \{1, 2, 3\}\).</p>
+  <div class="row">
+    <div class="box bad">
+      <h3>Thử dùng K mô hình Sigmoid độc lập</h3>
+      <p class="sub">\(a_1 = \sigma(z_1),\; a_2 = \sigma(z_2),\; a_3 = \sigma(z_3) \in (0, 1)\).</p>
+      <p style="margin-top:6px"><b>Vấn đề:</b> không ràng buộc được \(a_1 + a_2 + a_3 = 1\).</p>
+    </div>
+    <div class="box">
+      <h3>Giải pháp</h3>
+      <p style="margin-top:6px">Thay Bernoulli bằng phân phối <span class="nw"><b>Categorical</b></span> và đổi hàm kích hoạt sang <span class="nw"><b>Softmax</b></span> để đầu ra tạo thành phân phối xác suất hợp lệ.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <h2>2. Từ Bernoulli sang Categorical &amp; One-Hot</h2>
+  <p>Với \(Y \in \{1, 2, \dots, K\}\), xác suất từng lớp \(p_k = P(Y = k \mid x)\) thỏa mãn \(p_k \ge 0\) và \(\sum_{k=1}^K p_k = 1\):</p>
+  <div class="row">
+    <div class="box">
+      <h3>One-Hot Encoding</h3>
+      <p class="sub">Nhãn \(t = (t_1, \dots, t_K)^\top \in \{0,1\}^K\), \(\sum_{k=1}^K t_k = 1\).</p>
+      <p class="sub" style="margin-top:4px">Mèo: \([1, 0, 0]^\top\) · Chó: \([0, 1, 0]^\top\) · Chim: \([0, 0, 1]^\top\).</p>
+    </div>
+    <div class="box">
+      <h3>Hàm PMF có điều kiện</h3>
+      <div class="eq">$$P(Y = y \mid x) = \prod_{k=1}^{K} p_k^{t_k}$$</div>
+      <p class="sub">Chỉ thừa số có \(t_k = 1\) giữ lại xác suất lớp đúng.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <h2>3. Mô hình điểm số tuyến tính cho K lớp</h2>
+  <p>Mỗi lớp \(k \in \{1, \dots, K\}\) có vector trọng số \(w_k \in \mathbb{R}^d\) và hệ số chệch \(b_k\):</p>
+  <div class="row">
+    <div class="box eq">$$W = [w_1, w_2, \dots, w_K] \in \mathbb{R}^{d \times K}, \quad b = [b_1, \dots, b_K]^\top$$</div>
+    <div class="box eq">$$z_k = w_k^\top x + b_k, \qquad z = W^\top x + b \in \mathbb{R}^K$$</div>
+  </div>
+  <div class="eq">$$Z = XW + b \in \mathbb{R}^{n \times K} \quad (\text{với } X \in \mathbb{R}^{n \times d})$$</div>
+  <p class="sub">Mỗi hàng của \(Z\) chứa \(K\) điểm số (logits) của một mẫu. \(w_k^\top x\) đo mức chiếu của \(x\) lên \(w_k\) (phụ thuộc độ lớn vector, không phải Cosine Similarity).</p>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <h2>4. Suy dẫn hàm Softmax: \(\mathbb{R}^K \to \Delta^{K-1}\)</h2>
+  <p>Ánh xạ vector điểm số \(z\) vào <span class="nw">Simplex xác suất</span> \(\Delta^{K-1} = \bigl\{p : p_k \ge 0,\; \sum_{k=1}^K p_k = 1\bigr\}\) qua 2 bước:</p>
+  <div class="chain">
+    <div><b>Bước 1: Hàm mũ</b><small>\(a_k = e^{z_k} > 0\)<br>Bảo toàn thứ tự, trơn</small></div>
+    <div class="ar">→</div>
+    <div><b>Bước 2: Chuẩn hóa</b><small>\(p_k = \dfrac{a_k}{\sum_{j=1}^K a_j}\)<br>Tổng bằng \(1\)</small></div>
+    <div class="ar">→</div>
+    <div><b>Softmax</b><small>\(\text{softmax}(z)_k = \dfrac{e^{z_k}}{\sum_{j=1}^K e^{z_j}}\)</small></div>
+  </div>
+  <div class="eq">$$\sum_{k=1}^{K} p_k = \sum_{k=1}^{K} \frac{e^{z_k}}{\sum_{j=1}^{K} e^{z_j}} = \frac{\sum_{k=1}^{K} e^{z_k}}{\sum_{j=1}^{K} e^{z_j}} = 1$$</div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <h2>5. Công thức Softmax Regression &amp; Tương tác Logits</h2>
+  <div class="eq">$$P(Y = k \mid X = x) = \frac{e^{w_k^\top x + b_k}}{\sum_{j=1}^{K} e^{w_j^\top x + b_j}}, \qquad \hat y = \mathrm{softmax}(W^\top x + b)$$</div>
+  <div class="row">
+    <svg id="p6" viewBox="0 0 400 240"></svg>
+    <div>
+      <div class="ctl">
+        <label for="z1">z₁ (Mèo)</label><input id="z1" type="range" min="-3" max="4" step="0.2" value="2.0"><output id="o1"></output>
+        <label for="z2">z₂ (Chó)</label><input id="z2" type="range" min="-3" max="4" step="0.2" value="1.0"><output id="o2"></output>
+        <label for="z3">z₃ (Chim)</label><input id="z3" type="range" min="-3" max="4" step="0.2" value="0.0"><output id="o3"></output>
+      </div>
+      <p id="t6" class="box" style="margin-top:10px"></p>
+    </div>
+  </div>
+  <p class="sub">Bất biến dịch chuyển: \(\mathrm{softmax}(z + c\mathbf{1}) = \mathrm{softmax}(z)\). Khi \(K=2\) (với \(z_2 = 0\)), Softmax quy về Sigmoid.</p>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <h2>6. Likelihood của Softmax Regression</h2>
+  <p>Với tập dữ liệu \(D = \{(x_i, y_i)\}_{i=1}^n\), tham số \((W, b)\) và nhãn One-Hot \(t_{ik} = \mathbb{1}[y_i = k]\):</p>
+  <div class="eq">$$P(Y_i = y_i \mid x_i; W, b) = \prod_{k=1}^{K} p_{ik}^{t_{ik}}$$</div>
+  <p>Giả sử độc lập có điều kiện trên \(n\) mẫu, hàm Likelihood là tích xác suất của toàn bộ mẫu:</p>
+  <div class="eq">$$L(W, b) = \prod_{i=1}^{n} \prod_{k=1}^{K} p_{ik}^{t_{ik}}$$</div>
+  <p class="sub">Với mỗi mẫu \(i\), chỉ thừa số ứng với lớp đúng (\(t_{ik}=1\)) được giữ lại; các lớp còn lại có \(p_{ik}^0 = 1\).</p>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <h2>7. Từ Likelihood sang Log-Likelihood</h2>
+  <p>Lấy logarit tự nhiên hai vế để biến tích thành tổng (tránh underflow số học):</p>
+  <div class="eq">$$\ell(W, b) = \ln L(W, b) = \ln\!\left(\prod_{i=1}^{n} p_{i,\, y_i}\right) = \sum_{i=1}^{n} \ln p_{i,\, y_i}$$</div>
+  <p>Viết tường minh qua ma trận chỉ báo One-Hot \(t_{ik}\):</p>
+  <div class="eq">$$\ell(W, b) = \sum_{i=1}^{n} \sum_{k=1}^{K} t_{ik} \ln p_{ik}, \qquad (W^*, b^*) = \arg\max_{W, b} \ell(W, b)$$</div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <h2>8. Categorical Cross-Entropy Loss</h2>
+  <p>Đổi dấu và lấy trung bình trên \(n\) mẫu để chuyển từ cực đại hóa Log-Likelihood sang cực tiểu hóa Loss:</p>
+  <div class="eq">$$J(W, b) = -\frac{1}{n} \sum_{i=1}^{n} \sum_{k=1}^{K} t_{ik} \ln p_{ik}$$</div>
+  <div class="row">
+    <svg id="p9" viewBox="0 0 400 240"></svg>
+    <div>
+      <div class="ctl"><label for="pc">p_c (lớp đúng)</label><input id="pc" type="range" min="0.02" max="0.99" step="0.01" value="0.7"><output id="pco"></output></div>
+      <p id="t9" class="box" style="margin-top:10px"></p>
+      <p class="sub" style="margin-top:6px">Nếu mẫu thuộc lớp \(c\) (\(t_{ic}=1\)): \(J_i = -\ln p_{ic}\).</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <h2>9. Góc nhìn Lý thuyết Thông tin</h2>
+  <p>Cross-Entropy giữa phân phối thật \(t\) (One-Hot) và phân phối dự đoán \(p\) của mô hình:</p>
+  <div class="eq">$$H(t, p) = -\sum_{k=1}^{K} t_k \ln p_k$$</div>
+  <div class="box">
+    <p>Khi nhãn thực thuộc lớp \(c\) (chỉ \(t_c = 1\), các \(t_{k\neq c} = 0\)):</p>
+    <div class="eq">$$H(t, p) = -\ln p_c$$</div>
+  </div>
+  <p class="sub"><b>Kết luận:</b> Negative Log-Likelihood của phân phối Categorical và Cross-Entropy trong lý thuyết thông tin dẫn tới cùng một hàm mất mát.</p>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <h2>10. Đối chiếu Logistic vs Softmax Regression</h2>
+  <div class="tw"><table>
+    <tr><th>Thành phần</th><th>Logistic Regression</th><th>Softmax Regression</th></tr>
+    <tr><td><b>Số lớp</b></td><td>2 lớp</td><td>\(K\) lớp</td></tr>
+    <tr><td><b>Phân phối nhãn</b></td><td>Bernoulli</td><td>Categorical</td></tr>
+    <tr><td><b>Tham số</b></td><td>\(w \in \mathbb{R}^d,\; b \in \mathbb{R}\)</td><td>\(W \in \mathbb{R}^{d \times K},\; b \in \mathbb{R}^K\)</td></tr>
+    <tr><td><b>Logit</b></td><td>\(z = w^\top x + b\)</td><td>\(z_k = w_k^\top x + b_k\)</td></tr>
+    <tr><td><b>Hàm kích hoạt</b></td><td>Sigmoid \(\sigma(z)\)</td><td>Softmax \(\dfrac{e^{z_k}}{\sum_j e^{z_j}}\)</td></tr>
+    <tr><td><b>Loss (1 mẫu)</b></td><td>\(-\bigl[y\ln p + (1-y)\ln(1-p)\bigr]\)</td><td>\(-\ln p_c\) (lớp đúng \(c\))</td></tr>
+  </table></div>
+  <p class="sub">Softmax là tổng quát hóa tự nhiên của Sigmoid; khi \(K = 2\) (với \(z_2 = 0\)), hai mô hình tương đương.</p>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <h2>11. Câu hỏi &amp; Thảo luận</h2>
+  <div class="chain">
+    <div>Categorical &amp; One-Hot</div><div class="ar">→</div>
+    <div>Logit \(XW + b\)</div><div class="ar">→</div>
+    <div>Softmax \(\Delta^{K-1}\)</div><div class="ar">→</div>
+    <div>Categorical CE Loss</div>
+  </div>
+  <p class="big" style="text-align:center;margin-top:8px">Câu hỏi &amp; trao đổi về Softmax Regression</p>
+  <p class="sub" style="text-align:center">Tiếp theo: Gradient và Gradient Descent cho Softmax Regression.</p>
+</section>
+
+<nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
+
+<script>
+const render=el=>window.renderMathInElement&&renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});
+
+/* Demo 5 (Slide 6): Softmax probabilities trên 3 lớp Mèo / Chó / Chim */
+const p6=document.getElementById('p6'),z1=document.getElementById('z1'),z2=document.getElementById('z2'),z3=document.getElementById('z3');
+const o1=document.getElementById('o1'),o2=document.getElementById('o2'),o3=document.getElementById('o3'),t6=document.getElementById('t6');
+function up6(){
+  const zs=[+z1.value,+z2.value,+z3.value];
+  o1.textContent=zs[0].toFixed(1);o2.textContent=zs[1].toFixed(1);o3.textContent=zs[2].toFixed(1);
+  const mx=Math.max(...zs),exps=zs.map(v=>Math.exp(v-mx)),sum=exps.reduce((a,b)=>a+b,0),probs=exps.map(e=>e/sum);
+  const labels=['Mèo','Chó','Chim'],cols=['#1f5fd6','#0b2447','#d6453d'];
+  const L=44,R=386,T=24,B=200,barW=64,gap=(R-L-3*barW)/4;
+  let h=`<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#9fb0cc"/><line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#9fb0cc"/>`;
+  [0,0.5,1].forEach(v=>{const y=B-v*(B-T);h+=`<line x1="${L}" x2="${R}" y1="${y}" y2="${y}" stroke="#e3eaf6"/><text x="${L-6}" y="${y+4}" text-anchor="end">${v}</text>`});
+  probs.forEach((p,idx)=>{
+    const x=L+gap+(barW+gap)*idx,bh=Math.max(2,p*(B-T)),y=B-bh;
+    h+=`<rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="4" fill="${cols[idx]}"/>`;
+    h+=`<text x="${x+barW/2}" y="${y-6}" text-anchor="middle" style="fill:${cols[idx]};font-weight:700">${p.toFixed(2)}</text>`;
+    h+=`<text x="${x+barW/2}" y="${B+18}" text-anchor="middle">${labels[idx]}</text>`;
+  });
+  p6.innerHTML=h;
+  const sumP=probs.reduce((a,b)=>a+b,0);
+  t6.innerHTML=`\\(p = [${probs.map(v=>v.toFixed(2)).join(',\\; ')}]^\top\\), tổng \\(= ${sumP.toFixed(2)}\\)`;
+  render(t6);
+}
+
+/* Demo 8 (Slide 9): Loss 1 mẫu của Categorical Cross-Entropy: -ln(p_c) */
+const p9=document.getElementById('p9'),pc=document.getElementById('pc'),pco=document.getElementById('pco'),t9=document.getElementById('t9');
+function up9(){
+  const p=+pc.value;pco.textContent=p.toFixed(2);
+  const L=42,R=388,T=16,B=204,yMax=4;
+  const sx=x=>L+x*(R-L),sy=v=>B-Math.min(yMax,v)/yMax*(B-T);
+  let h=`<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#9fb0cc"/><line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#9fb0cc"/>`;
+  [0,1,2,3,4].forEach(v=>{const y=sy(v);h+=`<line x1="${L}" x2="${R}" y1="${y}" y2="${y}" stroke="#e3eaf6"/><text x="${L-6}" y="${y+4}" text-anchor="end">${v}</text>`});
+  [0,0.25,0.5,0.75,1].forEach(v=>h+=`<text x="${sx(v)}" y="${B+16}" text-anchor="middle">${v}</text>`);
+  h+=`<text x="${(L+R)/2}" y="236" text-anchor="middle">xác suất dự đoán lớp đúng p_c</text>`;
+  let d='';for(let i=1;i<=120;i++){const x=i/121;d+=(i===1?'M':'L')+sx(x).toFixed(1)+' '+sy(-Math.log(x)).toFixed(1)}
+  const loss=-Math.log(p);
+  h+=`<path d="${d}" fill="none" stroke="#1f5fd6" stroke-width="2.8"/><circle cx="${sx(p)}" cy="${sy(loss)}" r="5.5" fill="#d6453d"/>`;
+  p9.innerHTML=h;
+  t9.innerHTML=`Khi \\(p_c = ${p.toFixed(2)}\\), loss một mẫu \\(J_i = -\\ln p_c = ${loss.toFixed(2)}\\).`;
+  render(t9);
+}
+
+/* Điều hướng */
+const S=[...document.querySelectorAll('.slide')];let i=0;
+function go(n){
+  i=Math.max(0,Math.min(S.length-1,n));
+  S.forEach((e,k)=>e.classList.toggle('active',k===i));
+  cnt.textContent=`${i+1} / ${S.length}`;bar.style.width=(i+1)/S.length*100+'%';
+  S[i].scrollTop=0;history.replaceState(null,'','#'+(i+1));
+  if(i===5)up6();if(i===8)up9();
+}
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')&&!e.shiftKey)e.target.blur();
+  if(e.key==='ArrowRight'||e.key==='PageDown')go(i+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp')go(i-1);
+});
+pv.onclick=()=>go(i-1);nx.onclick=()=>go(i+1);
+let tx=null;document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{if(tx===null||e.target.tagName==='INPUT')return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(i+(d<0?1:-1));tx=null});
+z1.oninput=z2.oninput=z3.oninput=up6;pc.oninput=up9;
+addEventListener('load',()=>{render(document.body);go((parseInt(location.hash.slice(1))||1)-1)});
+go(0);
+</script>
+</body>
+</html>
