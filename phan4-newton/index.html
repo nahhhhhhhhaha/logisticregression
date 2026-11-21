@@ -225,7 +225,7 @@ nav button:hover{background:var(--sky)}
 <section class="slide">
   <h2>Cập nhật BFGS hạng 2</h2>
   <p>Tìm \(H_{k+1}\) thỏa \(H_{k+1}y_k=s_k\) và ít khác \(H_k\) nhất (\(H_k\approx[\nabla^2J]^{-1}\)):</p>
-  <div class="eq">$$H_{k+1}=(I-\rho_ks_ky_k^\top)\,H_k\,(I-\rho_ks_ky_k^\top)+\rho_ks_ks_k^\top,\qquad\rho_k=\frac1{y_k^\top s_k}$$</div>
+  <div class="eq">$$H_{k+1}=(I-\rho_ks_ky_k^\top)\,H_k\,(I-\rho_ky_ks_k^\top)+\rho_ks_ks_k^\top,\qquad\rho_k=\frac1{y_k^\top s_k}$$</div>
   <p class="sub">Vẫn phải lưu ma trận \(d\times d\): \(10^7\times10^7\) cần hàng Terabyte RAM.</p>
 </section>
 
@@ -255,16 +255,6 @@ nav button:hover{background:var(--sky)}
     <tr><td>BFGS</td><td>\(O(d^2)\)</td><td>\(O(d^2)\)</td><td>Siêu tuyến tính</td><td>\(d\sim10^3\text{–}10^4\)</td></tr>
     <tr><td>L-BFGS</td><td>\(O(cd)\)</td><td>\(O(cd)\)</td><td>Tuyến tính (nhanh)</td><td>\(d\sim10^7\)</td></tr>
   </table></div>
-</section>
-
-<!-- 16 -->
-<section class="slide">
-  <h2>Tóm tắt</h2>
-  <div class="chain">
-    <div>Gradient<br>+ Hessian</div><div class="ar">→</div><div>Newton</div><div class="ar">→</div><div>IRLS<br>Woodbury</div><div class="ar">→</div><div>BFGS</div><div class="ar">→</div><div>L-BFGS</div>
-  </div>
-  <div class="eq">$$w^{(t+1)}=w^{(t)}-[\nabla^2J]^{-1}\nabla J\quad\leadsto\quad w_{k+1}=w_k-\alpha_kH_k\nabla J$$</div>
-  <p class="sub">Tiếp theo: Optimization.</p>
 </section>
 
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
