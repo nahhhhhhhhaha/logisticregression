@@ -171,14 +171,6 @@ nav button:hover{background:var(--sky)}
 
 <!-- 12 -->
 <section class="slide">
-  <h2>Viết theo ma trận</h2>
-  <p>\(n\) mẫu, \(m\) đặc trưng: \(X\in\mathbb{R}^{n\times m},\; w\in\mathbb{R}^{m},\; y\in\{0,1\}^{n}\)</p>
-  <div class="eq">$$z=Xw+b\mathbf{1},\qquad p=\sigma(z)\;\text{(áp dụng từng phần tử)}$$</div>
-  <div class="eq">$$X=\begin{bmatrix}x_1^\top\\ \vdots\\ x_n^\top\end{bmatrix},\quad p=\begin{bmatrix}\sigma(w^\top x_1+b)\\ \vdots\\ \sigma(w^\top x_n+b)\end{bmatrix}$$</div>
-</section>
-
-<!-- 13 -->
-<section class="slide">
   <h2>Likelihood: dữ liệu "khớp" mô hình đến đâu?</h2>
   <p>\(n\) mẫu độc lập, \(D=\{(x_i,y_i)\}_{i=1}^n\). Xác suất đồng thời là tích:</p>
   <div class="eq">$$L(w,b)=\prod_{i=1}^{n}P(Y_i=y_i\mid x_i)=\prod_{i=1}^{n}p_i^{y_i}(1-p_i)^{1-y_i}$$</div>
@@ -186,7 +178,7 @@ nav button:hover{background:var(--sky)}
   <div class="eq">$$(w^*,b^*)=\arg\max_{w,b}L(w,b)$$</div>
 </section>
 
-<!-- 14 -->
+<!-- 13 -->
 <section class="slide">
   <h2>Log-Likelihood</h2>
   <p>Tích của nhiều xác suất nhỏ dễ gây underflow. Lấy logarit để biến tích thành tổng:</p>
@@ -194,7 +186,7 @@ nav button:hover{background:var(--sky)}
   <p class="sub">Logarit đồng biến nên nghiệm của bài toán max không đổi.</p>
 </section>
 
-<!-- 15 -->
+<!-- 14 -->
 <section class="slide">
   <h2>Binary Cross-Entropy Loss</h2>
   <p>Đổi dấu để chuyển max thành min, chia cho \(n\):</p>
@@ -202,7 +194,7 @@ nav button:hover{background:var(--sky)}
   <div class="eq">$$L=-\frac1n\Bigl[y^\top\ln p+(\mathbf{1}-y)^\top\ln(\mathbf{1}-p)\Bigr]$$</div>
 </section>
 
-<!-- 16 -->
+<!-- 15 -->
 <section class="slide">
   <h2>Loss của một mẫu: kéo p để xem</h2>
   <div class="row">
@@ -215,7 +207,7 @@ nav button:hover{background:var(--sky)}
   <p class="sub">Dự đoán sai mà tự tin → loss rất lớn. Đúng mà tự tin → loss gần 0.</p>
 </section>
 
-<!-- 17 -->
+<!-- 16 -->
 <section class="slide">
   <h2>Tóm tắt</h2>
   <div class="chain">
@@ -268,7 +260,7 @@ function up9(){
 }
 const base9=p9.innerHTML;
 
-// slide 16
+// slide 15 (loss một mẫu)
 const p16=frame('p16',0,5,1,'p');
 [0,0.2,0.4,0.6,0.8,1].forEach(v=>{});
 const base16=p16.innerHTML,pp=document.getElementById('pp');
@@ -291,7 +283,7 @@ function go(n){
   S.forEach((e,k)=>e.classList.toggle('active',k===i));
   cnt.textContent=`${i+1} / ${S.length}`;bar.style.width=(i+1)/S.length*100+'%';
   S[i].scrollTop=0;history.replaceState(null,'','#'+(i+1));
-  if(i===8)up9();if(i===15)up16();
+  if(i===8)up9();if(i===14)up16();
 }
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')&&!e.shiftKey)e.target.blur();
