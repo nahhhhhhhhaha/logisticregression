@@ -1,251 +1,433 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Phần 2: Gradient và Hessian</title>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logistic Regression – Phần 2: Gradient và Gradient Descent</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&display=swap">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eceff5;--ink:#0f1830;--mut:#5b6679;--card:#fff;--ln:#cfd6e2;--pos:#4338ca;--pos2:#312aa8;--ok:#12998a;--bad:#c2410c;--tint:#eceafe;--ftint:#e4e1ff;--fln:#9d97f2;--fink:#1c1480;--head:#e0e4f3;--glow1:rgba(67,56,202,.13);--glow2:rgba(18,153,138,.10);--dot:rgba(23,32,58,.07);--sh:0 1px 2px rgba(16,24,48,.06),0 8px 24px -10px rgba(16,24,48,.2)}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1024;--ink:#eef1fa;--mut:#a3adc4;--card:#161d3b;--ln:#2a3562;--pos:#8b87f0;--pos2:#aeabff;--tint:#232c5c;--ftint:#2b3570;--fln:#6e69d6;--fink:#ffffff;--head:#1b2450;--glow1:rgba(139,135,240,.18);--glow2:rgba(18,153,138,.14);--dot:rgba(255,255,255,.05);--sh:0 1px 2px rgba(0,0,0,.3),0 10px 28px -10px rgba(0,0,0,.6)}}
-*{box-sizing:border-box}html,body{height:100%;margin:0}
-body{color:var(--ink);font:18px/1.55 Newsreader,helvetica,sans-serif;display:flex;flex-direction:column;
-background:radial-gradient(900px 480px at 6% -8%,var(--glow1),transparent 65%),radial-gradient(800px 460px at 98% 100%,var(--glow2),transparent 62%),radial-gradient(var(--dot) 1px,transparent 1.2px) 0 0/22px 22px,var(--bg)}
-main{flex:1;overflow:hidden;position:relative}
-.s{position:absolute;inset:0;padding:24px 5vw;display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:minmax(0,1fr);gap:32px;overflow:hidden}
-.s.on{display:grid}
-.s>div{min-height:0;max-height:100%;align-self:center;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
-.s>div:first-child{padding:4px 14px 4px 2px}
-.s>div::-webkit-scrollbar{width:9px}.s>div::-webkit-scrollbar-track{background:transparent}.s>div::-webkit-scrollbar-thumb{background:var(--fln);border-radius:9px;border:2px solid transparent;background-clip:padding-box}.s>div::-webkit-scrollbar-thumb:hover{background:var(--pos);background-clip:padding-box}
-.s>div:first-child>p.mut:first-child{display:inline-block;margin:0 0 .6em;padding:3px 12px;font:600 12.5px system-ui,sans-serif;letter-spacing:.04em;color:var(--pos2);background:var(--tint);border:1px solid var(--fln);border-radius:99px}
-.pl .katex-display{background:none;border:0;box-shadow:none;padding:2px 0;margin:.5em 0}
-.pl .katex-display>.katex{font-size:1.15em;-webkit-text-stroke:.25px currentColor}
-.s.two.on{display:block;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
-.s.two>div{max-width:860px;margin:0 auto;max-height:none;overflow:visible;padding:4px 14px}
-@media(min-width:861px){.s.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.s.cols>div{align-self:start}}
-.v svg{display:block;width:100%;height:auto;max-height:64vh}
-.sa{stroke:var(--mut);stroke-width:1.2;fill:none}.st{fill:var(--mut);font:12px system-ui,sans-serif}.sb{fill:var(--tint);stroke:var(--fln);stroke-width:1.5}.sv{fill:var(--ink);font:15px system-ui,sans-serif}
-h1,h2,h3,h4{color:var(--ink);font-weight:700;line-height:1.2;margin:0}
-h1{font-size:2.2rem;letter-spacing:.01em;margin:.1em 0 .45em}
-h2{font-size:1.75rem;letter-spacing:-.01em;margin:0 0 .35em}
-h3{font-size:1.3rem;margin:.1em 0 .7em}
-h4{font-size:1.1rem;margin:1em 0 .2em}
-p{margin:.5em 0}ul{margin:.4em 0;padding-left:1.4em}li{margin:.25em 0}b{font-weight:700}.mut{color:var(--mut)}
-.box{border-left:4px solid var(--pos);padding:8px 14px;background:var(--tint);border-radius:0 8px 8px 0}
-.v{background:var(--card);border:1px solid var(--ln);border-top:4px solid var(--pos);border-radius:12px;padding:14px;box-shadow:var(--sh)}
-canvas{width:100%;height:300px;display:block}canvas.sm{height:200px}canvas.xs{height:150px}canvas.cl{cursor:crosshair}
-.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:14px system-ui,sans-serif;margin-top:8px}
-.c input{width:100%;accent-color:var(--pos)}
-.o{font:14px/1.6 system-ui,sans-serif;margin-top:10px;padding-top:8px;border-top:1px dashed var(--ln);color:var(--mut)}.o b{color:var(--ink)}
-.b{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-button,.nb{font:500 14px system-ui;padding:7px 13px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer;text-decoration:none;transition:border-color .12s,background .12s}
-button:hover,.nb:hover{border-color:var(--pos);background:var(--tint)}
-button.on{border-color:var(--pos);background:var(--tint);box-shadow:0 0 0 1px var(--pos);color:var(--pos2)}
-button:focus-visible,input:focus-visible,.nb:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
-nav{display:flex;gap:12px;align-items:center;justify-content:center;padding:10px;border-top:2px solid var(--ln);background:var(--card);box-shadow:0 -6px 18px -12px rgba(16,24,48,.35);font:600 14px system-ui}
-#nx{background:var(--pos);border-color:var(--pos);color:#fff}#nx:hover{background:var(--pos2);border-color:var(--pos2)}
-@media(prefers-color-scheme:dark){#nx{color:#10162b}}
-.katex{color:var(--fink);-webkit-text-stroke:.25px currentColor}
-.katex-display{overflow-x:auto;overflow-y:hidden;margin:.8em 0;padding:14px 16px;background:var(--ftint);border:1.5px solid var(--fln);border-left:6px solid var(--pos);border-radius:10px;box-shadow:var(--sh)}
-.katex-display>.katex{font-size:1.28em;-webkit-text-stroke:.45px currentColor}
-p .katex{font-size:1.08em}
-.fb{border:2.5px solid var(--pos);border-radius:12px;margin:.9em 0;overflow:hidden}
-.fb .katex-display{margin:0;border:0;border-radius:0;box-shadow:none}
-.ch{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;font:13px system-ui,sans-serif;margin-bottom:6px}
-.ch i{font-style:normal;border:1px solid var(--fln);background:var(--tint);border-radius:6px;padding:3px 9px}
-.ch s{text-decoration:none;color:var(--mut);font-size:11.5px}
-@media(max-width:860px){.s{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.s>div{max-height:none;overflow:visible;align-self:start}.s>div:first-child{padding:0}}
-</style></head>
+:root{--navy:#0b2447;--blue:#1f5fd6;--sky:#e8f0fc;--ink:#16233b;--mute:#5b6b85;--line:#d5deee;--red:#d6453d;--bg:#fff}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);overflow:hidden}
+header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,32px);font-size:13px;color:var(--mute);z-index:5;background:#fff}
+header a{color:var(--navy);text-decoration:none;font-weight:500}
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--blue);transition:width .25s;z-index:6}
+.slide{display:none;position:absolute;inset:46px 0 56px 0;padding:clamp(12px,3vw,40px) clamp(18px,7vw,110px);overflow:auto;flex-direction:column;justify-content:center;gap:clamp(12px,2.2vw,26px)}
+.slide.active{display:flex}
+h1{font-size:clamp(30px,6.5vw,72px);font-weight:800;color:var(--navy);line-height:1.1;letter-spacing:-.02em}
+h2{font-size:clamp(22px,3.6vw,40px);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.01em;text-wrap:balance}
+p,li{font-size:clamp(16px,2vw,24px);line-height:1.5}
+.sub{color:var(--mute)}
+.nw{white-space:nowrap}
+.cover{background:var(--navy);color:#fff}
+.cover h1,.cover .sub{color:#fff}.cover .sub{opacity:.75}
+.big{font-size:clamp(18px,2.6vw,32px)}
+.eq{font-size:clamp(15px,2.2vw,28px);text-align:center;overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.row{display:flex;gap:clamp(16px,3vw,40px);align-items:center;flex-wrap:wrap}
+.row>*{flex:1 1 280px;min-width:0}
+.box{background:var(--sky);border-left:4px solid var(--blue);padding:12px 18px;border-radius:4px}
+.bad{background:#fdeceb;border-color:var(--red)}
+.chain{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+.chain div{background:var(--sky);border-radius:6px;padding:12px 16px;text-align:center;min-width:120px}
+.chain small{display:block;color:var(--mute);font-size:13px;margin-top:4px}
+.chain .ar{background:none;min-width:0;font-size:24px;color:var(--blue);padding:0}
+svg{width:100%;height:auto;display:block;max-height:46vh}
+svg text{font-family:inherit;font-size:12px;fill:var(--mute)}
+.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:8px 14px;align-items:center;font-size:clamp(14px,1.8vw,18px)}
+.ctl output{font-variant-numeric:tabular-nums;min-width:44px;text-align:right;color:var(--navy);font-weight:700}
+.ctl button{grid-column:1/-1;border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;padding:6px 14px;font:inherit;font-weight:500;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--blue)}
+nav{position:fixed;bottom:0;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:center;gap:18px;background:#fff;border-top:1px solid var(--line);z-index:5;font-size:14px;color:var(--mute)}
+nav button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;width:44px;height:36px;font-size:18px;cursor:pointer}
+nav button:hover{background:var(--sky)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.katex{font-size:1.08em}
+.tri{align-items:stretch}
+.tri>.box{flex:1 1 240px;display:flex;flex-direction:column;gap:8px}
+.tri svg{max-height:130px}
+.tri p:not(.sub){font-size:clamp(14px,1.6vw,18px)}
+.mat .katex .arraycolsep{width:1.1em!important}
+.eq.mat{font-size:clamp(14px,1.9vw,25px);padding:10px 0}
+.eq.sm{font-size:clamp(13px,1.8vw,22px)}
+</style>
+</head>
 <body>
-<main>
+<div id="bar"></div>
+<header><a href="../index.html">← Mục lục</a><span>Logistic Regression · 2. Gradient và gradient descent</span></header>
 
 <!-- 1 -->
-<section class="s two on">
-<div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
-<p>$\nabla L=\left(\dfrac{\partial L}{\partial w},\dfrac{\partial L}{\partial b}\right)$. Nhắc lại thiết lập:</p>
-$$z=w^Tx+b,\qquad p=\sigma(z)=\frac{1}{1+e^{-z}}$$
-<p>và loss của một mẫu (Binary Cross-Entropy):</p>
-$$L(p,y)=-\big[y\log p+(1-y)\log(1-p)\big]$$
-</div>
-<div>
-<h4>Nối tiếp từ Phần 1</h4>
-<p>Ở Phần 1, ta đã xây dựng hàm sigmoid $p=\sigma(z)$ và chuyển Likelihood thành hàm loss Binary Cross-Entropy $L(p,y)$.</p>
-<p>Để huấn luyện mô hình, ta cần tìm $w,b$ làm loss nhỏ nhất. Vì vậy Phần 2 bắt đầu từ chính hàm loss đó, tính gradient và Hessian của nó.</p>
-<p class="box">Cần xem lại sigmoid hoặc cách xây dựng loss? <a class="nb" href="../phan1-sigmoid/">← Quay lại Phần 1</a></p>
-</div>
+<section class="slide cover">
+  <h1>Logistic Regression</h1>
+  <p class="big sub">Phần 2 · Gradient và gradient descent</p>
+  <p class="sub">Gradient · Hessian · Tính lồi · Gradient Descent</p>
 </section>
 
 <!-- 2 -->
-<section class="s cols">
-<div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
-<h3>1.1. Tính $\dfrac{\partial L}{\partial w}=(p-y)\,x$ và $\dfrac{\partial L}{\partial b}=p-y$</h3>
-<h4>Theo $w$</h4>
-<p>Sử dụng <b>Quy tắc chuỗi (Chain Rule)</b>:</p>
-<div class="pl">$$\frac{\partial L}{\partial w}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot\frac{\partial z}{\partial w}$$</div>
-<p>Các đạo hàm thành phần:</p>
-<div class="pl">$$\frac{\partial L}{\partial p}=-\frac{y}{p}+\frac{1-y}{1-p}=\frac{p-y}{p(1-p)}$$
-$$\frac{\partial p}{\partial z}=p(1-p),\qquad\frac{\partial z}{\partial w}=x$$</div>
-<p>Thay vào:</p>
-<div class="fb">$$\frac{\partial L}{\partial w}=\frac{p-y}{p(1-p)}\cdot p(1-p)\cdot x=(p-y)\,x$$</div>
-</div>
-<div>
-<h4>Theo $b$</h4>
-<p>Sử dụng <b>Quy tắc chuỗi (Chain Rule)</b>:</p>
-<div class="pl">$$\frac{\partial L}{\partial b}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot\frac{\partial z}{\partial b}$$</div>
-<p>Các đạo hàm thành phần, vì $z=w^Tx+b\Rightarrow\dfrac{\partial z}{\partial b}=1$:</p>
-<div class="pl">$$\frac{\partial L}{\partial p}=\frac{p-y}{p(1-p)},\qquad\frac{\partial p}{\partial z}=p(1-p),\qquad\frac{\partial z}{\partial b}=1$$</div>
-<p>Thay vào:</p>
-<div class="fb">$$\frac{\partial L}{\partial b}=\frac{p-y}{p(1-p)}\cdot p(1-p)\cdot1=p-y$$</div>
-</div>
+<section class="slide">
+  <h2>3. Từ loss function suy ra gradient</h2>
+  <p>Nhãn \(Y\) tuân theo phân bố Bernoulli với \(p=P(Y=1)\). Gộp hai trường hợp:</p>
+  <div class="eq">$$P(Y=y)=p^{y}(1-p)^{1-y},\qquad y\in\{0,1\}$$</div>
+  <div class="eq">$$p=\sigma(z)=\frac{1}{1+e^{-z}},\qquad z=w^\top x+b$$</div>
+  <div class="eq">$$L(y,z)=-\bigl[\,y\ln\sigma(z)+(1-y)\ln(1-\sigma(z))\,\bigr]$$</div>
+  <p>Cần tìm \(\nabla L=\Bigl(\dfrac{\partial L}{\partial w},\dfrac{\partial L}{\partial b}\Bigr)\). Quy tắc chuỗi:</p>
+  <div class="eq">$$\frac{\partial L}{\partial w}=\frac{\partial L}{\partial p}\cdot\frac{\partial p}{\partial z}\cdot\frac{\partial z}{\partial w}$$</div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <h2>3.1 – 3.2 Ba đạo hàm thành phần</h2>
+  <div class="row tri">
+    <div class="box">
+      <p class="sub">\(\dfrac{\partial L}{\partial p}\)</p>
+      <div class="eq sm">$$-\frac{y}{p}+\frac{1-y}{1-p}$$</div>
+      <div class="eq sm">$$=\frac{-y(1-p)+p(1-y)}{p(1-p)}$$</div>
+      <div class="eq sm">$$=\frac{p-y}{p(1-p)}$$</div>
+    </div>
+    <div class="box">
+      <p class="sub">\(\dfrac{\partial p}{\partial z}\), với \(p=(1+e^{-z})^{-1}\)</p>
+      <div class="eq sm">$$\frac{e^{-z}}{(1+e^{-z})^{2}}$$</div>
+      <div class="eq sm">$$=\frac{1}{1+e^{-z}}\Bigl(1-\frac{1}{1+e^{-z}}\Bigr)$$</div>
+      <div class="eq sm">$$=p(1-p)$$</div>
+    </div>
+    <div class="box">
+      <p class="sub">\(\dfrac{\partial z}{\partial w}\) và \(\dfrac{\partial z}{\partial b}\), với \(z=w^\top x+b\)</p>
+      <div class="eq sm">$$\frac{\partial z}{\partial w}=x$$</div>
+      <div class="eq sm">$$\frac{\partial z}{\partial b}=1$$</div>
+    </div>
+  </div>
+  <div class="eq">$$\frac{\partial L}{\partial w}=(p-y)\,x\qquad\qquad\frac{\partial L}{\partial b}=\frac{\partial L}{\partial z}\cdot\frac{\partial z}{\partial b}=p-y$$</div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <h2>3.3 Mở rộng cho toàn bộ tập dữ liệu</h2>
+  <p>\(n\) quan sát độc lập, mỗi quan sát có \(d\) đặc trưng:</p>
+  <div class="eq mat">$$x_i=\begin{bmatrix}x_{i1}\\x_{i2}\\\vdots\\x_{id}\end{bmatrix}\in\mathbb{R}^{d},\qquad\qquad w=\begin{bmatrix}w_1\\w_2\\\vdots\\w_d\end{bmatrix}\in\mathbb{R}^{d}$$</div>
+  <div class="eq">$$J(w,b)=\sum_{i=1}^{n}L_i,\qquad L_i=-\bigl[\,y_i\ln p_i+(1-y_i)\ln(1-p_i)\,\bigr]$$</div>
+  <div class="eq">$$p_i=\sigma(w^\top x_i+b)=\sigma\Bigl(\sum_{j=1}^{d}w_jx_{ij}+b\Bigr)$$</div>
+  <p class="sub">Đạo hàm của tổng bằng tổng các đạo hàm.</p>
 </section>
 
 <!-- 5 -->
-<section class="s">
-<div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>1. TỪ LOSS FUNCTION SUY RA GRADIENT</h2>
-<h3>1.2. Mở rộng cho toàn bộ tập dữ liệu</h3>
-<p>Hàm tổng loss cho $n$ quan sát độc lập:</p>
-$$J(w,b)=\sum_{i=1}^{n}L_i=-\sum_{i=1}^{n}\big[y_i\log p_i+(1-y_i)\log(1-p_i)\big]$$
-<p>Gradient toàn cục (đạo hàm của tổng = tổng các đạo hàm):</p>
-<h4>Theo trọng số $w$:</h4>
-$$\frac{\partial J}{\partial w}=\sum_{i=1}^{n}\frac{\partial L_i}{\partial w}=\sum_{i=1}^{n}(p_i-y_i)\,x_i$$
-<h4>Theo hệ số chặn $b$:</h4>
-$$\frac{\partial J}{\partial b}=\sum_{i=1}^{n}\frac{\partial L_i}{\partial b}=\sum_{i=1}^{n}(p_i-y_i)$$
-</div>
-<div class="v">
-<canvas id="c2"></canvas>
-<div class="c" id="k2"></div>
-<div class="o" id="o2"></div>
-</div>
+<section class="slide">
+  <h2>Gradient theo \(w\) (vector \(d\) chiều) và theo \(b\) (số thực)</h2>
+  <div class="eq mat">$$\nabla_wJ=\begin{bmatrix}\dfrac{\partial J}{\partial w_1}\\\dfrac{\partial J}{\partial w_2}\\\vdots\\\dfrac{\partial J}{\partial w_d}\end{bmatrix}=\begin{bmatrix}\sum_{i=1}^{n}(p_i-y_i)\,x_{i1}\\\sum_{i=1}^{n}(p_i-y_i)\,x_{i2}\\\vdots\\\sum_{i=1}^{n}(p_i-y_i)\,x_{id}\end{bmatrix}=\sum_{i=1}^{n}(p_i-y_i)\,x_i$$</div>
+  <div class="eq mat">$$\nabla_wJ=X^\top(p-y)=\begin{bmatrix}x_{11}&x_{21}&\cdots&x_{n1}\\x_{12}&x_{22}&\cdots&x_{n2}\\\vdots&\vdots&\ddots&\vdots\\x_{1d}&x_{2d}&\cdots&x_{nd}\end{bmatrix}\begin{bmatrix}p_1-y_1\\p_2-y_2\\\vdots\\p_n-y_n\end{bmatrix}$$</div>
+  <div class="eq">$$\frac{\partial J}{\partial b}=\sum_{i=1}^{n}\frac{\partial L_i}{\partial b}=\sum_{i=1}^{n}(p_i-y_i)$$</div>
 </section>
 
 <!-- 6 -->
-<section class="s two">
-<div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>2. MA TRẬN HESSIAN VÀ GIẢI THÍCH TÍNH LỒI</h2>
-<p>Mục tiêu: chứng minh hàm chi phí $J(w,b)$ là hàm <b>lồi (convex)</b> bằng cách kiểm tra ma trận Hessian $H\succeq0$</p>
-<p>Công thức cần đạt:</p>
-$$H=X^TRX,\qquad R=\operatorname{diag}\!\big(p_1(1-p_1),\,\dots,\,p_n(1-p_n)\big)$$
-<p>và từ đó suy ra $H\succeq0$. Khởi tạo từ gradient:</p>
-$$\nabla_wJ=\sum_{i=1}^{n}(p_i-y_i)\,x_i$$
-</div>
+<section class="slide">
+  <h2>4. Ma trận Hessian và tính lồi</h2>
+  <div class="box"><p>Mục tiêu: chứng minh \(J(w,b)\) lồi bằng cách kiểm tra \(H\succeq0\), với \(H=X^\top RX\) và \(R=\operatorname{diag}\bigl(p_1(1-p_1),\dots,p_n(1-p_n)\bigr)\).</p></div>
+  <p>4.1 Xuất phát từ gradient \(\nabla_wJ=\sum_{i=1}^{n}(p_i-y_i)x_i\), đạo hàm tiếp theo \(w\). Vì \(x_i,y_i\) không phụ thuộc \(w\):</p>
+  <div class="eq">$$H=\sum_{i=1}^{n}\frac{\partial}{\partial w}\bigl[(p_i-y_i)\,x_i\bigr]=\sum_{i=1}^{n}x_i\Bigl(\frac{\partial p_i}{\partial w}\Bigr)^{\!\top}$$</div>
+  <p>Đặt \(r_i=p_i(1-p_i)\), khi đó \(\dfrac{\partial p_i}{\partial w}=r_i\,x_i\):</p>
+  <div class="eq">$$H=\sum_{i=1}^{n}r_i\,x_ix_i^\top=\sum_{i=1}^{n}p_i(1-p_i)\,x_ix_i^\top$$</div>
+  <p class="sub">Đây là công thức Hessian dưới dạng tổng.</p>
 </section>
 
 <!-- 7 -->
-<section class="s cols">
-<div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>2. MA TRẬN HESSIAN VÀ GIẢI THÍCH TÍNH LỒI</h2>
-<h3>2.1. Suy ra Hessian</h3>
-<p>Đạo hàm cấp hai theo $w$:</p>
-$$H=\frac{\partial}{\partial w}\big(\nabla_wJ\big)=\sum_{i=1}^{n}\frac{\partial}{\partial w}\big[(p_i-y_i)\,x_i\big]$$
-<p>Vì $x_i,y_i$ không phụ thuộc vào $w$:</p>
-$$H=\sum_{i=1}^{n}x_i\left(\frac{\partial p_i}{\partial w}\right)^T$$
-<p>Mà $\dfrac{\partial p_i}{\partial w}=p_i(1-p_i)\,x_i=r_ix_i$ với $r_i=p_i(1-p_i)$, nên:</p>
-$$H=\sum_{i=1}^{n}r_i\,x_ix_i^T=\sum_{i=1}^{n}p_i(1-p_i)\,x_ix_i^T$$
-<p>Viết gọn dưới dạng ma trận, với $X\in\mathbb{R}^{n\times d}$ có các hàng là $x_i^T$:</p>
-<div class="fb">$$H=X^TRX,\qquad R=\operatorname{diag}\big(p_1(1-p_1),\dots,p_n(1-p_n)\big)$$</div>
-</div>
-<div>
-<h3>2.2. Chứng minh tính lồi (Convexity)</h3>
-<h4>Bước 1. Tính chất của ma trận $R$.</h4>
-<p>Vì xác suất dự đoán $0\lt p_i\lt1$, ta có $p_i(1-p_i)\gt0$. Do $R$ là ma trận đường chéo chứa các phần tử này:</p>
-$$R\succ0.$$
-<h4>Bước 2. Xét dạng toàn phương với vector bất kỳ.</h4>
-<p>Với $v\in\mathbb{R}^{d}$ tùy ý, đặt $u=Xv$:</p>
-$$v^THv=v^T(X^TRX)v=(Xv)^TR(Xv)=u^TRu$$
-<p>Khai triển theo tổng:</p>
-$$u^TRu=\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2$$
-<p>Vì $p_i(1-p_i)\gt0$ và $u_i^2\ge0$:</p>
-$$\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2\ge0\;\Longrightarrow\;v^THv\ge0,\quad\forall v$$
-</div>
+<section class="slide">
+  <h2>Viết Hessian dưới dạng ma trận</h2>
+  <div class="eq mat">$$R=\begin{bmatrix}p_1(1-p_1)&0&\cdots&0\\0&p_2(1-p_2)&\cdots&0\\\vdots&\vdots&\ddots&\vdots\\0&0&\cdots&p_n(1-p_n)\end{bmatrix}\in\mathbb{R}^{n\times n},\qquad X=\begin{bmatrix}x_1^\top\\x_2^\top\\\vdots\\x_n^\top\end{bmatrix}\in\mathbb{R}^{n\times d}$$</div>
+  <div class="eq mat">$$X^\top R\,X=\begin{bmatrix}x_1&x_2&\cdots&x_n\end{bmatrix}\begin{bmatrix}r_1&0&\cdots&0\\0&r_2&\cdots&0\\\vdots&\vdots&\ddots&\vdots\\0&0&\cdots&r_n\end{bmatrix}\begin{bmatrix}x_1^\top\\x_2^\top\\\vdots\\x_n^\top\end{bmatrix}=\sum_{i=1}^{n}p_i(1-p_i)\,x_ix_i^\top$$</div>
+  <div class="chain">
+    <div>\(X^\top\)<small>\(d\times n\)</small></div><div class="ar">×</div>
+    <div>\(R\)<small>\(n\times n\)</small></div><div class="ar">×</div>
+    <div>\(X\)<small>\(n\times d\)</small></div><div class="ar">=</div>
+    <div>\(H\)<small>\(d\times d\)</small></div>
+  </div>
 </section>
 
 <!-- 8 -->
-<section class="s">
-<div>
-<p class="mut">Logistic Regression · Phần 2 / 6</p><p></p>
-<h2>2. GIẢI THÍCH TÍNH LỒI</h2>
-<h4>Kết luận</h4>
-<div class="fb">$$H=X^TRX\succeq0\Longrightarrow J(w,b)\ \text{là hàm lồi}$$</div>
-<p>Do đó Logistic Regression với BCE có <b>một cực tiểu toàn cục duy nhất</b> (global minimum), và các thuật toán gradient (GD, Newton, L-BFGS, …) đều hội tụ về đó.</p>
-</div>
-<div class="v">
-<h3>2.3. Minh họa trực quan</h3>
-<svg style="max-height:34vh" viewBox="0 0 420 300" role="img" aria-label="Sigmoid và p(1-p)">
-<g class="sa"><line x1="50" y1="260" x2="400" y2="260"/><line x1="225" y1="268" x2="225" y2="28"/></g>
-<g class="st"><text x="46" y="276">−6</text><text x="133" y="276">−3</text><text x="222" y="276">0</text><text x="309" y="276">3</text><text x="397" y="276">6</text>
-<text x="215" y="264" text-anchor="end">0</text><text x="215" y="155" text-anchor="end">0.5</text><text x="215" y="46" text-anchor="end">1</text>
-<text x="400" y="292" text-anchor="end">z = wᵀx + b</text></g>
-<line x1="50" y1="205.5" x2="400" y2="205.5" style="stroke:var(--bad);stroke-width:1.5;stroke-dasharray:5 4"/>
-<path id="fs" fill="none" style="stroke:var(--pos);stroke-width:2.5"/><path id="fr" fill="none" style="stroke:var(--bad);stroke-width:2.5"/>
-<g style="font:13px system-ui,sans-serif"><text x="58" y="20" style="fill:var(--pos)">σ(z) = 1/(1+e⁻ᶻ)</text><text x="205" y="20" style="fill:var(--bad)">σ′(z) = p(1−p) ≤ 0.25</text></g>
-</svg>
-<div class="o">Hàm sigmoid và đạo hàm $p(1-p)$ — yếu tố xuất hiện trong $R$, đảm bảo $R\succ0$ và do đó $H\succeq0$.</div>
-<svg style="max-height:34vh" viewBox="0 0 420 300" role="img" aria-label="Hàm lồi J(w)">
-<g class="sa"><line x1="20" y1="270" x2="400" y2="270"/><line x1="210" y1="276" x2="210" y2="20"/></g>
-<g class="st"><text x="404" y="274">w</text><text x="216" y="18">J(w)</text></g>
-<line x1="62" y1="85.5" x2="358" y2="85.5" style="stroke:var(--mut);stroke-width:1.2;stroke-dasharray:5 4"/>
-<path id="fp" fill="none" style="stroke:var(--pos);stroke-width:2.5"/>
-<circle cx="210" cy="234.3" r="4.5" style="fill:var(--bad)"/><text x="220" y="252" style="fill:var(--bad);font:13px system-ui,sans-serif">global min</text>
-</svg>
-<div class="o">Hàm lồi $J(w)$ có duy nhất một cực tiểu toàn cục — hệ quả của $H\succeq0$.</div>
-</div>
+<section class="slide">
+  <h2>Xử lý bias \(b\)</h2>
+  <p>Đặt \(\theta=\begin{bmatrix}w\\b\end{bmatrix}\) và thêm một cột toàn số 1 vào ma trận dữ liệu:</p>
+  <div class="eq mat">$$\tilde X=\begin{bmatrix}x_1^\top&1\\x_2^\top&1\\\vdots&\vdots\\x_n^\top&1\end{bmatrix}=\begin{bmatrix}x_{11}&x_{12}&\cdots&x_{1d}&1\\x_{21}&x_{22}&\cdots&x_{2d}&1\\\vdots&\vdots&\ddots&\vdots&\vdots\\x_{n1}&x_{n2}&\cdots&x_{nd}&1\end{bmatrix}\in\mathbb{R}^{n\times(d+1)},\qquad z=\tilde X\theta$$</div>
+  <div class="eq">$$\nabla_\theta J=\tilde X^\top(p-y)\qquad\qquad H_\theta=\tilde X^\top R\,\tilde X$$</div>
+  <div class="eq mat">$$H_\theta=\sum_{i=1}^{n}r_i\begin{bmatrix}x_i\\1\end{bmatrix}\begin{bmatrix}x_i^\top&1\end{bmatrix}=\begin{bmatrix}\sum_i r_i\,x_ix_i^\top&\sum_i r_i\,x_i\\\sum_i r_i\,x_i^\top&\sum_i r_i\end{bmatrix}\in\mathbb{R}^{(d+1)\times(d+1)}$$</div>
 </section>
 
-</main>
-<nav>
-<a class="nb" href="../index.html">☰ Mục lục</a>
-<button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button>
-</nav>
+<!-- 9 -->
+<section class="slide">
+  <h2>4.2 Chứng minh tính lồi: \(H\succeq0\)</h2>
+  <p><b>Bước 1.</b> Xét tính chất của ma trận \(R\):</p>
+  <div class="eq">$$0\lt p_i\lt 1\ \Rightarrow\ p_i\gt 0,\ 1-p_i\gt 0\ \Rightarrow\ p_i(1-p_i)\gt 0$$</div>
+  <p>\(R\) là ma trận đường chéo với mọi phần tử trên đường chéo đều dương:</p>
+  <div class="eq mat">$$R=\begin{bmatrix}p_1(1-p_1)&0&\cdots&0\\0&p_2(1-p_2)&\cdots&0\\\vdots&\vdots&\ddots&\vdots\\0&0&\cdots&p_n(1-p_n)\end{bmatrix}\ \Longrightarrow\ R\succ0$$</div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <h2>Bước 2. Xét \(v^\top Hv\) với vector \(v\) bất kỳ</h2>
+  <p>Ta có \(v^\top Hv=v^\top X^\top R\,Xv\). Đặt \(u=Xv\):</p>
+  <div class="eq mat">$$u=Xv=\begin{bmatrix}x_1^\top\\x_2^\top\\\vdots\\x_n^\top\end{bmatrix}\begin{bmatrix}v_1\\v_2\\\vdots\\v_d\end{bmatrix}=\begin{bmatrix}x_1^\top v\\x_2^\top v\\\vdots\\x_n^\top v\end{bmatrix}=\begin{bmatrix}u_1\\u_2\\\vdots\\u_n\end{bmatrix}$$</div>
+  <div class="eq mat">$$v^\top Hv=u^\top R\,u=\begin{bmatrix}u_1&u_2&\cdots&u_n\end{bmatrix}\begin{bmatrix}r_1&0&\cdots&0\\0&r_2&\cdots&0\\\vdots&\vdots&\ddots&\vdots\\0&0&\cdots&r_n\end{bmatrix}\begin{bmatrix}u_1\\u_2\\\vdots\\u_n\end{bmatrix}=\sum_{i=1}^{n}p_i(1-p_i)\,u_i^2$$</div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <h2>Kết luận: \(H\succeq0\) nên \(J\) là hàm lồi</h2>
+  <div class="row">
+    <div>
+      <div class="box"><p>\(p_i(1-p_i)\gt 0\) và \(u_i^2\ge0\ \Rightarrow\ \sum_i p_i(1-p_i)u_i^2\ge0\)</p></div>
+      <div class="box" style="margin-top:12px"><p>\(v^\top Hv\ge0\ \ \forall v\ \Rightarrow\ H\succeq0\)</p></div>
+      <div class="box eq mat" id="tH" style="margin-top:12px"></div>
+    </div>
+    <svg id="p5" viewBox="0 0 400 240"></svg>
+  </div>
+  <p class="sub">Hàm mất mát Logistic Regression là hàm lồi theo các tham số. Đồ thị: \(J(w,b)\) theo \(w\) với \(b=b^*\), trên dữ liệu giờ ôn tập.</p>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <h2>5. Gradient Descent: ký hiệu</h2>
+  <div class="box"><p>Từ đây dùng loss <b>trung bình</b>: \(m\) mẫu, \(n\) đặc trưng, bias nằm ở đầu vector tham số.</p></div>
+  <div class="eq mat" style="font-size:clamp(13px,1.8vw,23px)">$$\tilde w=\begin{bmatrix}b\\w_1\\\vdots\\w_n\end{bmatrix}\in\mathbb{R}^{n+1},\qquad\tilde X=\begin{bmatrix}1&x_1^{(1)}&x_2^{(1)}&\cdots&x_n^{(1)}\\1&x_1^{(2)}&x_2^{(2)}&\cdots&x_n^{(2)}\\\vdots&\vdots&\vdots&\ddots&\vdots\\1&x_1^{(m)}&x_2^{(m)}&\cdots&x_n^{(m)}\end{bmatrix}\in\mathbb{R}^{m\times(n+1)}$$</div>
+  <div class="eq">$$J(\tilde w)=-\frac1m\sum_{i=1}^{m}\bigl[\,y_i\ln a_i+(1-y_i)\ln(1-a_i)\,\bigr]$$</div>
+  <div class="eq">$$\tilde w^{(t+1)}=\tilde w^{(t)}-\frac{\alpha}{m}\,\tilde X^\top\bigl(\hat y^{(t)}-y\bigr)$$</div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <h2>5.1 Giải phẫu ma trận Hessian</h2>
+  <p>Gradient chỉ cho biết <b>hướng dốc</b>; độ cong bề mặt được mô tả bởi Hessian \(H(\tilde w)=\nabla^2_{\tilde w}J(\tilde w)\):</p>
+  <div class="eq">$$H(\tilde w)=\frac1m\sum_{i=1}^{m}a_i(1-a_i)\,\tilde x^{(i)}\tilde x^{(i)\top}=\frac1m\tilde X^\top R\,\tilde X$$</div>
+  <div class="eq mat">$$R=\begin{bmatrix}\hat y_1(1-\hat y_1)&0&\cdots&0\\0&\hat y_2(1-\hat y_2)&\cdots&0\\\vdots&\vdots&\ddots&\vdots\\0&0&\cdots&\hat y_m(1-\hat y_m)\end{bmatrix}\in\mathbb{R}^{m\times m}$$</div>
+  <p class="sub">\(R\) là ma trận đường chéo chứa phương sai dự đoán của từng mẫu.</p>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <h2>Ba tính chất của Hessian chi phối Gradient Descent</h2>
+  <div class="row tri">
+    <div class="box">
+      <p class="sub">1 · Đảm bảo tìm thấy đáy toàn cục</p>
+      <svg id="m1" viewBox="0 0 200 120"></svg>
+      <div class="eq sm">$$H(\tilde w)\succeq0$$</div>
+      <p>Bề mặt hình cái bát lồi, không có cực tiểu địa phương. GD từ bất kỳ điểm nào cũng về nghiệm tốt nhất.</p>
+    </div>
+    <div class="box">
+      <p class="sub">2 · Đa cộng tuyến, nghiệm vô hạn</p>
+      <svg id="m2" viewBox="0 0 200 120"></svg>
+      <div class="eq sm">$$\operatorname{rank}(\tilde X)\lt n+1$$</div>
+      <div class="eq sm">$$\exists\,v\ne0:\ \tilde Xv=0\Rightarrow v^\top H(\tilde w)\,v=0$$</div>
+      <p>Rãnh phẳng kéo dài vô tận. Khởi tạo \(\tilde w^{(0)}=0\) thì GD hội tụ về nghiệm có \(\|\tilde w^*\|_2\) nhỏ nhất.</p>
+    </div>
+    <div class="box">
+      <p class="sub">3 · Chậm dần về cuối</p>
+      <svg id="m3" viewBox="0 0 200 120"></svg>
+      <div class="eq sm">$$H\approx0\ \Rightarrow\ \nabla J\approx\mathrm{const}$$</div>
+      <p>Ra xa vô cực, thành chảo duỗi thành mặt phẳng nghiêng. Khởi tạo \(\tilde w^{(0)}\) quá lớn thì GD đi rất chậm qua vùng phẳng.</p>
+    </div>
+  </div>
+  <p class="sub">Đồ thị 1 và 3: \(J(w)\) trên dữ liệu giờ ôn tập, \(b=b^*\). Đồ thị 2 là minh họa.</p>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-fn="up7">
+  <h2>Độ cong phụ thuộc vị trí \(\tilde w^{(t)}\) qua \(z=w^\top x+b\)</h2>
+  <div class="row">
+    <svg id="p7" viewBox="0 0 400 240"></svg>
+    <div>
+      <div class="ctl"><label for="zs">z</label><input id="zs" type="range" min="-8" max="8" step="0.1" value="0"><output id="zo"></output></div>
+      <p id="t7" class="box" style="margin-top:14px"></p>
+    </div>
+  </div>
+  <p class="sub">Dự đoán sai với độ tự tin cao: \(a_i-y_i\) vẫn lớn nên gradient vẫn lớn dù Hessian nhỏ. Vì vậy không phải mọi khởi tạo lớn đều làm GD chậm.</p>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <h2>5.2 Chặn trên của \(\alpha\) qua hằng số Lipschitz</h2>
+  <p>\(L\)-smooth: giá trị riêng lớn nhất của Hessian bị chặn trên bởi \(L\) tại mọi điểm.</p>
+  <div class="eq">$$\lambda_{\max}\bigl(H(\tilde w)\bigr)\le L,\quad\forall\tilde w\in\mathbb{R}^{n+1}$$</div>
+  <p>\(p(1-p)\) đạt lớn nhất bằng \(\tfrac14\) tại \(p=0.5\) (\(z=0\)), nên \(0\lt a_i(1-a_i)\le\tfrac14\):</p>
+  <div class="eq">$$H(\tilde w)=\frac1m\tilde X^\top R\,\tilde X\ \preceq\ \frac1{4m}\tilde X^\top\tilde X\ \Rightarrow\ L=\frac{\lambda_{\max}(\tilde X^\top\tilde X)}{4m}=\frac{\|\tilde X\|_2^2}{4m}$$</div>
+  <div class="row">
+    <div class="box eq">$$\alpha\le\frac1L\ \Rightarrow\ J(\tilde w^{(t+1)})\le J(\tilde w^{(t)})$$</div>
+    <div class="box eq">$$J(\tilde w)-J(\tilde w^*)\le\frac1{2\mu}\|\nabla J(\tilde w)\|_2^2$$</div>
+  </div>
+  <p class="sub">\(\|\tilde X\|_2\) là giá trị kỳ dị lớn nhất của \(\tilde X\). Bất đẳng thức bên phải cho biết khi nào đủ gần đáy để tự ngắt vòng lặp.</p>
+</section>
+
+<!-- 17 -->
+<section class="slide" data-fn="up9">
+  <h2>Thử chọn \(\alpha\) so với \(1/L\)</h2>
+  <div class="row">
+    <svg id="p9" viewBox="0 0 400 240"></svg>
+    <div>
+      <div class="ctl"><label for="gs">αL</label><input id="gs" type="range" min="0.1" max="4" step="0.1" value="1"><output id="go"></output></div>
+      <p id="t9" class="box" style="margin-top:14px"></p>
+    </div>
+  </div>
+  <p class="sub">Dữ liệu giờ ôn tập (\(m=11\) sinh viên), GD từ \(\tilde w^{(0)}=0\). Trục ngang: số vòng lặp \(t\).</p>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <h2>5.3 SGD: “vùng nhiễu” (noise ball) quanh điểm tối ưu</h2>
+  <p>Ngay cả khi \(J(\tilde w)\) lồi chặt và dữ liệu hoàn hảo, SGD với \(\alpha\) cố định không bao giờ hội tụ về đúng \(\tilde w^*\). Tại cực tiểu toàn cục:</p>
+  <div class="eq">$$\frac1m\sum_{i=1}^{m}(a_i^*-y_i)\,\tilde x^{(i)}=0$$</div>
+  <p>Nhưng \(P(y=1\mid x)\in(0,1)\) còn \(y_i\in\{0,1\}\), nên gradient từng mẫu luôn khác 0:</p>
+  <div class="eq">$$g_i(\tilde w^*)=(\hat a_i^*-y_i)\,\tilde x^{(i)}\ne0\quad\Rightarrow\quad\sigma_{\mathrm{grad}}^2=\frac1m\sum_{i=1}^{m}\|g_i(\tilde w^*)\|_2^2\gt0$$</div>
+  <div class="eq">$$\E\Bigl[\|\tilde w^{(t)}-\tilde w^*\|_2^2\Bigr]\ \propto\ \alpha\,\sigma_{\mathrm{grad}}^2$$</div>
+  <p class="sub">Cú hích ngẫu nhiên \(-\alpha\,g_{i_t}(\tilde w^*)\) đẩy \(\tilde w^{(t)}\) văng ra khỏi đáy.</p>
+</section>
+
+<!-- 19 -->
+<section class="slide" data-fn="up11">
+  <h2>Quả cầu nhiễu: bắt đầu ngay tại đáy</h2>
+  <div class="row">
+    <svg id="p11" viewBox="0 0 400 240"></svg>
+    <div>
+      <div class="ctl"><label for="ss">α₀L</label><input id="ss" type="range" min="0.05" max="1" step="0.05" value="0.5"><output id="so"></output><button id="rr">Chạy lại</button></div>
+      <p id="t11" class="box" style="margin-top:14px"></p>
+    </div>
+  </div>
+  <p class="sub">Trục dọc: \(\|\tilde w^{(t)}-\tilde w^*\|_2^2\). <b style="color:var(--red)">Đỏ</b>: \(\alpha\) cố định. <b style="color:var(--blue)">Xanh</b>: \(\alpha_t\) giảm dần.</p>
+</section>
+
+<!-- 20 -->
+<section class="slide">
+  <h2>Điều kiện Robbins–Monro</h2>
+  <p>Để triệt tiêu quả cầu nhiễu, cần lịch giảm learning rate \(\alpha_t\) thỏa:</p>
+  <div class="eq">$$\sum_{t=0}^{\infty}\alpha_t=\infty,\qquad\sum_{t=0}^{\infty}\alpha_t^2\lt\infty$$</div>
+  <div class="row">
+    <div>
+      <div class="box"><p>\(\sum\alpha_t=\infty\): vừa đủ sức đi tới đáy.</p></div>
+      <div class="box" style="margin-top:12px"><p>\(\sum\alpha_t^2\lt\infty\): dừng lại chính xác tại \(\tilde w^*\).</p></div>
+      <div class="eq" style="margin-top:10px">$$\alpha_t=\frac{\alpha_0}{1+t}$$</div>
+      <p class="sub">hoặc \(\alpha_t=\dfrac{\alpha_0}{1+\beta t}\)</p>
+    </div>
+    <svg id="p12" viewBox="0 0 400 240"></svg>
+  </div>
+</section>
+
+<!-- 21 -->
+<section class="slide">
+  <h2>Ý nghĩa thực tiễn</h2>
+  <div class="row">
+    <div class="box"><p><b>Tính lồi</b> → GD không kẹt, kết quả đáng tin.</p></div>
+    <div class="box"><p><b>Hằng số \(L\)</b> → ngưỡng \(\alpha\le1/L\) an toàn.</p></div>
+    <div class="box"><p><b>Noise ball</b> → cần <span class="nw">learning rate decay</span> khi dùng SGD.</p></div>
+    <div class="box"><p><b>Đa cộng tuyến</b> → nghiệm không duy nhất, cần L2.</p></div>
+  </div>
+  <p class="sub">Hessian còn cho phép thay learning rate cố định bằng \(H^{-1}\). Tiếp theo: Hessian, Newton và Quasi-Newton.</p>
+</section>
+
+<nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
+
 <script>
-const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan3-gradient-descent/',PREV='../phan1-sigmoid/';
-const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
-function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
-const PAD={l:38,r:8,t:22,b:22};
-function plot(id,xs,cs,o={}){const t=cv(id);if(!t)return;const[c,W,H]=t,p=PAD,x0=o.x0??xs[0],x1=o.x1??xs.at(-1),y0=o.y0??0,y1=o.y1;
-const X=x=>p.l+(x-x0)/(x1-x0)*(W-p.l-p.r),Y=y=>H-p.b-(y-y0)/(y1-y0)*(H-p.t-p.b);
-c.font='12px system-ui';c.fillStyle=c.strokeStyle=css('--mut');c.lineWidth=1;const ax=X(Math.max(x0,Math.min(0,x1)));
-c.beginPath();c.moveTo(p.l,Y(y0));c.lineTo(W-p.r,Y(y0));c.moveTo(ax,p.t);c.lineTo(ax,H-p.b);c.stroke();
-for(let k=0;k<=4;k++){const v=x0+(x1-x0)*k/4;c.fillText(+v.toFixed(1),X(v)-9,H-6)}
-for(let k=0;k<=2;k++){const v=y0+(y1-y0)*k/2;c.fillText(+v.toFixed(1),0,Y(v)+4)}
-c.save();c.beginPath();c.rect(p.l,p.t,W-p.l-p.r,H-p.t-p.b);c.clip();
-(o.h||[]).forEach(v=>{c.setLineDash([4,4]);c.beginPath();c.moveTo(p.l,Y(v));c.lineTo(W-p.r,Y(v));c.stroke();c.setLineDash([])});
-cs.forEach(k=>{c.strokeStyle=c.fillStyle=k.c;c.lineWidth=2;c.setLineDash(k.dash?[6,4]:[]);
-if(k.pts)k.pts.forEach(q=>{c.beginPath();c.arc(X(q[0]),Y(q[1]),k.r||4,0,7);c.fill()});
-else{c.beginPath();k.y.forEach((v,i)=>i?c.lineTo(X(xs[i]),Y(v)):c.moveTo(X(xs[i]),Y(v)));c.stroke()}c.setLineDash([])});
-(o.v||[]).forEach(v=>{c.strokeStyle=v[1]||css('--mut');c.setLineDash([3,3]);c.beginPath();c.moveTo(X(v[0]),p.t);c.lineTo(X(v[0]),H-p.b);c.stroke();c.setLineDash([])});c.restore();
-let lx=p.l+6;cs.forEach(k=>{if(k.n){c.fillStyle=k.c;c.fillText(k.n,lx,13);lx+=c.measureText(k.n).width+14}});
-if(o.t){c.fillStyle=css('--mut');c.textAlign='right';c.fillText(o.t,W-p.r,13);c.textAlign='left'}}
-function sl(h,lab,mn,mx,st,v,f,fmt=x=>x){const g=$(h),l=document.createElement('label'),i=document.createElement('input'),o=document.createElement('span');l.textContent=lab;
-Object.assign(i,{type:'range',min:mn,max:mx,step:st,value:v});o.textContent=fmt(+v);i.oninput=()=>{o.textContent=fmt(+i.value);f()};g.append(l,i,o);
-const q=()=>+i.value;q.set=a=>{i.value=a;o.textContent=fmt(+i.value)};return q}
+const sig=z=>1/(1+Math.exp(-z));
+/* DATA: cùng dữ liệu Phần 1 (giờ ôn tập -> đậu/rớt) */
+const X=[0,1,2,3,4,5,6,7,8,9,10],Y=[0,0,0,0,0,1,0,1,1,1,1],n=X.length;
+const P=(t,i)=>sig(t[0]+t[1]*X[i]);                       /* t=[b,w] */
+const J=t=>{let s=0;for(let i=0;i<n;i++){const p=P(t,i);s-=Y[i]*Math.log(p)+(1-Y[i])*Math.log(1-p)}return s/n};
+const gi=(t,i)=>{const e=P(t,i)-Y[i];return[e,e*X[i]]};
+const gr=t=>{let a=0,b=0;for(let i=0;i<n;i++){const g=gi(t,i);a+=g[0];b+=g[1]}return[a/n,b/n]};
+let ts=[0,0];
+for(let k=0;k<50;k++){let h0=0,h1=0,h2=0;for(let i=0;i<n;i++){const p=P(ts,i),r=p*(1-p);h0+=r;h1+=r*X[i];h2+=r*X[i]*X[i]}
+const g=gr(ts),d=h0*h2-h1*h1;ts=[ts[0]-n*(h2*g[0]-h1*g[1])/d,ts[1]-n*(-h1*g[0]+h0*g[1])/d]}
+let Sx=0,Sxx=0;X.forEach(x=>{Sx+=x;Sxx+=x*x});
+const tr=n+Sxx,det=n*Sxx-Sx*Sx,Lip=(tr+Math.sqrt(tr*tr-4*det))/2/(4*n),Js=J(ts),J0=J([0,0]);
+/* /DATA */
 
-// dữ liệu 1 chiều dùng chung cho slide 2 và 4: [x, y]
-const DATA=[[-3,0],[-2,0],[-1,1],[.5,0],[1.5,1],[3,1]],Jf=(w,b)=>DATA.reduce((a,[x,y])=>{const z=w*x+b;return a+Math.log(1+Math.exp(z))-y*z},0);
+const el=id=>document.getElementById(id);
+const MACROS={"\\tw":"\\tilde{w}","\\tx":"\\tilde{x}","\\tX":"\\tilde{X}","\\norm":"\\left\\lVert#1\\right\\rVert","\\rank":"\\operatorname{rank}","\\diag":"\\operatorname{diag}","\\E":"\\mathbb{E}","\\R":"\\mathbb{R}","\\arraystretch":"1.7"};
+const render=e=>window.renderMathInElement&&renderMathInElement(e,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],macros:MACROS,throwOnError:false});
+const RED='#d6453d',BLUE='#1f5fd6';
 
-// 1: gradient trên cả tập dữ liệu
-{const xs=lin(-4,4,120),w=sl('#k2','w',-3,3,.1,1,dr,f2),b=sl('#k2','b',-3,3,.1,0,dr,f2);
-function dr(){const W=w(),B=b();let gw=0,gb=0;DATA.forEach(([x,y])=>{const e=sg(W*x+B)-y;gw+=e*x;gb+=e});
-plot('#c2',xs,[{y:xs.map(t=>sg(W*t+B)),c:C.bad,n:'p = σ(wx+b)'},{pts:DATA.filter(d=>d[1]==1),c:C.ok,r:5},{pts:DATA.filter(d=>d[1]==0),c:C.a,r:5}],{y0:0,y1:1,h:[.5]});
-$('#o2').innerHTML=`Điểm xanh: y = 1, cam: y = 0. J = <b>${f2(Jf(W,B))}</b> · ∂J/∂w = Σ(p−y)x = <b>${f2(gw)}</b> · ∂J/∂b = Σ(p−y) = <b>${f2(gb)}</b>`}D[2]=dr}
+/* biểu đồ chung (cùng phong cách Phần 1) */
+function chart(id,o){
+  const s=el(id),L=44,R=392,T=14,B=206,W=R-L;
+  const sx=x=>L+(x-o.x0)/(o.x1-o.x0)*W,sy=y=>B-(Math.max(o.y0,Math.min(o.y1,y))-o.y0)/(o.y1-o.y0)*(B-T);
+  let h=`<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#9fb0cc"/><line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#9fb0cc"/>`;
+  for(let k=0;k<=4;k++){const v=o.y0+(o.y1-o.y0)*k/4;h+=`<line x1="${L}" x2="${R}" y1="${sy(v)}" y2="${sy(v)}" stroke="#e3eaf6"/><text x="${L-6}" y="${sy(v)+4}" text-anchor="end">${v.toFixed(o.yd??2)}</text>`}
+  for(let k=0;k<=4;k++){const v=o.x0+(o.x1-o.x0)*k/4;h+=`<text x="${sx(v)}" y="${B+16}" text-anchor="middle">${+v.toFixed(1)}</text>`}
+  h+=`<text x="${(L+R)/2}" y="236" text-anchor="middle">${o.xl||''}</text>`;
+  (o.hl||[]).forEach(q=>{h+=`<line x1="${L}" x2="${R}" y1="${sy(q.v)}" y2="${sy(q.v)}" stroke="${q.c}" stroke-dasharray="4"/><text x="${R-2}" y="${sy(q.v)-5}" text-anchor="end" style="fill:${q.c};font-weight:700">${q.t}</text>`});
+  (o.lines||[]).forEach(q=>{h+=`<polyline fill="none" stroke="${q.c}" stroke-width="${q.w||3}" stroke-linejoin="round" points="${q.p.map(p=>sx(p[0]).toFixed(1)+','+sy(p[1]).toFixed(1)).join(' ')}"/>`});
+  (o.dots||[]).forEach(q=>{h+=`<circle cx="${sx(q[0])}" cy="${sy(q[1])}" r="6" fill="${q[2]||BLUE}"/>`});
+  (o.labels||[]).forEach(q=>{h+=`<text x="${q[0]}" y="${q[1]}" style="fill:${q[3]};font-weight:700">${q[2]}</text>`});
+  s.innerHTML=h;
+}
+const curve=(f,a,b,k=120)=>{const p=[];for(let i=0;i<=k;i++){const x=a+(b-a)*i/k;p.push([x,f(x)])}return p};
 
-// hình tĩnh (SVG): vẽ đường cong một lần
-const P=(f,a,b,X,Y)=>lin(a,b,120).map((t,i)=>(i?'L':'M')+X(t).toFixed(1)+' '+Y(f(t)).toFixed(1)).join('');
-{const X=t=>50+(t+6)*29.17,Y=v=>260-v*218;$('#fs').setAttribute('d',P(sg,-6,6,X,Y));$('#fr').setAttribute('d',P(t=>sg(t)*(1-sg(t)),-6,6,X,Y))}
-{$('#fp').setAttribute('d',P(w=>.4*w*w+.6,-2.7,2.7,w=>210+w*59,J=>270-J*59.5))}
+/* ma trận Hessian số tại θ* = [w*; b*] (dạng tổng, như mục 4) */
+(function(){let A=0,B=0,C=0;for(let k=0;k<n;k++){const p=P(ts,k),r=p*(1-p);A+=r*X[k]*X[k];B+=r*X[k];C+=r}
+ const tr=A+C,dt=A*C-B*B,q=Math.sqrt(tr*tr/4-dt),f=v=>v.toPrecision(3);
+ el('tH').innerHTML=`$$H_\\theta(\\theta^*)=\\begin{bmatrix}${f(A)}&${f(B)}\\\\${f(B)}&${f(C)}\\end{bmatrix}$$\\(\\lambda_{\\min}=${f(tr/2-q)}\\gt0,\\ \\lambda_{\\max}=${f(tr/2+q)}\\)`})();
+/* bề mặt lồi J(w) với b = b* */
+(function(){const f=w=>n*J([ts[0],w]),a=0,b=2*ts[1];
+ let mx=Math.max(f(a),f(b));chart('p5',{x0:a,x1:b,y0:Js*.95,y1:mx,xl:'w  (b = b*)',lines:[{p:curve(f,a,b),c:BLUE}],dots:[[ts[1],Js,RED]],labels:[[120,34,'J(w) lồi: một đáy duy nhất',RED]]})})();
 
-// điều hướng
-let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 1':'← Trước';$('#nx').textContent=cu==S.length-1?'Phần 3 →':'Sau →';history.replaceState(null,'','#'+(cu+1));D[cu]&&D[cu]()}
-$('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
-addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
-addEventListener('resize',()=>D[cu]&&D[cu]());
-addEventListener('load',()=>{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});go((+location.hash.slice(1)||1)-1)});
+/* slide 9: ba đồ thị nhỏ */
+function mini(id,o){const s=el(id),W=200,l=8,r=192,t=8,b=108,xs=o.p.map(p=>p[0]),x0=Math.min(...xs),x1=Math.max(...xs);
+ const sx=x=>l+(x-x0)/(x1-x0)*(r-l),sy=y=>b-(Math.max(o.y0,Math.min(o.y1,y))-o.y0)/(o.y1-o.y0)*(b-t);
+ const pl=(p,c,w)=>`<polyline fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round" points="${p.map(q=>sx(q[0]).toFixed(1)+','+sy(q[1]).toFixed(1)).join(' ')}"/>`;
+ s.innerHTML=`<line x1="${l}" y1="${b}" x2="${r}" y2="${b}" stroke="#9fb0cc"/>`+pl(o.p,BLUE,3)+(o.seg?pl(o.seg,RED,5):'')+(o.d||[]).map(d=>`<circle cx="${sx(d[0])}" cy="${sy(d[1])}" r="5" fill="${RED}"/>`).join('')+(o.lab||[]).map(q=>`<text x="${q[0]}" y="${q[1]}" text-anchor="${q[3]||'middle'}" style="font-size:11px;fill:${RED};font-weight:700">${q[2]}</text>`).join('')}
+(function(){const f=w=>J([ts[0],w]);
+ let a=curve(f,0,2.6,60);mini('m1',{p:a,y0:Js*.9,y1:Math.max(a[0][1],a[60][1]),d:[[ts[1],Js]],lab:[[100,24,'một đáy duy nhất']]});
+ mini('m2',{p:curve(t=>Math.max(0,Math.abs(t)-1)**2,-2.5,2.5,60),seg:[[-1,0],[1,0]],y0:-.15,y1:2.25,lab:[[100,24,'vô số nghiệm tối ưu']]});
+ a=curve(f,-4,6,80);mini('m3',{p:a,y0:0,y1:Math.max(a[0][1],a[80][1]),d:[[5,f(5)]],lab:[[100,24,'gần như thẳng: H ≈ 0']]})})();
+
+/* slide 7: p(1−p) theo z */
+const zs=el('zs');
+function up7(){const z=+zs.value,p=sig(z);el('zo').textContent=z.toFixed(1);
+ chart('p7',{x0:-8,x1:8,y0:0,y1:.25,xl:'z',hl:[{v:.25,c:'#9fb0cc',t:'1/4'}],lines:[{p:curve(x=>sig(x)*(1-sig(x)),-8,8),c:BLUE}],dots:[[z,p*(1-p),RED]],labels:[[60,34,'p(1−p) ∝ độ cong H',BLUE]]});
+ el('t7').innerHTML=`\\(p=${p.toFixed(3)}\\)<br>\\(p(1-p)=${(p*(1-p)).toFixed(3)}\\)<br>Nếu \\(y=0\\): \\(|p-y|=${p.toFixed(3)}\\)`;render(el('t7'))}
+zs.oninput=up7;
+
+/* slide 9: GD với α = c/L */
+const gs=el('gs');
+function up9(){const c=+gs.value,a=c/Lip;let t=[0,0];const pts=[[0,J0]];
+ for(let k=1;k<=200;k++){const g=gr(t);t=[t[0]-a*g[0],t[1]-a*g[1]];pts.push([k,J(t)])}
+ const mono=pts.every((p,i)=>!i||p[1]<=pts[i-1][1]+1e-12);
+ chart('p9',{x0:0,x1:200,y0:Js*.95,y1:J0*1.02,xl:'vòng lặp t',yd:2,hl:[{v:Js,c:'#9fb0cc',t:'J(w̃*)'}],lines:[{p:pts,c:mono?BLUE:RED}]});
+ el('go').textContent=c.toFixed(1);
+ el('t9').innerHTML=`\\(1/L=${(1/Lip).toFixed(3)}\\), \\(\\alpha=${a.toFixed(3)}\\)<br>`+(mono?`Loss giảm đơn điệu ✓`:`<span style="color:${RED}"><b>Loss không giảm đơn điệu ✗</b></span>`);render(el('t9'))}
+gs.oninput=up9;
+
+/* slide 11: SGD */
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let seed=7;const ss=el('ss');
+function sgd(a0,dec,N){const R=rng(seed);let t=[...ts];const pts=[[0,0]];
+ for(let k=1;k<=N;k++){const i=Math.floor(R()*n),g=gi(t,i),a=dec?a0/(1+.05*k):a0;t=[t[0]-a*g[0],t[1]-a*g[1]];pts.push([k,(t[0]-ts[0])**2+(t[1]-ts[1])**2])}return pts}
+function up11(){const c=+ss.value,a0=c/Lip,N=600;el('so').textContent=c.toFixed(2);
+ const A=sgd(a0,false,N),B=sgd(a0,true,N),mx=Math.max(1e-6,...A.map(p=>p[1]))*1.1;
+ chart('p11',{x0:0,x1:N,y0:0,y1:mx,xl:'bước t',yd:2,lines:[{p:A,c:RED,w:1.8},{p:B,c:BLUE}]});
+ const mean=q=>q.slice(-200).reduce((s,p)=>s+p[1],0)/200;
+ el('t11').innerHTML=`\\(\\alpha_0=${a0.toFixed(3)}\\)<br>200 bước cuối:<br>cố định ≈ \\(${mean(A).toFixed(3)}\\)<br>giảm dần ≈ \\(${mean(B).toFixed(4)}\\)`;render(el('t11'))}
+ss.oninput=up11;el('rr').onclick=()=>{seed=Math.floor(Math.random()*1e6);up11()};
+
+/* slide 12: Robbins–Monro */
+chart('p12',{x0:0,x1:50,y0:0,y1:1,xl:'t',lines:[{p:curve(t=>1/(1+t),0,50,50),c:BLUE},{p:curve(t=>1/(1+t)**2,0,50,50),c:RED}],labels:[[200,60,'α_t = 1/(1+t)',BLUE],[200,80,'α_t² (tổng hữu hạn)',RED]]});
+
+/* điều hướng (giống Phần 1) */
+const S=[...document.querySelectorAll('.slide')];let i=0;
+function go(k){
+  i=Math.max(0,Math.min(S.length-1,k));
+  S.forEach((e,j)=>e.classList.toggle('active',j===i));
+  el('cnt').textContent=`${i+1} / ${S.length}`;el('bar').style.width=(i+1)/S.length*100+'%';
+  S[i].scrollTop=0;history.replaceState(null,'','#'+(i+1));
+  const f=S[i].dataset.fn;if(f)({up7,up9,up11})[f]();
+}
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')&&!e.shiftKey)e.target.blur();
+  if(e.key==='ArrowRight'||e.key==='PageDown')go(i+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp')go(i-1);
+});
+el('pv').onclick=()=>go(i-1);el('nx').onclick=()=>go(i+1);
+let tx=null;document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{if(tx===null||e.target.tagName==='INPUT')return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(i+(d<0?1:-1));tx=null});
+addEventListener('load',()=>{render(document.body);go((parseInt(location.hash.slice(1))||1)-1)});
+go(0);
 </script>
-</body></html>
+</body>
+</html>
