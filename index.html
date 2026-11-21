@@ -1,46 +1,212 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CS115: Logistic and Softmax Regression</title>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logistic Regression và Softmax Regression – Mục lục</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eceff5;--ink:#0f1830;--mut:#5b6679;--card:#fff;--ln:#cfd6e2;--pos:#4338ca;--pos2:#312aa8;--tint:#eceafe;--glow1:rgba(67,56,202,.13);--glow2:rgba(18,153,138,.11);--dot:rgba(23,32,58,.07);--sh:0 1px 2px rgba(16,24,48,.06),0 8px 24px -10px rgba(16,24,48,.18)}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1024;--ink:#eef1fa;--mut:#a3adc4;--card:#161d3b;--ln:#2a3562;--pos:#8b87f0;--pos2:#aeabff;--tint:#232c5c;--glow1:rgba(139,135,240,.18);--glow2:rgba(18,153,138,.14);--dot:rgba(255,255,255,.05);--sh:0 1px 2px rgba(0,0,0,.3),0 10px 28px -10px rgba(0,0,0,.6)}}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;color:var(--ink);font:18px/1.55 Newsreader,Georgia,serif;text-align:center;
-background:radial-gradient(900px 480px at 8% -8%,var(--glow1),transparent 65%),radial-gradient(800px 460px at 96% 4%,var(--glow2),transparent 62%),radial-gradient(var(--dot) 1px,transparent 1.2px) 0 0/22px 22px,var(--bg);background-attachment:fixed}
-main{max-width:980px;margin:0 auto;padding:56px 5vw 72px}
-h1{font-size:2.8rem;line-height:1.12;font-weight:600;letter-spacing:-.015em;margin:0 0 .35em;padding-bottom:.45em;position:relative}
-h1::after{content:"";position:absolute;left:50%;bottom:0;width:84px;height:4px;margin-left:-42px;border-radius:4px;background:var(--pos)}
-h1+.mut{font-size:1.08rem;margin-top:.9em}
-h2{display:flex;align-items:center;gap:16px;font-size:1.65rem;font-weight:600;margin:2.1em 0 .3em;color:var(--ink)}
-h2::before,h2::after{content:"";flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--ln))}
-h2::after{background:linear-gradient(270deg,transparent,var(--ln))}
-h2+.mut{margin-top:.2em}
-.mut{color:var(--mut)}
-.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:20px}
-.k{display:block;background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:18px 16px;color:inherit;text-decoration:none;text-align:center;box-shadow:var(--sh)}
-a.k{border-top:4px solid var(--pos);transition:transform .15s,box-shadow .15s,border-color .15s}
-a.k:hover,a.k:focus-visible{border-color:var(--pos);outline:none;box-shadow:0 0 0 2px var(--pos),var(--sh);transform:translateY(-2px)}
-.k b{display:block;font-size:1.18rem;font-weight:600;margin:.1em 0 .25em}.k span{font-size:.92rem;color:var(--mut)}
-.n{font:600 12px system-ui;color:var(--pos);letter-spacing:.08em;display:inline-block;background:var(--tint);padding:2px 10px;border-radius:99px;margin-bottom:6px}
-.k.off{opacity:.6;box-shadow:none;border-style:dashed;background:transparent}
-.tag{display:inline-block;font:12px system-ui;border:1px solid var(--ln);border-radius:99px;padding:1px 10px;margin-top:6px;color:var(--mut)}
-.big{background:var(--card);border:2px dashed var(--ln);border-radius:14px;padding:26px;margin-top:16px;opacity:.75}
-</style></head><body><main>
-<h1>CS115: Logistic and Softmax Regression</h1>
-<p class="mut">Người trình bày: Mỹ Huyền, Minh Thy, Thành Luân, Công Minh</p>
+  :root {
+    --navy: #0f2a4a;
+    --navy-deep: #091d36;
+    --blue: #2f6fe4;
+    --ice: #eef3f9;
+    --line: #d5deea;
+    --ink: #14263d;
+    --muted: #5d6f86;
+    --white: #ffffff;
+    --font: "Be Vietnam Pro", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: clamp(15px, 0.9rem + 0.3vw, 18px); }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--white);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
 
-<h2>1. Logistic Regression</h2>
-<p class="mut">Sáu phần, từ xây dựng mô hình đến suy diễn Bayesian.</p>
-<div class="g">
-<a class="k" href="phan1-sigmoid/"><div class="n">PHẦN 1</div><b>Sigmoid và Loss</b><span>Bài toán → Bernoulli → Odds → Log-Odds → Sigmoid, Likelihood, Binary Cross-Entropy</span></a>
-<a class="k" href="phan2-gradient/"><div class="n">PHẦN 2</div><b>Gradient và Hessian</b><span>Đạo hàm của loss, ma trận Hessian, tính lồi</span><br></a>
-<a class="k" href="phan3-gradient-descent/"><div class="n">PHẦN 3</div><b>Gradient Descent</b><span>Batch GD, SGD, Momentum, điều kiện hội tụ</span><br></a>
-<a class="k" href="phan4-newton/"><div class="n">PHẦN 4</div><b>Newton, IRLS & Quasi-Newton</b><span>Xấp xỉ bậc hai, hội tụ bậc hai</span><br></a>
-<a class="k" href="phan5-regularization/"><div class="n">PHẦN 5</div><b>Regularization</b><span>L1, L2, subgradient</span><br></a>
-<a class="k" href="phan6-map/"><div class="n">PHẦN 6</div><b>Bayesian và MAP</b><span>Prior, Posterior, Laplace, MCMC</span><br></a>
-</div>
+  /* ---------- Cột trái: tiêu đề + đường sigmoid ---------- */
+  .hero {
+    background: var(--navy);
+    color: var(--white);
+    padding: clamp(2rem, 5vw, 4.5rem);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  .hero h1 {
+    font-weight: 800;
+    font-size: clamp(2rem, 4.2vw, 3.6rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+  .hero p {
+    margin-top: 1.25rem;
+    font-weight: 300;
+    color: #b9c8dd;
+    max-width: 28ch;
+  }
+  .curve { width: 100%; height: auto; max-height: 38vh; }
+  .curve .axis { stroke: #3b5a82; stroke-width: 1; }
+  .curve .guide { stroke: #3b5a82; stroke-width: 1; stroke-dasharray: 4 5; }
+  .curve .line { fill: none; stroke: var(--white); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+  .curve .dot { fill: var(--blue); stroke: var(--white); stroke-width: 2; }
+  .curve text { fill: #8ea6c4; font-family: var(--font); font-size: 12px; }
+  .meta { font-size: 0.85rem; color: #8ea6c4; font-weight: 300; }
 
-<h2>2. Softmax Regression</h2>
-<div class="big"><b>Mở rộng cho bài toán nhiều lớp</b><br><span class="mut">Nội dung sẽ được bổ sung sau.</span><br><i class="tag">Sắp ra mắt</i></div>
-</main></body></html>
+  /* ---------- Cột phải: mục lục ---------- */
+  main { padding: clamp(2rem, 5vw, 4.5rem); max-width: 46rem; }
+  section + section { margin-top: 3.5rem; }
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    padding-bottom: 0.9rem;
+    border-bottom: 2px solid var(--navy);
+  }
+  ol { list-style: none; }
+  li { border-bottom: 1px solid var(--line); }
+  a.row {
+    display: grid;
+    grid-template-columns: 2.4rem 1fr;
+    column-gap: 0.75rem;
+    padding: 1.05rem 0.75rem;
+    margin: 0 -0.75rem;
+    color: inherit;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.15s;
+  }
+  a.row:hover, a.row:focus-visible { background: var(--ice); }
+  a.row:focus-visible { outline: 2px solid var(--blue); outline-offset: 0; }
+  .num { font-weight: 600; color: var(--blue); }
+  .title { font-weight: 600; }
+  .desc { color: var(--muted); font-weight: 300; font-size: 0.92rem; }
+  .hint { margin-top: 3rem; font-size: 0.85rem; color: var(--muted); font-weight: 300; }
+  kbd {
+    font-family: var(--font);
+    font-size: 0.8rem;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 0 0.4rem;
+    background: var(--ice);
+  }
+
+  /* ---------- Màn hình nhỏ ---------- */
+  @media (max-width: 820px) {
+    body { grid-template-columns: 1fr; }
+    .hero { position: static; height: auto; gap: 2rem; }
+    .curve { max-height: 200px; }
+    .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div>
+    <h1>Logistic Regression<br>và Softmax Regression</h1>
+    <p>Từ xác suất, ma trận đến thuật toán tối ưu.</p>
+  </div>
+
+  <svg class="curve" viewBox="0 0 400 200" role="img" aria-label="Đồ thị hàm sigmoid">
+    <line class="axis" x1="10" y1="170" x2="390" y2="170"/>
+    <line class="axis" x1="200" y1="15" x2="200" y2="185"/>
+    <line class="guide" x1="10" y1="30" x2="390" y2="30"/>
+    <path class="line" id="sig" d=""/>
+    <circle class="dot" cx="200" cy="100" r="6"/>
+    <text x="206" y="24">1</text>
+    <text x="206" y="116">0,5</text>
+    <text x="206" y="184">0</text>
+  </svg>
+
+  <p class="meta">Thời lượng 45 phút</p>
+</header>
+
+<main>
+  <section aria-labelledby="h-logistic">
+    <h2 id="h-logistic">Logistic regression</h2>
+    <ol>
+      <li><a class="row" href="phan1-sigmoid/index.html">
+        <span class="num">1</span>
+        <span><span class="title">Hàm sigmoid và loss function</span><br>
+        <span class="desc">Mô hình xác suất, likelihood và cross-entropy</span></span></a></li>
+      <li><a class="row" href="phan2-gradient/index.html">
+        <span class="num">2</span>
+        <span><span class="title">Gradient và gradient descent</span><br>
+        <span class="desc">Đạo hàm theo w, b và cập nhật tham số</span></span></a></li>
+      <li><a class="row" href="phan4-newton/index.html">
+        <span class="num">3</span>
+        <span><span class="title">Hessian, Newton và Quasi-Newton</span><br>
+        <span class="desc">Dùng đạo hàm bậc hai để hội tụ nhanh hơn</span></span></a></li>
+      <li><a class="row" href="phan5-regularization/index.html">
+        <span class="num">4</span>
+        <span><span class="title">Optimization</span><br>
+        <span class="desc">So sánh các phương pháp tối ưu</span></span></a></li>
+      <li><a class="row" href="phan6-map/index.html">
+        <span class="num">5</span>
+        <span><span class="title">MAP và Bayesian inference</span><br>
+        <span class="desc">Prior, regularization và suy diễn Bayes</span></span></a></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-softmax">
+    <h2 id="h-softmax">Softmax regression</h2>
+    <ol>
+      <li><a class="row" href="softmax-1-softmax-loss.html">
+        <span class="num">1</span>
+        <span><span class="title">Hàm softmax và loss function</span><br>
+        <span class="desc">Mở rộng sang nhiều lớp, ví dụ phân loại chó, mèo</span></span></a></li>
+      <li><a class="row" href="softmax-2-gradient.html">
+        <span class="num">2</span>
+        <span><span class="title">Gradient và gradient descent</span><br>
+        <span class="desc">Dạng ma trận của gradient</span></span></a></li>
+      <li><a class="row" href="softmax-3-hessian.html">
+        <span class="num">3</span>
+        <span><span class="title">Hessian</span><br>
+        <span class="desc">Đạo hàm bậc hai của softmax loss</span></span></a></li>
+    </ol>
+  </section>
+
+  <p class="hint">Dùng <kbd>←</kbd> <kbd>→</kbd> để chọn mục, <kbd>Enter</kbd> để mở.</p>
+</main>
+
+<script>
+  // Vẽ đường sigmoid: x từ -6 đến 6 -> khung 10..390 ngang, 170..30 dọc
+  (function () {
+    var d = "";
+    for (var x = -6; x <= 6.001; x += 0.25) {
+      var s = 1 / (1 + Math.exp(-x));
+      var px = 200 + x * (190 / 6);
+      var py = 170 - s * 140;
+      d += (d ? "L" : "M") + px.toFixed(1) + " " + py.toFixed(1);
+    }
+    document.getElementById("sig").setAttribute("d", d);
+  })();
+
+  // Phím ← → chuyển giữa các mục (theo thứ tự), Enter mở mục đang chọn
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll("a.row"));
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      var i = links.indexOf(document.activeElement);
+      if (e.key === "ArrowRight") i = i < 0 ? 0 : Math.min(i + 1, links.length - 1);
+      else i = i < 0 ? links.length - 1 : Math.max(i - 1, 0);
+      links[i].focus();
+      e.preventDefault();
+    });
+  })();
+</script>
+</body>
+</html>
