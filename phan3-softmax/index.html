@@ -174,7 +174,7 @@ nav button:hover{background:var(--sky)}
         <p class="sub" style="font-size:13.5px">Thử thay đổi vector $\mathbf{v}$ với $\mathbf{a} = [0.6, 0.3, 0.1]^\top$ để kiểm chứng $\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \operatorname{Var}(V) \ge 0$:</p>
       </div>
       <div class="card">
-        <b class="title">Kiểm chứng $\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} \ge 0$ ($\mathbf{a} = [0.6, 0.3, 0.1]^\top$)</b>
+        <b class="title">Kiểm chứng <span class="nowrap">$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} \ge 0$</span> (<span class="nowrap">$\mathbf{a} = [0.6, 0.3, 0.1]^\top$</span>)</b>
         <div class="ctl" style="margin-top:8px">
           <label for="v1">$v_1$</label><input id="v1" type="range" min="-3" max="3" step="0.2" value="2.0"><output id="v1o"></output>
           <label for="v2">$v_2$</label><input id="v2" type="range" min="-3" max="3" step="0.2" value="-1.0"><output id="v2o"></output>
@@ -187,7 +187,7 @@ nav button:hover{background:var(--sky)}
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $L(\mathbf{z}) = -\sum_{k=1}^{K} y_k \ln a_k$ là hàm mất mát theo logits với vector xác suất $\mathbf{a}$ (thay cho $\mathbf{p}$).</div>
+  <div class="note"><b>Quy ước ký hiệu:</b> $L(\mathbf{z}) = -\sum_{k=1}^{K} y_k \ln a_k$ là hàm mất mát theo logits với vector xác suất $\mathbf{a}$ (thay cho $\mathbf{p}$); $\mathbf{H}_{\mathbf{z}}$ là ma trận Hessian theo logits.</div>
 </section>
 
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
