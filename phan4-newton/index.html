@@ -1,88 +1,172 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
 <title>Phần 4: Newton và Quasi-Newton</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eceff5;--ink:#0f1830;--mut:#5b6679;--card:#fff;--ln:#cfd6e2;--pos:#4338ca;--pos2:#312aa8;--ok:#12998a;--bad:#c2410c;--tint:#eceafe;--ftint:#e4e1ff;--fln:#9d97f2;--fink:#1c1480;--head:#e0e4f3;--glow1:rgba(67,56,202,.13);--glow2:rgba(18,153,138,.10);--dot:rgba(23,32,58,.07);--sh:0 1px 2px rgba(16,24,48,.06),0 8px 24px -10px rgba(16,24,48,.2)}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1024;--ink:#eef1fa;--mut:#a3adc4;--card:#161d3b;--ln:#2a3562;--pos:#8b87f0;--pos2:#aeabff;--tint:#232c5c;--ftint:#2b3570;--fln:#6e69d6;--fink:#ffffff;--head:#1b2450;--glow1:rgba(139,135,240,.18);--glow2:rgba(18,153,138,.14);--dot:rgba(255,255,255,.05);--sh:0 1px 2px rgba(0,0,0,.3),0 10px 28px -10px rgba(0,0,0,.6)}}
-*{box-sizing:border-box}html,body{height:100%;margin:0}
-body{color:var(--ink);font:18px/1.55 Newsreader,helvetica,sans-serif;display:flex;flex-direction:column;
-background:radial-gradient(900px 480px at 6% -8%,var(--glow1),transparent 65%),radial-gradient(800px 460px at 98% 100%,var(--glow2),transparent 62%),radial-gradient(var(--dot) 1px,transparent 1.2px) 0 0/22px 22px,var(--bg)}
-main{flex:1;overflow:hidden;position:relative}
-.s{position:absolute;inset:0;padding:24px 5vw;display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:minmax(0,1fr);gap:32px;overflow:hidden}
-.s.on{display:grid}
-.s>div{min-height:0;max-height:100%;align-self:center;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
+:root{
+  --bg:#f4f5fb;--ink:#101828;--mut:#667085;--card:#fff;--ln:#e1e5f0;
+  --pos:#4f46e5;--pos2:#3730a3;--ok:#12998a;--bad:#c2410c;
+  --tint:#eef0ff;--ftint:#f3f4ff;--fln:#c9cdf4;--fink:#1b1a63;--head:#eceef9;
+  --glow1:rgba(79,70,229,.10);--glow2:rgba(20,184,166,.08);
+  --sh:0 1px 2px rgba(16,24,40,.04),0 12px 32px -14px rgba(16,24,40,.16);
+  color-scheme:light dark;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#090d1b;--ink:#eef1fb;--mut:#9aa6c4;--card:#121932;--ln:#252f58;
+    --pos:#8f8bff;--pos2:#b4b1ff;--tint:#1b2352;--ftint:#161e47;--fln:#3a4690;--fink:#fff;--head:#19214a;
+    --glow1:rgba(143,139,255,.16);--glow2:rgba(20,184,166,.10);
+    --sh:0 1px 2px rgba(0,0,0,.3),0 14px 34px -14px rgba(0,0,0,.65);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;height:100%}
+@supports(height:100dvh){html,body{height:100dvh}}
+body{
+  margin:0;height:100%;display:flex;flex-direction:column;
+  font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:16.5px;line-height:1.65;color:var(--ink);
+  background:radial-gradient(900px 520px at 4% -10%,var(--glow1),transparent 65%),radial-gradient(800px 480px at 100% 105%,var(--glow2),transparent 62%),var(--bg);
+  overflow-wrap:break-word;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
+}
+@media(max-height:740px){body{font-size:15.5px}}
+main{flex:1;min-height:0;overflow:hidden;position:relative}
+.s{
+  position:absolute;top:0;right:0;bottom:0;left:0;
+  padding:28px max(5vw,env(safe-area-inset-left,0px)) 28px max(5vw,env(safe-area-inset-right,0px));
+  display:none;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:minmax(0,1fr);
+  gap:40px;overflow:hidden;
+}
+.s.on{display:grid;animation:sIn .3s ease-out}
+@media(prefers-reduced-motion:reduce){.s.on{animation:none}}
+@keyframes sIn{from{opacity:0}}
+.s>div{
+  min-width:0;min-height:0;max-height:100%;align-self:center;
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--fln) transparent;
+}
 .s>div:first-child{padding:4px 14px 4px 2px}
-.s>div::-webkit-scrollbar{width:9px}.s>div::-webkit-scrollbar-track{background:transparent}.s>div::-webkit-scrollbar-thumb{background:var(--fln);border-radius:9px;border:2px solid transparent;background-clip:padding-box}.s>div::-webkit-scrollbar-thumb:hover{background:var(--pos);background-clip:padding-box}
-.s>div:first-child>p.mut:first-child{display:inline-block;margin:0 0 .6em;padding:3px 12px;font:600 12.5px system-ui,sans-serif;letter-spacing:.04em;color:var(--pos2);background:var(--tint);border:1px solid var(--fln);border-radius:99px}
-.pl .katex-display{background:none;border:0;box-shadow:none;padding:2px 0;margin:.5em 0}
-.pl .katex-display>.katex{font-size:1.15em;-webkit-text-stroke:.25px currentColor}
+.s>div::-webkit-scrollbar{width:9px}
+.s>div::-webkit-scrollbar-track{background:transparent}
+.s>div::-webkit-scrollbar-thumb{background:var(--fln);border-radius:9px;border:2px solid transparent;background-clip:padding-box}
+.s>div::-webkit-scrollbar-thumb:hover{background:var(--pos);background-clip:padding-box}
+.s>div:first-child>p.mut:first-child{
+  display:inline-flex;align-items:center;gap:8px;margin:0 0 .6em;padding:5px 13px;
+  font:600 12.5px "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color:var(--pos2);background:var(--tint);border:1px solid var(--fln);border-radius:99px;
+}
+.s>div:first-child>p.mut:first-child::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pos)}
 .s.two.on{display:block;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--fln) transparent}
 .s.two>div{max-width:860px;margin:0 auto;max-height:none;overflow:visible;padding:4px 14px}
-@media(min-width:861px){.s.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.s.cols>div{align-self:start}}
-.v svg{display:block;width:100%;height:auto;max-height:64vh}
-.sa{stroke:var(--mut);stroke-width:1.2;fill:none}.st{fill:var(--mut);font:12px system-ui,sans-serif}.sb{fill:var(--tint);stroke:var(--fln);stroke-width:1.5}.sv{fill:var(--ink);font:15px system-ui,sans-serif}
-h1,h2,h3,h4{color:var(--ink);font-weight:700;line-height:1.2;margin:0}
-h1{font-size:2.2rem;letter-spacing:.01em;margin:.1em 0 .45em}
-h2{font-size:1.75rem;letter-spacing:-.01em;margin:0 0 .35em}
-h3{font-size:1.3rem;margin:.1em 0 .7em}
-h4{font-size:1.1rem;margin:1em 0 .2em}
-p{margin:.5em 0}ul{margin:.4em 0;padding-left:1.4em}li{margin:.25em 0}b{font-weight:700}.mut{color:var(--mut)}
-.box{border-left:4px solid var(--pos);padding:8px 14px;background:var(--tint);border-radius:0 8px 8px 0}
-.v{background:var(--card);border:1px solid var(--ln);border-top:4px solid var(--pos);border-radius:12px;padding:14px;box-shadow:var(--sh)}
-canvas{width:100%;height:300px;display:block}canvas.sm{height:200px}canvas.xs{height:150px}canvas.cl{cursor:crosshair}
-.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:14px system-ui,sans-serif;margin-top:8px}
-.c input{width:100%;accent-color:var(--pos)}
-.o{font:14px/1.6 system-ui,sans-serif;margin-top:10px;padding-top:8px;border-top:1px dashed var(--ln);color:var(--mut)}.o b{color:var(--ink)}
-.b{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-button,.nb{font:500 14px system-ui;padding:7px 13px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer;text-decoration:none;transition:border-color .12s,background .12s}
-button:hover,.nb:hover{border-color:var(--pos);background:var(--tint)}
-button.on{border-color:var(--pos);background:var(--tint);box-shadow:0 0 0 1px var(--pos);color:var(--pos2)}
-button:focus-visible,input:focus-visible,.nb:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
-nav{display:flex;gap:12px;align-items:center;justify-content:center;padding:10px;border-top:2px solid var(--ln);background:var(--card);box-shadow:0 -6px 18px -12px rgba(16,24,48,.35);font:600 14px system-ui}
-#nx{background:var(--pos);border-color:var(--pos);color:#fff}#nx:hover{background:var(--pos2);border-color:var(--pos2)}
-@media(prefers-color-scheme:dark){#nx{color:#10162b}}
-.katex{color:var(--fink);-webkit-text-stroke:.25px currentColor}
-.katex-display{overflow-x:auto;overflow-y:hidden;margin:.8em 0;padding:14px 16px;background:var(--ftint);border:1.5px solid var(--fln);border-left:6px solid var(--pos);border-radius:10px;box-shadow:var(--sh)}
-.katex-display>.katex{font-size:1.28em;-webkit-text-stroke:.45px currentColor}
-p .katex{font-size:1.08em}
-.fb{border:2.5px solid var(--pos);border-radius:12px;margin:.9em 0;overflow:hidden}
-.fb .katex-display{margin:0;border:0;border-radius:0;box-shadow:none}
-.ch{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;font:13px system-ui,sans-serif;margin-bottom:6px}
-.ch i{font-style:normal;border:1px solid var(--fln);background:var(--tint);border-radius:6px;padding:3px 9px}
-.ch s{text-decoration:none;color:var(--mut);font-size:11.5px}
-@media(max-width:860px){.s{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.s>div{max-height:none;overflow:visible;align-self:start}.s>div:first-child{padding:0}}
-.s.wide>div{max-width:1180px}.s.wide table{width:100%;min-width:860px;table-layout:fixed;border-collapse:separate;border-spacing:0;margin:.9em 0 .5em;font-size:.88rem;line-height:1.45;background:var(--card);border:1.5px solid var(--ln);border-radius:12px;box-shadow:var(--sh)}
-.s.wide th,.s.wide td{padding:12px 14px;text-align:center;vertical-align:middle;border-bottom:1px solid var(--ln);overflow-wrap:break-word}
+.s.wide>div{max-width:1180px}
+.tw{max-width:100%}
+.s.wide table{
+  width:100%;min-width:860px;table-layout:fixed;border-collapse:separate;border-spacing:0;
+  margin:.9em 0 .5em;font-size:clamp(.88rem,1.9vh,1.05rem);line-height:1.45;
+  background:var(--card);border:1px solid var(--ln);border-radius:16px;box-shadow:var(--sh);
+}
+.s.wide th,.s.wide td{
+  padding:clamp(12px,1.9vh,18px) 14px;text-align:center;vertical-align:middle;
+  border-bottom:1px solid var(--ln);overflow-wrap:break-word;
+}
 .s.wide th:first-child,.s.wide td:first-child,.s.wide th:last-child,.s.wide td:last-child{text-align:left}
-.s.wide th{background:var(--head);color:var(--ink);font-weight:700;border-bottom:2px solid var(--fln)}
+.s.wide th{background:var(--head);color:var(--ink);font-weight:600;border-bottom:2px solid var(--fln)}
+.s.wide th+th,.s.wide td+td{border-left:1px solid var(--ln)}
 .s.wide td:first-child{font-weight:600;color:var(--pos2)}
 .s.wide tbody tr:nth-child(n+4):nth-child(-n+5) td{background:var(--tint)}
 .s.wide tbody tr:nth-child(3) td,.s.wide tbody tr:nth-child(5) td{border-bottom:2px solid var(--fln)}
 .s.wide tbody tr:last-child td{border-bottom:0}
-.s.wide thead th:first-child{border-top-left-radius:10px}.s.wide thead th:last-child{border-top-right-radius:10px}
-.s.wide tbody tr:last-child td:first-child{border-bottom-left-radius:10px}.s.wide tbody tr:last-child td:last-child{border-bottom-right-radius:10px}
+.s.wide thead th:first-child{border-top-left-radius:15px}
+.s.wide thead th:last-child{border-top-right-radius:15px}
+.s.wide tbody tr:last-child td:first-child{border-bottom-left-radius:15px}
+.s.wide tbody tr:last-child td:last-child{border-bottom-right-radius:15px}
 .s.wide table+p.mut{text-align:center;font-size:.9rem}
-@media(max-height:740px){body{font-size:16.5px}}
+h1,h2,h3,h4{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);font-weight:700;line-height:1.2;letter-spacing:-.02em;margin:0}
+h1{font-size:clamp(1.9rem,3.6vw,2.7rem);font-weight:800;line-height:1.1;margin:.2em 0 .5em;padding-bottom:.5em;position:relative}
+h1::after{content:"";position:absolute;left:0;bottom:0;width:64px;height:4px;border-radius:4px;background:var(--pos)}
+h2{font-size:clamp(1.3rem,2.2vw,1.65rem);line-height:1.25;margin:0 0 .35em}
+h3{font-size:1.15rem;font-weight:600;color:var(--pos2);margin:.1em 0 .7em}
+h4{font-size:1.02rem;font-weight:600;margin:1em 0 .2em}
+p{margin:.5em 0}
+ul,ol{margin:.4em 0;padding-left:1.4em}
+li{margin:.25em 0}
+b,strong{font-weight:600}
+.mut{color:var(--mut)}
+.box{border:1px solid var(--fln);border-left:4px solid var(--pos);padding:12px 18px;background:var(--tint);border-radius:14px}
+.v{background:var(--card);border:1px solid var(--ln);border-top:3px solid var(--pos);border-radius:20px;padding:18px;box-shadow:var(--sh)}
+img,svg,video{max-width:100%}
+img{height:auto}
+canvas{width:100%;height:300px;display:block}
+canvas.sm{height:200px}
+canvas.xs{height:150px}
+.c{display:grid;grid-template-columns:auto 1fr 4.5em;gap:4px 10px;align-items:center;font:13.5px "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin-top:8px}
+.c input{width:100%;min-width:0;accent-color:var(--pos)}
+.o{font:13.5px/1.6 "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--bg);color:var(--mut)}
+.o b{color:var(--ink)}
+button,.nb{font:500 13.5px "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:8px 15px;border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:10px;cursor:pointer;text-decoration:none;box-shadow:0 1px 2px rgba(16,24,40,.05);transition:border-color .12s,background .12s}
+button:hover,.nb:hover{border-color:var(--pos);background:var(--tint)}
+button:focus-visible,input:focus-visible,.nb:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
+nav{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:center;padding:11px max(10px,env(safe-area-inset-left,0px)) max(11px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-right,0px));border-top:1px solid var(--ln);background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(12px);font:600 13.5px "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+nav #ct{min-width:64px;padding:5px 12px;border-radius:99px;background:var(--tint);color:var(--pos2);font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
+#nx{background:var(--pos);border-color:var(--pos);color:#fff;box-shadow:0 6px 16px -6px var(--pos)}
+#nx:hover{background:var(--pos2);border-color:var(--pos2)}
+@media(prefers-color-scheme:dark){#nx{color:#10162b}}
+.katex{color:var(--fink);-webkit-text-stroke:.12px currentColor}
+.katex-display{overflow-x:auto;overflow-y:hidden;margin:.8em 0;padding:16px 20px;background:var(--ftint);border:1px solid var(--fln);border-left:4px solid var(--pos);border-radius:14px}
+.katex-display>.katex{font-size:1.28em;-webkit-text-stroke:.2px currentColor}
 .s .katex-display>.katex{font-size:1.45em}
-.s .fb .katex-display>.katex{font-size:1.55em}
 .s .pl .katex-display>.katex{font-size:1.4em}
+p .katex{font-size:1.08em}
+.fb{border:1.5px solid var(--pos);border-radius:16px;margin:.9em 0;overflow:hidden;box-shadow:var(--sh)}
+.fb .katex-display{margin:0;border:0;border-radius:0}
+.s .fb .katex-display>.katex{font-size:1.55em}
+.pl .katex-display{background:none;border:0;padding:2px 0;margin:.5em 0}
+.pl .katex-display>.katex{font-size:1.15em;-webkit-text-stroke:.25px currentColor}
 .fm{display:flex;flex-direction:column;justify-content:center;gap:.5em}
 .fm .pl .katex-display{margin:.3em 0}
 .fm .pl+.pl,.fm .pl+.fb,.fm .fb+.pl{border-top:1px dashed var(--ln);padding-top:.5em}
-.fm .katex-display>.katex{font-size:1.7em}.fm .fb .katex-display>.katex{font-size:1.8em}
-.fm canvas.sm{height:190px;margin-top:.4em}.fm p.mut{font-size:.88rem;margin:.3em 0 0;text-align:center}
-.ag h4{margin:0 0 .4em;font-size:1.25rem}.ag p{margin:.7em 0 .1em}.ag ul{margin:.1em 0}
-.s.lg>div:first-child{font-size:1.15em}.s.lg.xl>div:first-child{font-size:1.3em}
-.flow{display:flex;flex-direction:column;align-items:center;gap:.25em;margin-bottom:.9em}.flow>span{background:var(--tint);border:1px solid var(--fln);border-radius:10px;padding:.3em 1.1em}.flow>i{font:600 .86rem system-ui,sans-serif;color:var(--pos2);font-style:normal}
-.s.wide table{font-size:clamp(.88rem,1.9vh,1.05rem)}.s.wide th,.s.wide td{padding:clamp(12px,1.9vh,18px) 14px}
-.s.cols .box{margin:.7em 0}.s.cols .box p:first-child{margin-top:0}.s.cols .box p:last-child,.s.cols .box ol{margin-bottom:0}
-
-@media(max-width:860px){.s.wide>div{overflow-x:auto}}
-</style></head>
+.fm .katex-display>.katex{font-size:1.7em}
+.fm .fb .katex-display>.katex{font-size:1.8em}
+.fm canvas.sm{height:190px;margin-top:.4em}
+.fm p.mut{font-size:.88rem;margin:.3em 0 0;text-align:center}
+.s.lg>div:first-child{font-size:1.15em}
+.s.lg.xl>div:first-child{font-size:1.3em}
+.flow{display:flex;flex-direction:column;align-items:center;gap:.25em;margin-bottom:.9em}
+.flow>span{background:var(--tint);border:1px solid var(--fln);border-radius:10px;padding:.3em 1.1em}
+.flow>i{font:600 .86rem "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--pos2);font-style:normal}
+@media(max-width:860px){
+  .s{grid-template-columns:1fr;grid-template-rows:none;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:18px max(16px,env(safe-area-inset-left,0px)) 18px max(16px,env(safe-area-inset-right,0px));gap:22px}
+  .s>div{max-height:none;overflow:visible;align-self:start}
+  .s>div:first-child{padding:0}
+  .s.wide>div{overflow-x:auto}
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  canvas{height:260px}
+  .katex-display{padding:12px 14px}
+  .katex-display>.katex{font-size:1.12em}
+}
+@media(max-width:480px){
+  body{font-size:16px}
+  nav{gap:6px}
+  button,.nb{padding:8px 10px;font-size:13px}
+  nav #ct{min-width:52px;padding:5px 8px}
+  .c{grid-template-columns:minmax(0,auto) minmax(60px,1fr) 3.6em;gap:4px 8px}
+}
+@media(max-height:520px){
+  canvas{height:210px}canvas.sm{height:170px}canvas.xs{height:130px}
+  nav{padding-top:6px}
+}
+@media(pointer:coarse){
+  button,.nb{min-height:40px}
+  .nb{display:inline-flex;align-items:center}
+}
+</style>
+</head>
 <body>
 <main>
 
@@ -92,7 +176,7 @@ p .katex{font-size:1.08em}
 <h1>NEWTON’S METHODS VÀ QUASI-NEWTON METHODS</h1>
 <h3>Tối ưu hóa Bậc hai và Xấp xỉ Hessian</h3>
 <p class="box">Phần 3 chỉ dùng gradient (thông tin bậc nhất): bước đi theo hướng dốc nhất, và bị zích-zắc khi gặp hẻm núi hẹp. Phần 4 thêm thông tin về độ cong của hàm mục tiêu thông qua ma trận Hessian, đã được xây dựng ở Phần 2.</p>
-<p><a class="nb" href="../phan3-gradient-descent/">← Quay lại Phần 3</a></p>
+<p><a class="nb" href="../phan3-gradient-descent/index.html">← Quay lại Phần 3</a></p>
 </div>
 </section>
 
@@ -102,12 +186,8 @@ p .katex{font-size:1.08em}
 <p class="mut">Logistic Regression · Phần 4 / 6</p>
 <h2>1. NEWTON’S METHODS</h2>
 <h3>1.1. Khái niệm và Xấp xỉ Taylor Bậc hai</h3>
-
-
 <p>Phương pháp Newton (Newton-Raphson Optimization) là thuật toán tối ưu hóa bậc hai (Second-Order Optimization) khai thác thông tin độ cong của hàm mục tiêu thông qua ma trận Hessian:</p>
-
 <p>Tại mỗi bước lặp $\theta_k$, hàm mục tiêu $f(\theta)$ được xấp xỉ bằng chuỗi Taylor đến bậc hai xung quanh điểm $\theta_k$:</p>
-
 <p>với $g_k=\nabla f(\theta_k)$ và $H_k=\nabla^2f(\theta_k)$.</p>
 <p>Toàn bộ quá trình tìm kiếm bước nhảy Newton $d_k=\theta-\theta_k$ xuất phát từ việc giải điểm dừng của hàm xấp xỉ bậc hai. Lấy đạo hàm của $f_{\text{quad}}(\theta)$ theo $\theta$ và cho bằng 0:</p>
 </div>
@@ -140,7 +220,6 @@ p .katex{font-size:1.08em}
 <p class="mut">Logistic Regression · Phần 4 / 6</p>
 <h2>1. NEWTON’S METHODS</h2>
 <h3>1.2. Nhược điểm và Kỹ thuật Khắc phục</h3>
-
 <p>Mặc dù sở hữu tốc độ hội tụ bậc hai ấn tượng, phương pháp Newton gặp phải hai rào cản tính toán lớn:</p>
 <ul>
 <li>Chi phí tính toán ma trận Hessian $D\times D$ và giải hệ phương trình tuyến tính $H_kd_k=-g_k$ tiêu tốn $\mathcal{O}(D^3)$ phép tính cùng $\mathcal{O}(D^2)$ dung lượng bộ nhớ tại mỗi bước lặp.</li>
@@ -164,11 +243,8 @@ p .katex{font-size:1.08em}
 <p class="mut">Logistic Regression · Phần 4 / 6</p>
 <h2>1. NEWTON’S METHODS</h2>
 <h3>1.3. Quan hệ giữa Newton-Raphson và Iteratively Reweighted Least Squares (IRLS)</h3>
-
-
-<p>IRLS là thuật toán chuyên biệt áp dụng phương pháp Newton để tìm ước lượng cực đại khả phong (MLE) cho mô hình Logistic Regression.</p>
+<p>IRLS là thuật toán chuyên biệt áp dụng phương pháp Newton để tìm MLE cho mô hình Logistic Regression.</p>
 <p>Biểu thức $w_{k+1}=(X^TS_kX)^{-1}X^TS_kz_k$ chính là nghiệm dạng đóng (closed-form solution) của bài toán Bình phương tối thiểu có trọng số (Weighted Least Squares - WLS) tại mỗi bước lặp:</p>
-
 <p>trong đó trọng số của mỗi mẫu $i$ là $S_{k,ii}=\mu_{k,i}(1-\mu_{k,i})$, và giá trị mục tiêu làm việc $z_{k,i}$ được biểu diễn từng thành phần:</p>
 </div>
 <div class="v fm">
@@ -203,11 +279,8 @@ p .katex{font-size:1.08em}
 <p class="mut">Logistic Regression · Phần 4 / 6</p>
 <h2>2. QUASI-NEWTON METHOD</h2>
 <h3>2.1. Khái niệm và Phương trình Secant</h3>
-
-
 <p>Các phương pháp Quasi-Newton được phát triển nhằm giữ lại tốc độ hội tụ siêu tuyến tính (Superlinear Convergence) của phương pháp Newton nhưng loại bỏ chi phí tính toán $\mathcal{O}(D^3)$ của việc nghịch đảo ma trận Hessian trực tiếp. Thuật toán xây dựng một chuỗi ma trận xấp xỉ $B_k\approx H_k$ hoặc $C_k\approx H_k^{-1}$ chỉ dựa trên thông tin Gradient thu thập qua các bước lặp.</p>
 <p>Định nghĩa các vector chênh lệch vị trí và chênh lệch Gradient giữa hai bước lặp liên tiếp $k$ và $k+1$:</p>
-
 <p>Khai triển Taylor cấp một của Gradient $\nabla f(\theta_{k+1})$ xung quanh $\theta_k$ thu được $y_k\approx H_{k+1}s_k$. Từ đó, ta áp dụng <b>Phương trình Secant</b> làm điều kiện ràng buộc bắt buộc đối với ma trận xấp xỉ $B_{k+1}$:</p>
 </div>
 <div class="v fm">
@@ -238,13 +311,10 @@ p .katex{font-size:1.08em}
 <p class="mut">Logistic Regression · Phần 4 / 6</p>
 <h2>2. QUASI-NEWTON METHOD</h2>
 <h3>2.2. Điều kiện Xác định Dương và Điều kiện Curvature</h3>
-
 <p>Để đảm bảo hướng tìm kiếm $d_{k+1}=-C_{k+1}g_{k+1}$ luôn là hướng giảm (descent direction), ma trận $C_{k+1}$ bắt buộc phải xác định dương ($C_{k+1}\succ0$). Nhân $s_k^T$ vào hai vế của phương trình Secant $B_{k+1}s_k=y_k$, ta thu được <b>điều kiện độ cong</b> (Curvature Condition):</p>
-
 <h3>2.3. Bản chất Hình học của Quasi-Newton</h3>
 <p>Hệ phương trình $C_{k+1}y_k=s_k$ chỉ cung cấp $D$ ràng buộc tuyến tính trong khi ma trận đối xứng $C_{k+1}\in\mathbb{R}^{D\times D}$ có tới $\frac{D(D+1)}{2}$ ẩn số (hệ vô định).</p>
 <p>Để chọn ra một ma trận $C_{k+1}$ duy nhất mà không làm mất đi thông tin độ cong đã học được ở các bước trước, BFGS giải bài toán chiếu gần nhất (Proximity Minimization) trong chuẩn Frobenius có trọng số $W$:</p>
-
 <p>Nghiệm giải tích chính xác của bài toán tối ưu có ràng buộc này chính là công thức cập nhật BFGS!</p>
 </div>
 <div class="v fm">
@@ -261,11 +331,8 @@ p .katex{font-size:1.08em}
 <p class="mut">Logistic Regression · Phần 4 / 6</p>
 <h2>2. QUASI-NEWTON METHOD</h2>
 <h3>2.4. Thuật toán BFGS</h3>
-
-
 <p>Thuật toán BFGS được đánh giá là phương pháp Quasi-Newton hiệu quả và ổn định nhất trong lớp các thuật toán tối ưu hóa phi tuyến. BFGS đề xuất công thức hiệu chỉnh hạng hai (rank-two update) để cập nhật ma trận $B_k$ sao cho duy trì tính đối xứng và xác định dương.</p>
 <h4>Công thức Cập nhật Ma trận Hessian Xấp xỉ $B_k$:</h4>
-
 <p>Cấu trúc cập nhật bao gồm hai ma trận hạng một: thành phần cộng thêm $\frac{y_ky_k^T}{y_k^Ts_k}$ đảm bảo ma trận mới thỏa mãn phương trình Secant, trong khi thành phần trừ đi $\frac{B_ks_ks_k^TB_k}{s_k^TB_ks_k}$ triệt tiêu tác động xấp xỉ cũ theo hướng $s_k$.</p>
 <p><i>Kiểm chứng trực tiếp phương trình Secant:</i> Nhân hai vế bên phải với $s_k$:</p>
 </div>
@@ -281,10 +348,8 @@ p .katex{font-size:1.08em}
 <p class="mut">Logistic Regression · Phần 4 / 6</p>
 <h2>2. QUASI-NEWTON METHOD</h2>
 <h3>2.4. Thuật toán BFGS <span class="mut">(tiếp)</span></h3>
-
 <h4>Biến đổi Sherman-Morrison-Woodbury tính Ma trận Nghịch đảo $C_k=B_k^{-1}$:</h4>
 <p>Để tránh việc phải đảo ma trận $B_{k+1}$ với chi phí $\mathcal{O}(D^3)$, bổ đề Sherman-Morrison-Woodbury được áp dụng để biến đổi công thức cập nhật cho $C_{k+1}=B_{k+1}^{-1}$:</p>
-
 <p>với đại lượng vô hướng $\rho_k=\dfrac{1}{y_k^Ts_k}$.</p>
 </div>
 <div class="v fm">
@@ -316,10 +381,8 @@ p .katex{font-size:1.08em}
 <p class="mut">Logistic Regression · Phần 4 / 6</p>
 <h2>2. QUASI-NEWTON METHOD</h2>
 <h3>2.5. Thuật toán L-BFGS</h3>
-
 <p>Thuật toán L-BFGS (Limited-memory BFGS) giải quyết hạn chế dung lượng bộ nhớ $\mathcal{O}(D^2)$ của BFGS bằng cách không lưu trữ toàn bộ ma trận $C_k$. Thay vào đó, L-BFGS chỉ lưu trữ $m$ cặp vector gần nhất $\{(s_i,y_i)\}_{i=k-m}^{k-1}$ với $m$ thường chọn trong khoảng từ 3 đến 20.</p>
 <p>Khai triển liên tiếp công thức cập nhật BFGS cho ma trận nghịch đảo Hessian $H_k$ (dùng ký hiệu $H_k$ thay cho $C_k$) ngược về $m$ bước lặp trong quá khứ thu được biểu thức:</p>
-
 <p>với $V_i=I-\rho_iy_is_i^T$.</p>
 <p>Để tính trực tiếp hướng giảm $r=H_kg_k$ (cho bước nhảy $p_k=-r$) mà không cần dựng ma trận $H_k$, thuật toán sử dụng kỹ thuật <b>Đệ quy Hai Vòng lặp</b> (Two-loop Recursion) do Jorge Nocedal phát triển.</p>
 </div>
@@ -343,7 +406,8 @@ p .katex{font-size:1.08em}
 <li>Tính vô hướng $\alpha_i=\rho_i(s_i^Tq)$.</li>
 <li>Cập nhật vector $q=q-\alpha_iy_i$.</li>
 </ol>
-</div><div class="box">
+</div>
+<div class="box">
 <p><b>Khởi tạo ma trận cơ sở (Initial scaling):</b><br>Định nghĩa ma trận Hessian cơ sở dạng đường chéo $H_k^0=\gamma_kI$, trong đó hằng số tỉ lệ Nocedal-Wright được xác định bởi $\gamma_k=\dfrac{s_{k-1}^Ty_{k-1}}{y_{k-1}^Ty_{k-1}}$.<br>Khởi tạo vector kết quả: $r=H_k^0q=\gamma_kq$.</p>
 </div>
 </div>
@@ -355,7 +419,8 @@ p .katex{font-size:1.08em}
 <li>Tính vô hướng $\beta=\rho_i(y_i^Tr)$.</li>
 <li>Cập nhật vector $r=r+s_i(\alpha_i-\beta)$.</li>
 </ol>
-</div><p>Sau khi kết thúc hai vòng lặp, vector $r$ thu được chính là tích $H_kg_k$, cho phép xác định hướng tìm kiếm $p_k=-r$ hoàn toàn bằng các phép nhân nội dung vector với chi phí $\mathcal{O}(mD)$.</p>
+</div>
+<p>Sau khi kết thúc hai vòng lặp, vector $r$ thu được chính là tích $H_kg_k$, cho phép xác định hướng tìm kiếm $p_k=-r$ hoàn toàn bằng các phép nhân nội dung vector với chi phí $\mathcal{O}(mD)$.</p>
 </div>
 </section>
 
@@ -384,7 +449,8 @@ p .katex{font-size:1.08em}
 <button id="pv">← Trước</button><span id="ct"></span><button id="nx">Sau →</button>
 </nav>
 <script>
-const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan5-regularization/',PREV='../phan3-gradient-descent/';
+if(!Array.prototype.at)Object.defineProperty(Array.prototype,'at',{value:function(n){n=Math.trunc(n)||0;if(n<0)n+=this.length;return this[n]},writable:true,configurable:true});
+const $=s=>document.querySelector(s),sg=z=>1/(1+Math.exp(-z)),S=[...document.querySelectorAll('.s')],D={},NEXT='../phan5-regularization/index.html',PREV='../phan3-gradient-descent/index.html';
 const C={a:'#d9822b',ok:'#12998a',bad:'#c2410c',pos:'#4338ca'},css=n=>getComputedStyle(document.documentElement).getPropertyValue(n),lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n),f2=x=>x.toFixed(2),f3=x=>x.toFixed(3);
 function cv(id){const e=$(id),r=e.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return null;e.width=r.width*d;e.height=r.height*d;const c=e.getContext('2d');c.scale(d,d);return[c,r.width,r.height]}
 const PAD={l:38,r:8,t:22,b:22};
@@ -406,10 +472,8 @@ function sl(h,lab,mn,mx,st,v,f,fmt=x=>x){const g=$(h),l=document.createElement('
 Object.assign(i,{type:'range',min:mn,max:mx,step:st,value:v});o.textContent=fmt(+v);i.oninput=()=>{o.textContent=fmt(+i.value);f()};g.append(l,i,o);
 const q=()=>+i.value;q.set=a=>{i.value=a;o.textContent=fmt(+i.value)};return q}
 
-
 const fm=x=>!isFinite(x)?'∞':Math.abs(x)<1e-9?'0':(Math.abs(x)>=1e4||Math.abs(x)<1e-3)?x.toExponential(1):x.toFixed(3);
 const gq=(A,m)=>th=>[A[0]*(th[0]-m[0]),A[1]*(th[1]-m[1])],fq=(A,m,th)=>.5*(A[0]*(th[0]-m[0])**2+A[1]*(th[1]-m[1])**2);
-// đường đẳng mức của f=½(θ-m)ᵀdiag(A)(θ-m) và các đường đi (ps)
 function ctr(id,A,m,ps){const t=cv(id);if(!t)return;const[c,W,H]=t,s=W/8.8,X=x=>W/2+x*s,Y=y=>H/2-y*s;
 c.lineWidth=1;c.strokeStyle=css('--ln');c.beginPath();c.moveTo(0,H/2);c.lineTo(W,H/2);c.moveTo(W/2,0);c.lineTo(W/2,H);c.stroke();
 c.strokeStyle=css('--fln');[.4,1,2,3.5,5.5,8,12,17,24].forEach(k=>{c.beginPath();c.ellipse(X(m[0]),Y(m[1]),Math.sqrt(2*k/A[0])*s,Math.sqrt(2*k/A[1])*s,0,0,7);c.stroke()});
@@ -418,22 +482,18 @@ c.save();c.beginPath();c.rect(0,0,W,H);c.clip();
 ps.forEach(k=>{c.strokeStyle=c.fillStyle=k.c;c.lineWidth=2;c.beginPath();k.p.forEach((q,i)=>i?c.lineTo(X(q[0]),Y(q[1])):c.moveTo(X(q[0]),Y(q[1])));c.stroke();k.p.forEach((q,i)=>{c.beginPath();c.arc(X(q[0]),Y(q[1]),i?2.5:5,0,7);c.fill()})});c.restore();
 c.font='12px system-ui';let lx=8;ps.forEach(k=>{if(k.n){c.fillStyle=k.c;c.fillText(k.n,lx,14);lx+=c.measureText(k.n).width+14}})}
 
-// hàm 1 chiều dùng ở slide 1.2 và 2.1: f(θ)=log(1+e^θ)−0.3θ+0.05θ²
 const F1=t=>Math.log(1+Math.exp(t))-.3*t+.05*t*t,G1=t=>sg(t)-.3+.1*t,H1=t=>sg(t)*(1-sg(t))+.1;
 
-// 1.1 Taylor bậc hai và bước Newton
 {const xs=lin(-4,4,160),k=sl('#k1','θk',-2.5,2.5,.1,1.5,dr,f2);
 function dr(){const a=k(),g=G1(a),h=H1(a),d=-g/h,nx=a+d,q=t=>F1(a)+g*(t-a)+.5*h*(t-a)**2;
 plot('#c1',xs,[{y:xs.map(F1),c:C.pos,n:'f(θ)'},{y:xs.map(q),c:C.bad,dash:1,n:'f_quad(θ)'},{pts:[[a,F1(a)]],c:C.ok,r:5},{pts:[[nx,F1(nx)]],c:C.a,r:5}],{y0:0,y1:5,v:[[a],[nx,C.a]]});
 $('#o1').innerHTML=`g<sub>k</sub> = <b>${f2(g)}</b> · H<sub>k</sub> = <b>${f2(h)}</b> · d<sub>k</sub> = −g<sub>k</sub>/H<sub>k</sub> = <b>${f2(d)}</b> → θ<sub>k+1</sub> = <b>${f2(nx)}</b> (đáy của f<sub>quad</sub>)`}D[2]=dr}
 
-// 1.2 Levenberg-Marquardt: f = θ⁴/4 − θ²/2
 {const xs=lin(-2,2,160),f=t=>t**4/4-t*t/2,th=sl('#k2','θk',-1.5,1.5,.05,.3,dr,f2),de=sl('#k2','δ',0,5,.1,0,dr,f2);
 function dr(){const a=th(),dl=de(),g=a**3-a,h=3*a*a-1,m=h+dl,ok=Math.abs(m)>1e-6,d=ok?-g/m:0,nx=a+d,q=t=>f(a)+g*(t-a)+.5*m*(t-a)**2;
 plot('#c2',xs,[{y:xs.map(f),c:C.pos,n:'f(θ)'},{y:xs.map(q),c:C.bad,dash:1,n:'mô hình với H + δ'},{pts:[[a,f(a)]],c:C.ok,r:5},...(ok?[{pts:[[nx,f(nx)]],c:C.a,r:5}]:[])],{y0:-.5,y1:2.5,v:ok?[[a],[nx,C.a]]:[[a]]});
 $('#o2').innerHTML=`H<sub>k</sub> = <b>${f2(h)}</b> · H<sub>k</sub>+δ = <b>${f2(m)}</b> · d<sub>k</sub> = <b>${ok?f2(d):'—'}</b> → θ<sub>k+1</sub> = <b>${ok?f2(nx):'—'}</b>`+(dl>0?` · (GD: −g/δ = ${f2(-g/dl)})`:'')+`<br>${m>1e-6?(h>0?'Hessian đã xác định dương: bước Newton chuẩn đi xuống.':'H<sub>k</sub> + δ &gt; 0 nên hướng d<sub>k</sub> là hướng giảm.'):'H<sub>k</sub> + δ ≤ 0: mô hình là parabol úp, bước đi hướng về cực đại/điểm yên.'}`}D[3]=dr}
 
-// 1.3 IRLS và Gradient Descent trên Logistic Regression 1 chiều (có hệ số chặn)
 const IX=[-3,-2,-1.2,-.5,0,.4,1,1.5,2.5,3.5],IY=[0,0,1,0,0,1,0,1,1,1];
 function igr(w){let a=0,b=0;IX.forEach((x,i)=>{const e=sg(w[0]+w[1]*x)-IY[i];a+=e;b+=e*x});return[a,b]}
 function irls(w){let a=0,b=0,c=0,r0=0,r1=0;IX.forEach((x,i)=>{const m=sg(w[0]+w[1]*x),s=Math.max(m*(1-m),1e-12),z=w[0]+w[1]*x+(IY[i]-m)/s;a+=s;b+=s*x;c+=s*x*x;r0+=s*z;r1+=s*x*z});const dt=a*c-b*b;return[(c*r0-b*r1)/dt,(a*r1-b*r0)/dt]}
@@ -445,13 +505,11 @@ plot('#c3a',xs,[{y:xs.map(x=>sg(w[0]+w[1]*x)),c:C.bad,n:'p = σ(w₀ + w₁x) sa
 plot('#c3b',ts,[{y:WI.map(v=>L10(nm(v))),c:C.pos,n:'IRLS'},{y:WG.map(v=>L10(nm(v))),c:C.a,n:'GD (η = 0.05)'}],{y0:-12,y1:2,v:[[k]],t:'log₁₀‖∇J‖ theo số bước'});
 $('#o3').innerHTML=`k = <b>${k}</b> · w = (<b>${f3(w[0])}</b>, <b>${f3(w[1])}</b>) · ‖∇J‖: IRLS <b>${fm(nm(WI[k]))}</b>, GD <b>${fm(nm(WG[k]))}</b>`}D[5]=dr}
 
-// 2.1 Phương trình Secant (1 chiều): B = y/s
 {const xs=lin(-4,4,160),a=sl('#k4','θk',-3,3,.1,-1.5,dr,f2),b=sl('#k4','θk+1',-3,3,.1,1,dr,f2);
 function dr(){const p=a(),q=b(),s=q-p,y=G1(q)-G1(p),B=Math.abs(s)>1e-9?y/s:H1(q),l=t=>G1(p)+B*(t-p);
 plot('#c4',xs,[{y:xs.map(G1),c:C.pos,n:'g = f′(θ)'},{y:xs.map(l),c:C.bad,dash:1,n:'đường secant'},{pts:[[p,G1(p)],[q,G1(q)]],c:C.ok,r:5}],{y0:-2,y1:2,h:[0],v:[[p],[q,C.a]]});
 $('#o4').innerHTML=`s<sub>k</sub> = <b>${f2(s)}</b> · y<sub>k</sub> = <b>${f2(y)}</b> · B<sub>k+1</sub> = y<sub>k</sub>/s<sub>k</sub> = <b>${f3(B)}</b> (f″(θ<sub>k+1</sub>) = ${f3(H1(q))}) · s<sub>k</sub>y<sub>k</sub> = <b>${f3(s*y)}</b>`}D[7]=dr}
 
-// 2.4 BFGS, Newton, GD trên f = ½(x² + κy²)
 const mv=(M,v)=>[M[0][0]*v[0]+M[0][1]*v[1],M[1][0]*v[0]+M[1][1]*v[1]],mm=(P,Q)=>[[P[0][0]*Q[0][0]+P[0][1]*Q[1][0],P[0][0]*Q[0][1]+P[0][1]*Q[1][1]],[P[1][0]*Q[0][0]+P[1][1]*Q[1][0],P[1][0]*Q[0][1]+P[1][1]*Q[1][1]]];
 function bfgs(A,n){let th=[-3.4,1.8],Cm=[[1,0],[0,1]];const p=[th];
 for(let i=0;i<n;i++){const g=[A[0]*th[0],A[1]*th[1]],d=mv(Cm,g).map(v=>-v),Ad=[A[0]*d[0],A[1]*d[1]],den=d[0]*Ad[0]+d[1]*Ad[1];if(den<1e-14)break;
@@ -464,16 +522,20 @@ const pn=n>0?[[-3.4,1.8],[0,0]]:[[-3.4,1.8]],pb=bfgs(A,n),F=p=>fq(A,m,p.at(-1));
 ctr('#c6',A,m,[{p:pg,c:C.a,n:'GD (η = 1/L)'},{p:pn,c:C.ok,n:'Newton'},{p:pb,c:C.pos,n:'BFGS'}]);
 $('#o6').innerHTML=`t = <b>${n}</b> · f(θ<sub>t</sub>): GD <b>${fm(fq(A,m,th))}</b>, Newton <b>${fm(n>0?0:fq(A,m,[-3.4,1.8]))}</b>, BFGS <b>${fm(F(pb))}</b>`}D[11]=dr}
 
-// minh họa tĩnh: trọng số IRLS, ràng buộc vs ẩn số, bộ nhớ BFGS vs L-BFGS
 {const m=lin(.01,.99,99);D[4]=()=>plot('#c4w',m,[{y:m.map(a=>a*(1-a)),c:C.pos,n:'S = μ(1−μ)'}],{y0:0,y1:.3,v:[[.5]],t:'μ'})}
 {const d=lin(1,20,20);D[8]=()=>plot('#c8',d,[{y:d,c:C.ok,n:'D ràng buộc'},{y:d.map(x=>x*(x+1)/2),c:C.bad,n:'D(D+1)/2 ẩn số'}],{y0:0,y1:210,t:'D'})}
 {const x=lin(2,7,60);D[12]=()=>plot('#c12',x,[{y:x.map(a=>2*a),c:C.bad,n:'BFGS: O(D²)'},{y:x.map(a=>a+Math.log10(20)),c:C.ok,n:'L-BFGS: O(mD), m=10'}],{y0:2,y1:14,t:'log₁₀ D'})}
+
 function fit(){document.querySelectorAll('.s.on .katex-display>.katex').forEach(k=>{k.style.fontSize='';const e=k.parentNode;let f=parseFloat(getComputedStyle(k).fontSize);while(e.scrollWidth>e.clientWidth+1&&f>12){f-=1;k.style.fontSize=f+'px'}})}
-// điều hướng
-let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 3':'← Trước';$('#nx').textContent=cu==S.length-1?'Phần 5 →':'Sau →';history.replaceState(null,'','#'+(cu+1));fit();document.fonts&&document.fonts.ready.then(fit);D[cu]&&D[cu]()}
+let cu=0;function go(i){if(i>=S.length){location.href=NEXT;return}if(i<0){location.href=PREV;return}cu=i;S.forEach((e,j)=>e.classList.toggle('on',j==cu));$('#ct').textContent=(cu+1)+' / '+S.length;$('#pv').textContent=cu==0?'← Phần 3':'← Trước';$('#nx').textContent=cu==S.length-1?'Phần 5 →':'Sau →';try{history.replaceState(null,'','#'+(cu+1))}catch(e){}if(S[cu])S[cu].scrollTop=0;fit();document.fonts&&document.fonts.ready.then(fit);D[cu]&&D[cu]()}
 $('#pv').onclick=()=>go(cu-1);$('#nx').onclick=()=>go(cu+1);
 addEventListener('keydown',e=>{if(e.target.type=='range')return;if(e.key=='ArrowRight')go(cu+1);if(e.key=='ArrowLeft')go(cu-1)});
+function rd(){try{dispatchEvent(new Event('resize'))}catch(e){}}
 addEventListener('resize',()=>{fit();D[cu]&&D[cu]()});
-addEventListener('load',()=>{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});go((+location.hash.slice(1)||1)-1)});
+addEventListener('orientationchange',()=>setTimeout(rd,250));
+try{var m=matchMedia('(prefers-color-scheme:dark)');if(m.addEventListener)m.addEventListener('change',rd);else if(m.addListener)m.addListener(rd)}catch(e){}
+document.querySelectorAll('table').forEach(function(t){if(t.closest('.tw,.wide'))return;var w=document.createElement('div');w.className='tw';t.parentNode.insertBefore(w,t);w.appendChild(t)});
+addEventListener('load',()=>{try{renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})}catch(e){}go((+location.hash.slice(1)||1)-1)});
 </script>
-</body></html>
+</body>
+</html>
