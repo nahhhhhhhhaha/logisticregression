@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Softmax Regression – Phần 3: Ma trận Hessian và Tính lồi</title>
+<title>Softmax Regression – Hessian và Tính lồi</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&display=swap">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
@@ -53,132 +53,132 @@ nav button:hover{background:var(--sky)}
 </head>
 <body>
 <div id="bar"></div>
-<header><a href="../index.html">← Mục lục</a><span>Softmax Regression · 3. Ma trận Hessian</span></header>
+<header><a href="../index.html">← Mục lục</a><span>Softmax Regression · Hessian và Tính lồi</span></header>
 
-<!-- 1: BÌA -->
+<!-- BÌA -->
 <section class="slide cover">
   <h1>Softmax Regression</h1>
-  <p class="big sub">Phần 3 · Ma trận Hessian và Tính lồi</p>
-  <p class="sub">Đạo hàm bậc hai của Softmax, Hessian theo $\mathbf{W}, \mathbf{b}$ và chứng minh hàm lồi</p>
+  <p class="big sub">Hessian và Tính lồi</p>
+  <p class="sub">Đạo hàm bậc hai của Softmax, Hessian theo $\mathbf{W}, \mathbf{b}$ và tính lồi của hàm mất mát</p>
 </section>
 
-<!-- 2: ĐẠO HÀM BẬC HAI CỦA SOFTMAX -->
+<!-- ĐẠO HÀM BẬC HAI CỦA SOFTMAX -->
 <section class="slide">
-  <h2>3.1. Đạo hàm bậc hai của hàm Softmax</h2>
+  <h2>Đạo hàm bậc hai Softmax</h2>
   <div class="body-wrap">
-    <p>Xuất phát từ hàm kích hoạt Softmax và đạo hàm bậc nhất đã chứng minh ở Phần 2:</p>
-    <div class="eq">$$a_i = \frac{e^{z_i}}{\sum_{k=1}^{K} e^{z_k}}, \qquad \frac{\partial a_i}{\partial z_j} = a_i(\delta_{ij} - a_j)$$</div>
-    <p>Lấy đạo hàm riêng tiếp theo biến $z_l$ bằng quy tắc đạo hàm tích:</p>
-    <div class="eq">$$\frac{\partial^2 a_i}{\partial z_j \partial z_l} = \frac{\partial}{\partial z_l}\bigl[a_i(\delta_{ij} - a_j)\bigr] = (\delta_{ij} - a_j)\frac{\partial a_i}{\partial z_l} - a_i\frac{\partial a_j}{\partial z_l}$$</div>
-    <div class="box eq">$$\frac{\partial^2 a_i}{\partial z_j \partial z_l} = a_i\bigl[(\delta_{ij} - a_j)(\delta_{il} - a_l) - a_j(\delta_{jl} - a_l)\bigr]$$</div>
+    <p>Từ hàm Softmax và đạo hàm bậc nhất theo logits:</p>
+    <div class="eq">$$p_k = \frac{e^{z_k}}{\sum_{m=1}^{K} e^{z_m}}, \qquad \frac{\partial p_k}{\partial z_j} = p_k(\delta_{kj} - p_j)$$</div>
+    <p>Lấy đạo hàm riêng tiếp theo biến $z_l$ bằng quy tắc tích:</p>
+    <div class="eq">$$\frac{\partial^2 p_k}{\partial z_j \partial z_l} = \frac{\partial}{\partial z_l}\bigl[p_k(\delta_{kj} - p_j)\bigr] = (\delta_{kj} - p_j)\frac{\partial p_k}{\partial z_l} - p_k\frac{\partial p_j}{\partial z_l}$$</div>
+    <div class="box eq">$$\frac{\partial^2 p_k}{\partial z_j \partial z_l} = p_k\bigl[(\delta_{kj} - p_j)(\delta_{kl} - p_l) - p_j(\delta_{jl} - p_l)\bigr]$$</div>
   </div>
-  <div class="note"><b>Chuyển đổi ký hiệu:</b> Toàn bộ ký hiệu xác suất $p_i, \mathbf{p}$ trong tài liệu gốc được đổi thống nhất thành $a_i, \mathbf{a}$ để đồng bộ với Phần 2; $\delta_{ij}$ là Kronecker Delta.</div>
+  <div class="note"><b>Ký hiệu:</b> $p_k$ là xác suất lớp $k$; $z_j, z_l$ là các logits; $\delta_{kj}$ là Kronecker Delta.</div>
 </section>
 
-<!-- 3: HESSIAN CỦA CROSS-ENTROPY THEO LOGITS -->
+<!-- HESSIAN THEO LOGITS -->
 <section class="slide">
-  <h2>3.2. Ma trận Hessian của Cross-Entropy theo Logits</h2>
+  <h2>Hessian theo Logits</h2>
   <div class="body-wrap">
     <div class="row">
       <div>
-        <p>Từ gradient bậc nhất $\dfrac{\partial L}{\partial z_i} = a_i - y_i$, lấy đạo hàm theo $z_j$ (với nhãn $y_i$ là hằng số nên $\dfrac{\partial y_i}{\partial z_j} = 0$):</p>
-        <div class="eq">$$\frac{\partial^2 L}{\partial z_i \partial z_j} = \frac{\partial a_i}{\partial z_j} = a_i(\delta_{ij} - a_j)$$</div>
+        <p>Từ gradient bậc nhất $\dfrac{\partial J_i}{\partial z_k} = p_k - y_{i,k}$, lấy đạo hàm theo $z_j$ (với $y_{i,k}$ cố định nên $\dfrac{\partial y_{i,k}}{\partial z_j} = 0$):</p>
+        <div class="eq">$$\frac{\partial^2 J_i}{\partial z_k \partial z_j} = \frac{\partial p_k}{\partial z_j} = p_k(\delta_{kj} - p_j)$$</div>
         <div class="box good" style="margin-top:8px">
-          <p><b>Kết quả đặc biệt:</b> Ma trận Hessian $\mathbf{H}_{\mathbf{z}}$ của Cross-Entropy theo logits trùng khớp hoàn toàn với <b>Ma trận Jacobi</b> của Softmax!</p>
+          <p><b>Nhận xét:</b> Ma trận Hessian $\mathbf{H}_{\mathbf{z}}$ của Cross-Entropy theo logits trùng với <b>Ma trận Jacobi</b> của Softmax.</p>
         </div>
       </div>
       <div class="card">
-        <b class="title">Biểu diễn ma trận $\mathbf{H}_{\mathbf{z}} \in \mathbb{R}^{K \times K}$</b>
-        <div class="eq" style="font-size:clamp(13px,1.45vw,17px)">$$\mathbf{H}_{\mathbf{z}} = \begin{bmatrix} \frac{\partial^2 L}{\partial z_1^2} & \dots & \frac{\partial^2 L}{\partial z_1 \partial z_K} \\ \vdots & \ddots & \vdots \\ \frac{\partial^2 L}{\partial z_K \partial z_1} & \dots & \frac{\partial^2 L}{\partial z_K^2} \end{bmatrix} = \operatorname{diag}(\mathbf{a}) - \mathbf{a}\mathbf{a}^\top$$</div>
-        <p class="sub" style="font-size:13px;margin-top:6px">• Đường chéo: $H_{ii} = a_i(1 - a_i)$<br>• Ngoài đường chéo: $H_{ij} = -a_i a_j \;(i \neq j)$</p>
+        <b class="title">Ma trận $\mathbf{H}_{\mathbf{z}} \in \mathbb{R}^{K \times K}$</b>
+        <div class="eq" style="font-size:clamp(13px,1.45vw,17px)">$$\mathbf{H}_{\mathbf{z}} = \begin{bmatrix} \frac{\partial^2 J_i}{\partial z_1^2} & \dots & \frac{\partial^2 J_i}{\partial z_1 \partial z_K} \\ \vdots & \ddots & \vdots \\ \frac{\partial^2 J_i}{\partial z_K \partial z_1} & \dots & \frac{\partial^2 J_i}{\partial z_K^2} \end{bmatrix} = \operatorname{diag}(\mathbf{p}) - \mathbf{p}\mathbf{p}^\top$$</div>
+        <p class="sub" style="font-size:13px;margin-top:6px">• Đường chéo: $H_{kk} = p_k(1 - p_k)$<br>• Ngoài đường chéo: $H_{kj} = -p_k p_j \;(k \neq j)$</p>
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $\mathbf{H}_{\mathbf{z}} = \nabla_{\mathbf{z}}^2 L \in \mathbb{R}^{K \times K}$ là ma trận Hessian của hàm mất mát $L$ theo vector logits $\mathbf{z}$; $\mathbf{a} = [a_1, \dots, a_K]^\top$ thay cho $\mathbf{p}$.</div>
+  <div class="note"><b>Ký hiệu:</b> $\mathbf{H}_{\mathbf{z}} = \nabla_{\mathbf{z}}^2 J_i \in \mathbb{R}^{K \times K}$; $\mathbf{p} = [p_1, \dots, p_K]^\top$.</div>
 </section>
 
-<!-- 4: HESSIAN TỔNG QUÁT THEO THAM SỐ -->
+<!-- HESSIAN THEO THAM SỐ -->
 <section class="slide">
-  <h2>3.3. Ma trận Hessian theo tham số $\mathbf{W}$ và $\mathbf{b}$</h2>
+  <h2>Hessian theo tham số</h2>
   <div class="body-wrap">
-    <p>Gom các tham số $\mathbf{W}, \mathbf{b}$ thành vector $\boldsymbol{\theta}$. Với hàm hợp $L = L(\mathbf{z})$ và $\mathbf{z} = f(\boldsymbol{\theta})$, Chain Rule bậc hai cho:</p>
-    <div class="eq">$$\mathbf{H}_{\boldsymbol{\theta}} = \mathbf{J}^\top \mathbf{H}_{\mathbf{z}} \mathbf{J} + \sum_{k=1}^{K} \frac{\partial L}{\partial z_k} \mathbf{H}_{z_k}$$</div>
+    <p>Gộp tham số $\mathbf{W}, \mathbf{b}$ thành vector $\boldsymbol{\theta}$. Với hàm hợp $J_i(\mathbf{z})$ và $\mathbf{z} = f(\boldsymbol{\theta})$, quy tắc chuỗi bậc hai cho:</p>
+    <div class="eq">$$\mathbf{H}_{\boldsymbol{\theta}, i} = \mathbf{J}_i^\top \mathbf{H}_{\mathbf{z}} \mathbf{J}_i + \sum_{k=1}^{K} \frac{\partial J_i}{\partial z_k} \mathbf{H}_{z_k}$$</div>
     <div class="row">
       <div class="box">
-        <p><b>Tính chất tuyến tính của Logits:</b></p>
-        <p style="margin-top:4px">Vì $\mathbf{z} = \mathbf{W}^\top \mathbf{x} + \mathbf{b}$ là hàm tuyến tính theo $\mathbf{W}, \mathbf{b}$ nên đạo hàm bậc hai của từng logit bằng không: $\mathbf{H}_{z_k} = \mathbf{0}$.</p>
+        <p><b>Tính tuyến tính của Logits:</b></p>
+        <p style="margin-top:4px">Do $\mathbf{z} = \mathbf{W}^\top \mathbf{x}_i + \mathbf{b}$ tuyến tính theo tham số, đạo hàm bậc hai của từng logit bằng không: $\mathbf{H}_{z_k} = \mathbf{0}$.</p>
       </div>
       <div class="box good">
-        <p><b>Công thức Hessian rút gọn (Gauss-Newton):</b></p>
-        <div class="eq">$$\mathbf{H}_{\boldsymbol{\theta}} = \mathbf{J}^\top \mathbf{H}_{\mathbf{z}} \mathbf{J}$$</div>
-        <p class="sub">Trong đó $\mathbf{J} = \dfrac{\partial \mathbf{z}}{\partial \boldsymbol{\theta}}$ là Jacobian của logits theo tham số.</p>
+        <p><b>Biểu thức rút gọn:</b></p>
+        <div class="eq">$$\mathbf{H}_{\boldsymbol{\theta}, i} = \mathbf{J}_i^\top \mathbf{H}_{\mathbf{z}} \mathbf{J}_i$$</div>
+        <p class="sub">Trong đó $\mathbf{J}_i = \dfrac{\partial \mathbf{z}}{\partial \boldsymbol{\theta}}$ là ma trận Jacobi của logits theo tham số.</p>
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $\boldsymbol{\theta}$ là vector tham số gộp từ $\mathbf{W} \in \mathbb{R}^{d \times K}$ và $\mathbf{b} \in \mathbb{R}^{K}$; $\mathbf{H}_{z_k}$ là ma trận Hessian của logit thứ $k$ theo $\boldsymbol{\theta}$.</div>
+  <div class="note"><b>Ký hiệu:</b> $\boldsymbol{\theta}$ là tham số gộp từ $\mathbf{W}$ và $\mathbf{b}$; $\mathbf{H}_{z_k}$ là Hessian của $z_k$ theo $\boldsymbol{\theta}$.</div>
 </section>
 
-<!-- 5: CÁC THÀNH PHẦN HESSIAN THEO W, b VÀ NHIỀU MẪU -->
+<!-- CÁC KHỐI HESSIAN & N MẪU -->
 <section class="slide">
-  <h2>Các khối thành phần của Hessian &amp; Mở rộng cho $N$ mẫu</h2>
+  <h2>Các khối Hessian &amp; $N$ mẫu</h2>
   <div class="body-wrap">
     <div class="grid3">
       <div class="card">
-        <b class="title">1. Khối theo trọng số $\mathbf{W}$</b>
-        <div class="eq" style="font-size:clamp(13px,1.4vw,17px)">$$\frac{\partial^2 L}{\partial w_{jk} \partial w_{ml}} = x_j x_m a_k(\delta_{kl} - a_l)$$</div>
-        <p class="sub" style="font-size:13px">Kết hợp tương quan 2 đặc trưng ($x_j x_m$) và 2 lớp ($a_k(\delta_{kl}-a_l)$).</p>
+        <b class="title">Khối theo $\mathbf{W}$</b>
+        <div class="eq" style="font-size:clamp(13px,1.4vw,17px)">$$\frac{\partial^2 J_i}{\partial w_{j,k} \partial w_{l,m}} = x_{i,j} x_{i,l} p_k(\delta_{km} - p_m)$$</div>
+        <p class="sub" style="font-size:13px">Tích đặc trưng $x_{i,j} x_{i,l}$ và hệ số lớp $p_k(\delta_{km} - p_m)$.</p>
       </div>
       <div class="card">
-        <b class="title">2. Khối theo Bias $\mathbf{b}$</b>
-        <div class="eq" style="font-size:clamp(13px,1.4vw,17px)">$$\frac{\partial^2 L}{\partial b_k \partial b_l} = a_k(\delta_{kl} - a_l)$$</div>
-        <p class="sub" style="font-size:13px">Ma trận khối $\mathbf{H}_{\mathbf{bb}}$ trùng với $\mathbf{H}_{\mathbf{z}}$.</p>
+        <b class="title">Khối theo $\mathbf{b}$</b>
+        <div class="eq" style="font-size:clamp(13px,1.4vw,17px)">$$\frac{\partial^2 J_i}{\partial b_k \partial b_m} = p_k(\delta_{km} - p_m)$$</div>
+        <p class="sub" style="font-size:13px">Khối đạo hàm theo bias trùng dạng với $\mathbf{H}_{\mathbf{z}}$.</p>
       </div>
       <div class="card">
-        <b class="title">3. Đạo hàm hỗn hợp $\mathbf{W}, \mathbf{b}$</b>
-        <div class="eq" style="font-size:clamp(13px,1.4vw,17px)">$$\frac{\partial^2 L}{\partial w_{jk} \partial b_l} = x_j a_k(\delta_{kl} - a_l)$$</div>
-        <p class="sub" style="font-size:13px">Thể hiện sự tương tác chéo giữa trọng số và bias.</p>
+        <b class="title">Đạo hàm chéo $\mathbf{W}, \mathbf{b}$</b>
+        <div class="eq" style="font-size:clamp(13px,1.4vw,17px)">$$\frac{\partial^2 J_i}{\partial w_{j,k} \partial b_m} = x_{i,j} p_k(\delta_{km} - p_m)$$</div>
+        <p class="sub" style="font-size:13px">Liên kết giữa đặc trưng $x_{i,j}$ và cặp lớp $(k, m)$.</p>
       </div>
     </div>
     <div class="box">
-      <p><b>Mở rộng cho $N$ mẫu với Mean Cross-Entropy:</b> $\mathbf{H}_{\boldsymbol{\theta}} = \dfrac{1}{N} \sum_{i=1}^{N} \mathbf{H}_{\boldsymbol{\theta}, i} = \dfrac{1}{N} \sum_{i=1}^{N} \mathbf{J}_i^\top \mathbf{H}_{\mathbf{z}, i} \mathbf{J}_i$.</p>
+      <p><b>Trung bình trên $N$ mẫu:</b> $\mathbf{H}_{\boldsymbol{\theta}} = \dfrac{1}{N} \sum_{i=1}^{N} \mathbf{H}_{\boldsymbol{\theta}, i} = \dfrac{1}{N} \sum_{i=1}^{N} \mathbf{J}_i^\top \mathbf{H}_{\mathbf{z}, i} \mathbf{J}_i$.</p>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $w_{jk}, w_{ml}$ là các phần tử của ma trận trọng số $\mathbf{W}$; $a_k, a_l$ là xác suất dự đoán thay cho $p_k, p_l$; $\mathbf{H}_{\boldsymbol{\theta}, i}$ là Hessian tính trên mẫu thứ $i$.</div>
+  <div class="note"><b>Ký hiệu:</b> $w_{j,k}, w_{l,m}$ là phần tử của $\mathbf{W}$; $x_{i,j}$ là chiều $j$ của mẫu $i$; $N$ là số mẫu.</div>
 </section>
 
-<!-- 6: CHỨNG MINH HESSIAN LÀ PSD -->
+<!-- CHỨNG MINH HESSIAN PSD -->
 <section class="slide">
-  <h2>3.4a. Chứng minh $\mathbf{H}_{\mathbf{z}}$ là Nửa xác định dương (PSD)</h2>
+  <h2>Chứng minh $\mathbf{H}_{\mathbf{z}}$ nửa xác định dương</h2>
   <div class="body-wrap">
-    <p>Cần chứng minh $\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} \ge 0$ với mọi vector $\mathbf{v} = [v_1, v_2, \dots, v_K]^\top \in \mathbb{R}^K$:</p>
-    <div class="eq">$$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \mathbf{v}^\top \bigl[\operatorname{diag}(\mathbf{a}) - \mathbf{a}\mathbf{a}^\top\bigr] \mathbf{v} = \mathbf{v}^\top \operatorname{diag}(\mathbf{a})\mathbf{v} - (\mathbf{a}^\top \mathbf{v})^2$$</div>
-    <div class="eq">$$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \sum_{i=1}^{K} a_i v_i^2 - \left(\sum_{i=1}^{K} a_i v_i\right)^2$$</div>
+    <p>Xét dạng toàn phương $\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v}$ với vector bất kỳ $\mathbf{v} = [v_1, v_2, \dots, v_K]^\top \in \mathbb{R}^K$:</p>
+    <div class="eq">$$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \mathbf{v}^\top \bigl[\operatorname{diag}(\mathbf{p}) - \mathbf{p}\mathbf{p}^\top\bigr] \mathbf{v} = \mathbf{v}^\top \operatorname{diag}(\mathbf{p})\mathbf{v} - (\mathbf{p}^\top \mathbf{v})^2$$</div>
+    <div class="eq">$$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \sum_{k=1}^{K} p_k v_k^2 - \left(\sum_{k=1}^{K} p_k v_k\right)^2$$</div>
     <div class="box good">
-      <p><b>Liên hệ Xác suất Thống kê:</b> Vì $a_i \ge 0$ và $\sum_{i=1}^{K} a_i = 1$, coi $V$ là biến ngẫu nhiên nhận giá trị $v_i$ với xác suất $a_i$. Biểu thức trên chính là <b>Phương sai (Variance)</b> của $V$:</p>
-      <div class="eq">$$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \mathbb{E}[V^2] - (\mathbb{E}[V])^2 = \operatorname{Var}(V) \ge 0 \implies \mathbf{H}_{\mathbf{z}} \succeq 0 \text{ (PSD)}$$</div>
+      <p><b>Góc nhìn xác suất:</b> Với $p_k \ge 0$ và $\sum_{k=1}^{K} p_k = 1$, xem $V$ là biến ngẫu nhiên nhận giá trị $v_k$ với xác suất $p_k$. Đây chính là <b>phương sai (variance)</b> của $V$:</p>
+      <div class="eq">$$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \mathbb{E}[V^2] - (\mathbb{E}[V])^2 = \operatorname{Var}(V) \ge 0 \implies \mathbf{H}_{\mathbf{z}} \succeq 0$$</div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $\mathbf{v} \in \mathbb{R}^K$ là vector kiểm tra bất kỳ; $V$ là biến ngẫu nhiên rời rạc phân phối theo $\mathbf{a} = [a_1, \dots, a_K]^\top$; ký hiệu $\succeq 0$ chỉ ma trận nửa xác định dương (PSD).</div>
+  <div class="note"><b>Ký hiệu:</b> $\mathbf{v} \in \mathbb{R}^K$; $\succeq 0$ ký hiệu ma trận nửa xác định dương (positive semi-definite).</div>
 </section>
 
-<!-- 7: TÍNH LỒI & TƯƠNG TÁC -->
+<!-- TÍNH LỒI & TƯƠNG TÁC -->
 <section class="slide">
-  <h2>3.4b. Tính lồi của hàm mất mát &amp; Kiểm chứng dạng toàn phương</h2>
+  <h2>Tính lồi &amp; Kiểm chứng dạng toàn phương</h2>
   <div class="body-wrap">
     <div class="row">
       <div>
-        <p>Hàm khả vi hai lần $f$ là <b>hàm lồi (Convex)</b> khi $\nabla^2 f \succeq 0$. Vì $\mathbf{H}_{\mathbf{z}} \succeq 0$ và $\mathbf{H}_{\boldsymbol{\theta}} = \mathbf{J}^\top \mathbf{H}_{\mathbf{z}} \mathbf{J} \succeq 0$:</p>
+        <p>Hàm khả vi cấp hai có Hessian nửa xác định dương là <b>hàm lồi (convex function)</b>. Vì $\mathbf{H}_{\mathbf{z}} \succeq 0$ và $\mathbf{H}_{\boldsymbol{\theta}} = \mathbf{J}^\top \mathbf{H}_{\mathbf{z}} \mathbf{J} \succeq 0$:</p>
         <div class="box good" style="margin:8px 0">
-          <p><b>Hệ quả:</b> Hàm Cross-Entropy $L(\mathbf{z})$ và $J(\mathbf{W}, \mathbf{b})$ là <b>hàm lồi</b> $\Rightarrow$ mọi cực tiểu địa phương đều là cực tiểu toàn cục!</p>
+          <p><b>Kết luận:</b> Hàm mất mát Cross-Entropy là <b>hàm lồi</b> nên mọi cực tiểu địa phương đều là cực tiểu toàn cục.</p>
         </div>
-        <p class="sub" style="font-size:13.5px">Thử thay đổi vector $\mathbf{v}$ với $\mathbf{a} = [0.6, 0.3, 0.1]^\top$ để kiểm chứng $\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \operatorname{Var}(V) \ge 0$:</p>
+        <p class="sub" style="font-size:13.5px">Điều chỉnh vector $\mathbf{v}$ với $\mathbf{p} = [0.6, 0.3, 0.1]^\top$ để kiểm chứng $\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \operatorname{Var}(V) \ge 0$:</p>
       </div>
       <div class="card">
-        <b class="title">Kiểm chứng <span class="nowrap">$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} \ge 0$</span> (<span class="nowrap">$\mathbf{a} = [0.6, 0.3, 0.1]^\top$</span>)</b>
+        <b class="title">Dạng toàn phương <span class="nowrap">$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v}$</span> (<span class="nowrap">$\mathbf{p} = [0.6, 0.3, 0.1]^\top$</span>)</b>
         <div class="ctl" style="margin-top:8px">
-          <label for="v1">$v_1$</label><input id="v1" type="range" min="-3" max="3" step="0.2" value="2.0"><output id="v1o"></output>
-          <label for="v2">$v_2$</label><input id="v2" type="range" min="-3" max="3" step="0.2" value="-1.0"><output id="v2o"></output>
-          <label for="v3">$v_3$</label><input id="v3" type="range" min="-3" max="3" step="0.2" value="0.4"><output id="v3o"></output>
+          <label for="v1">$v_1$</label><input id="v1" type="range" min="-3" max="3" step="0.2" value="2.0"><output id="v1o">2.0</output>
+          <label for="v2">$v_2$</label><input id="v2" type="range" min="-3" max="3" step="0.2" value="-1.0"><output id="v2o">-1.0</output>
+          <label for="v3">$v_3$</label><input id="v3" type="range" min="-3" max="3" step="0.2" value="0.4"><output id="v3o">0.4</output>
         </div>
         <div class="box" style="margin-top:12px;font-size:14px">
           <p id="evOut"></p>
@@ -187,13 +187,12 @@ nav button:hover{background:var(--sky)}
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $L(\mathbf{z}) = -\sum_{k=1}^{K} y_k \ln a_k$ là hàm mất mát theo logits với vector xác suất $\mathbf{a}$ (thay cho $\mathbf{p}$); $\mathbf{H}_{\mathbf{z}}$ là ma trận Hessian theo logits.</div>
+  <div class="note"><b>Ký hiệu:</b> $\mathbf{p} = [p_1, p_2, p_3]^\top$ là vector xác suất cố định cho ví dụ; $\mathbf{H}_{\mathbf{z}}$ là Hessian theo logits.</div>
 </section>
 
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
 
 <script>
-// KaTeX render
 const render=el=>window.renderMathInElement&&renderMathInElement(el,{
   delimiters:[
     {left:'$$',right:'$$',display:true},
@@ -203,25 +202,23 @@ const render=el=>window.renderMathInElement&&renderMathInElement(el,{
   throwOnError:false
 });
 
-// Tương tác kiểm chứng PSD trên Slide 7
 const v1=document.getElementById('v1'),v2=document.getElementById('v2'),v3=document.getElementById('v3');
 function upPSD(){
-  const a=[0.6,0.3,0.1];
+  const p=[0.6,0.3,0.1];
   const v=[+v1.value,+v2.value,+v3.value];
   v1o.textContent=v[0].toFixed(1);
   v2o.textContent=v[1].toFixed(1);
   v3o.textContent=v[2].toFixed(1);
-  const ev=a[0]*v[0]+a[1]*v[1]+a[2]*v[2];
-  const ev2=a[0]*v[0]*v[0]+a[1]*v[1]*v[1]+a[2]*v[2]*v[2];
+  const ev=p[0]*v[0]+p[1]*v[1]+p[2]*v[2];
+  const ev2=p[0]*v[0]*v[0]+p[1]*v[1]*v[1]+p[2]*v[2]*v[2];
   const quad=Math.max(0,ev2-ev*ev);
   evOut.innerHTML=`$\\mathbb{E}[V^2] = ${ev2.toFixed(3)}, \\quad (\\mathbb{E}[V])^2 = ${(ev*ev).toFixed(3)}$`;
-  quadOut.innerHTML=`$\\mathbf{v}^\\top \\mathbf{H}_{\\mathbf{z}} \\mathbf{v} = \\operatorname{Var}(V) = ${quad.toFixed(3)} \\ge 0$ (Luôn không âm)`;
+  quadOut.innerHTML=`$\\mathbf{v}^\\top \\mathbf{H}_{\\mathbf{z}} \\mathbf{v} = \\operatorname{Var}(V) = ${quad.toFixed(3)} \\ge 0$`;
   render(evOut);
   render(quadOut);
 }
 v1.oninput=v2.oninput=v3.oninput=upPSD;
 
-// Điều hướng slide
 const S=[...document.querySelectorAll('.slide')];let i=0;
 function go(n){
   i=Math.max(0,Math.min(S.length-1,n));
@@ -230,7 +227,7 @@ function go(n){
   bar.style.width=(i+1)/S.length*100+'%';
   S[i].scrollTop=0;
   history.replaceState(null,'','#'+(i+1));
-  if(i===6)upPSD();
+  if(i===5)upPSD();
 }
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')&&!e.shiftKey)e.target.blur();
