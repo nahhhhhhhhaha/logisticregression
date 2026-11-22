@@ -91,35 +91,35 @@ nav button:hover{background:var(--sky)}
 <!-- 1 -->
 <section class="slide">
   <h2>1. Ba hạn chế của MLE: Tại sao cần Bayesian?</h2>
-  <p>MLE chỉ tối đa hóa \(P(D \mid w, b)\) dựa trên dữ liệu, bỏ qua hiểu biết ban đầu về tham số:</p>
+  <p>MLE chỉ tối đa hóa \(P(\mathcal{D} \mid \mathbf{w}, b)\) dựa trên dữ liệu, bỏ qua hiểu biết ban đầu về tham số:</p>
   <div class="row">
     <div class="box bad">
       <h3>1. Dữ liệu ít → thiếu ổn định</h3>
-      <p class="sub">Với 5 sinh viên (thay vì 1.000), thêm/bớt 1 mẫu làm trọng số \(w\) biến động mạnh.</p>
+      <p class="sub">Với 5 sinh viên (thay vì 1.000), thêm/bớt 1 mẫu làm trọng số \(\mathbf{w}\) biến động mạnh.</p>
     </div>
     <div class="box bad">
-      <h3>2. Complete separation</h3>
-      <p class="sub">Tách bạch 2 lớp: \(w' = c w\) với \(c\to\infty\) làm \(P(D\mid w')\to 1\Rightarrow \|w_{\text{MLE}}\|\to\infty\).</p>
+      <h3>2. Tách bạch hoàn toàn (complete separation)</h3>
+      <p class="sub">Phân tách hoàn hảo 2 lớp: \(\mathbf{w}' = c\mathbf{w}\) với \(c\to\infty\) làm \(P(\mathcal{D}\mid \mathbf{w}')\to 1\Rightarrow \|\mathbf{w}_{\text{MLE}}\|_2\to\infty\).</p>
     </div>
     <div class="box bad">
-      <h3>3. Thiếu <span class="nw">uncertainty</span></h3>
-      <p class="sub">\(\hat p = 0.8\) từ 10.000 SV vs 5 SV có cùng kết quả điểm nhưng độ tin cậy khác hẳn.</p>
+      <h3>3. Thiếu độ bất định (uncertainty)</h3>
+      <p class="sub">\(p = 0.8\) từ 10.000 SV vs 5 SV có cùng kết quả điểm nhưng độ tin cậy khác hẳn.</p>
     </div>
   </div>
-  <div class="box"><p><b>Giải pháp:</b> kết hợp dữ liệu với hiểu biết ban đầu qua <span class="nw"><b>Bayesian Inference</b></span>.</p></div>
+  <div class="box"><p><b>Giải pháp:</b> kết hợp dữ liệu với hiểu biết ban đầu qua <b>suy luận Bayesian (Bayesian inference)</b>.</p></div>
 </section>
 
 <!-- 2 -->
 <section class="slide">
   <h2>2. Ý tưởng Bayesian &amp; Định lý Bayes</h2>
-  <p>Khác với MLE, Bayesian xem \(w\) là <b>biến ngẫu nhiên</b> thay vì hằng số cố định:</p>
-  <div class="eq">$$P(w \mid D) = \frac{P(D \mid w)\,P(w)}{P(D)} \quad\Longrightarrow\quad P(w \mid D) \propto P(D \mid w)\,P(w)$$</div>
+  <p>Khác với MLE, Bayesian xem \(\mathbf{w}\) là <b>biến ngẫu nhiên</b> thay vì hằng số cố định:</p>
+  <div class="eq">$$P(\mathbf{w} \mid \mathcal{D}) = \frac{P(\mathcal{D} \mid \mathbf{w})\,P(\mathbf{w})}{P(\mathcal{D})} \quad\Longrightarrow\quad P(\mathbf{w} \mid \mathcal{D}) \propto P(\mathcal{D} \mid \mathbf{w})\,P(\mathbf{w})$$</div>
   <div class="tw"><table>
     <tr><th>Thành phần</th><th>Tên gọi</th><th>Ý nghĩa</th></tr>
-    <tr><td>\(P(w \mid D)\)</td><td><b>Posterior</b> (Hậu nghiệm)</td><td>Phân phối tham số sau khi quan sát dữ liệu</td></tr>
-    <tr><td>\(P(D \mid w)\)</td><td><b>Likelihood</b> (Hợp lý)</td><td>Khả năng dữ liệu xuất hiện nếu biết tham số \(w\)</td></tr>
-    <tr><td>\(P(w)\)</td><td><b>Prior</b> (Tiên nghiệm)</td><td>Niềm tin ban đầu về \(w\) trước khi thấy dữ liệu</td></tr>
-    <tr><td>\(P(D)\)</td><td><b>Evidence</b> (Bằng chứng)</td><td>Xác suất biên của dữ liệu (hằng số chuẩn hóa)</td></tr>
+    <tr><td>\(P(\mathbf{w} \mid \mathcal{D})\)</td><td><b>Posterior</b> (Hậu nghiệm)</td><td>Phân phối tham số sau khi quan sát dữ liệu</td></tr>
+    <tr><td>\(P(\mathcal{D} \mid \mathbf{w})\)</td><td><b>Likelihood</b> (Hợp lý)</td><td>Khả năng dữ liệu xuất hiện nếu biết tham số \(\mathbf{w}\)</td></tr>
+    <tr><td>\(P(\mathbf{w})\)</td><td><b>Prior</b> (Tiên nghiệm)</td><td>Niềm tin ban đầu về \(\mathbf{w}\) trước khi thấy dữ liệu</td></tr>
+    <tr><td>\(P(\mathcal{D})\)</td><td><b>Evidence</b> (Bằng chứng)</td><td>Xác suất biên của dữ liệu (hằng số chuẩn hóa)</td></tr>
   </table></div>
   <p class="sub"><b>Posterior = Likelihood × Prior</b> — cập nhật niềm tin ban đầu bằng bằng chứng từ dữ liệu.</p>
 </section>
@@ -130,19 +130,19 @@ nav button:hover{background:var(--sky)}
   <div class="row">
     <div>
       <div class="box">
-        <h3>a) Gaussian Prior</h3>
+        <h3>a) Phân phối tiên nghiệm Gaussian (Gaussian prior)</h3>
         <p class="sub">\(w_j \sim \mathcal{N}(0, \sigma^2)\) độc lập → ưu tiên trọng số gần \(0\):</p>
-        <div class="eq">$$P(w) \propto \exp\!\left(-\frac{1}{2\sigma^2}w^\top w\right)$$</div>
+        <div class="eq">$$P(\mathbf{w}) \propto \exp\!\left(-\frac{1}{2\sigma^2}\mathbf{w}^\top \mathbf{w}\right)$$</div>
       </div>
       <div class="box" style="margin-top:10px">
         <h3>b) Likelihood &amp; Posterior</h3>
-        <div class="eq">$$P(D\mid w) = \prod_{i=1}^n p_i^{y_i}(1-p_i)^{1-y_i}$$</div>
+        <div class="eq">$$P(\mathcal{D}\mid \mathbf{w}) = \prod_{i=1}^N p_i^{y_i}(1-p_i)^{1-y_i}$$</div>
         <p class="sub">Posterior nằm giữa Prior (kéo về \(0\)) và Likelihood (khớp dữ liệu).</p>
       </div>
     </div>
     <div>
       <svg id="p3" viewBox="0 0 400 240"></svg>
-      <div class="ctl" style="margin-top:8px"><label for="sig3">σ</label><input id="sig3" type="range" min="0.4" max="2.5" step="0.1" value="1.0"><output id="so3"></output></div>
+      <div class="ctl" style="margin-top:8px"><label for="sig3">\(\sigma\)</label><input id="sig3" type="range" min="0.4" max="2.5" step="0.1" value="1.0"><output id="so3">1.0</output></div>
       <p id="t3" class="sub" style="margin-top:4px;text-align:center"></p>
     </div>
   </div>
@@ -151,11 +151,11 @@ nav button:hover{background:var(--sky)}
 <!-- 4 -->
 <section class="slide">
   <h2>4. MAP — Maximum A Posteriori</h2>
-  <p>MAP tìm điểm cực đại của phân phối hậu nghiệm \(P(w \mid D)\):</p>
-  <div class="eq">$$w_{\text{MAP}} = \arg\max_w P(D \mid w)\,P(w) = \arg\max_w \bigl[\ln P(D \mid w) + \ln P(w)\bigr]$$</div>
-  <p>Thay Gaussian prior \(\ln P(w) = -\frac{1}{2\sigma^2}w^\top w + C\) và đổi dấu sang bài toán cực tiểu:</p>
-  <div class="eq">$$w_{\text{MAP}} = \arg\min_w \left[L_{\text{BCE}}(w) + \frac{1}{2\sigma^2}w^\top w\right]$$</div>
-  <div class="box"><p><b>Kết luận cốt lõi:</b> <span class="nw">MAP với Gaussian prior</span> \(\equiv\) <span class="nw">Logistic Regression với L2 Regularization</span> (với \(\lambda = \frac{1}{2n\sigma^2}\) khi \(L_{\text{BCE}}\) lấy trung bình trên \(n\) mẫu).</p></div>
+  <p>MAP tìm điểm cực đại của phân phối hậu nghiệm \(P(\mathbf{w} \mid \mathcal{D})\):</p>
+  <div class="eq">$$\mathbf{w}_{\text{MAP}} = \arg\max_{\mathbf{w}} P(\mathcal{D} \mid \mathbf{w})\,P(\mathbf{w}) = \arg\max_{\mathbf{w}} \bigl[\ln P(\mathcal{D} \mid \mathbf{w}) + \ln P(\mathbf{w})\bigr]$$</div>
+  <p>Thay Gaussian prior \(\ln P(\mathbf{w}) = -\frac{1}{2\sigma^2}\mathbf{w}^\top \mathbf{w} + C\), đổi dấu sang bài toán cực tiểu và chia cho \(N\) (với \(J_{\text{BCE}}(\mathbf{w}) = -\frac{1}{N}\sum_{i=1}^N [y_i\ln p_i + (1-y_i)\ln(1-p_i)]\)):</p>
+  <div class="eq">$$\mathbf{w}_{\text{MAP}} = \arg\min_{\mathbf{w}} \left[J_{\text{BCE}}(\mathbf{w}) + \frac{1}{2N\sigma^2}\|\mathbf{w}\|_2^2\right] = \arg\min_{\mathbf{w}} \left[J_{\text{BCE}}(\mathbf{w}) + \frac{\lambda}{2}\|\mathbf{w}\|_2^2\right]$$</div>
+  <div class="box"><p><b>Kết luận cốt lõi:</b> MAP với Gaussian prior \(\equiv\) Logistic Regression với L2 Regularization (với \(\lambda = \frac{1}{N\sigma^2}\) khi \(J_{\text{BCE}}\) lấy trung bình trên \(N\) mẫu và hàm phạt viết là \(\frac{\lambda}{2}\|\mathbf{w}\|_2^2\)).</p></div>
 </section>
 
 <!-- 5 -->
@@ -163,15 +163,15 @@ nav button:hover{background:var(--sky)}
   <h2>5. Thay đổi Prior → Thay đổi Regularization</h2>
   <div class="row">
     <div class="tw"><table>
-      <tr><th>Prior \(P(w)\)</th><th>Regularization</th><th>Đặc điểm</th></tr>
-      <tr><td><b>Gaussian</b> \(\mathcal{N}(0, \sigma^2)\)</td><td><b>L2</b> (\(\propto \|w\|_2^2\))</td><td>Giảm độ lớn hệ số</td></tr>
-      <tr><td><b>Laplace</b> \(\propto e^{-|w_j|/b}\)</td><td><b>L1</b> (\(\propto \|w\|_1\))</td><td>Đưa hệ số về \(0\) (sparse)</td></tr>
+      <tr><th>Prior \(P(\mathbf{w})\)</th><th>Regularization</th><th>Đặc điểm</th></tr>
+      <tr><td><b>Gaussian</b> \(\mathcal{N}(0, \sigma^2)\)</td><td><b>L2</b> (\(\propto \|\mathbf{w}\|_2^2\))</td><td>Giảm độ lớn hệ số</td></tr>
+      <tr><td><b>Laplace</b> \(\propto e^{-|w_j|/b}\)</td><td><b>L1</b> (\(\propto \|\mathbf{w}\|_1\))</td><td>Đưa hệ số về \(0\) (thưa)</td></tr>
       <tr><td>Gaussian \(\sigma^2\) lớn</td><td>L2 yếu</td><td>Prior lỏng lẻo</td></tr>
       <tr><td>Gaussian \(\sigma^2\) nhỏ</td><td>L2 mạnh</td><td>Prior chặt chẽ</td></tr>
     </table></div>
     <svg id="p5" viewBox="0 0 400 240"></svg>
   </div>
-  <p class="sub"><span class="cb">━</span> Gaussian prior (trơn, đỉnh tù) &nbsp; <span class="cr">━</span> Laplace prior (đỉnh nhọn tại \(0\) → tạo tính thưa L1 vì \(-\ln P(w) \propto \sum_j |w_j|\)).</p>
+  <p class="sub"><span class="cb">━</span> Gaussian prior (trơn, đỉnh tù) &nbsp; <span class="cr">━</span> Laplace prior (đỉnh nhọn tại \(0\) → tạo tính thưa L1 vì \(-\ln P(\mathbf{w}) \propto \sum_j |w_j|\)).</p>
 </section>
 
 <!-- 6 -->
@@ -180,52 +180,52 @@ nav button:hover{background:var(--sky)}
   <div class="tw"><table>
     <tr><th>Tiêu chí</th><th>MLE</th><th>MAP</th><th>Bayesian đầy đủ</th></tr>
     <tr><td><b>Prior</b></td><td>Không</td><td>Có</td><td>Có</td></tr>
-    <tr><td><b>Đầu ra</b></td><td>Một bộ tham số</td><td>Một bộ tham số</td><td><b>Phân phối tham số</b> \(P(w\mid D)\)</td></tr>
+    <tr><td><b>Đầu ra</b></td><td>Một bộ tham số</td><td>Một bộ tham số</td><td><b>Phân phối tham số</b> \(P(\mathbf{w}\mid \mathcal{D})\)</td></tr>
     <tr><td><b>Likelihood</b></td><td>Có</td><td>Có</td><td>Có</td></tr>
-    <tr><td><b>Uncertainty</b></td><td>Không trực tiếp</td><td>Không trực tiếp</td><td><b>Có</b></td></tr>
+    <tr><td><b>Độ bất định (uncertainty)</b></td><td>Không trực tiếp</td><td>Không trực tiếp</td><td><b>Có</b></td></tr>
     <tr><td><b>Regularization</b></td><td>Không mặc định</td><td>Từ prior</td><td>Từ prior</td></tr>
     <tr><td><b>Mục tiêu</b></td><td>Max likelihood</td><td>Max posterior</td><td>Suy ra toàn bộ posterior</td></tr>
   </table></div>
-  <p class="sub">MLE và MAP đều là <b>ước lượng điểm</b>; chỉ <span class="nw">Bayesian đầy đủ</span> giữ lại toàn bộ phân phối để lượng hóa độ bất định.</p>
+  <p class="sub">MLE và MAP đều là <b>ước lượng điểm</b>; chỉ Bayesian đầy đủ giữ lại toàn bộ phân phối để lượng hóa độ bất định.</p>
 </section>
 
 <!-- 7 -->
 <section class="slide">
   <h2>7. Thách thức: Tính Posterior không có nghiệm đóng</h2>
-  <div class="eq">$$P(w \mid D) = \frac{P(D \mid w)\,P(w)}{\displaystyle\int P(D \mid w)\,P(w)\,dw}$$</div>
-  <p>Tích phân mẫu số \(P(D)\) nhiều chiều kết hợp sigmoid + Bernoulli khiến posterior <b>không thuộc họ phân phối chuẩn đã biết</b>.</p>
+  <div class="eq">$$P(\mathbf{w} \mid \mathcal{D}) = \frac{P(\mathcal{D} \mid \mathbf{w})\,P(\mathbf{w})}{\displaystyle\int P(\mathcal{D} \mid \mathbf{w})\,P(\mathbf{w})\,d\mathbf{w}}$$</div>
+  <p>Tích phân mẫu số \(P(\mathcal{D})\) nhiều chiều kết hợp sigmoid + Bernoulli khiến posterior <b>không thuộc họ phân phối chuẩn đã biết</b>.</p>
   <div class="tw"><table>
     <tr><th>Phương pháp xấp xỉ</th><th>Ý tưởng chính</th></tr>
-    <tr><td><b>Laplace Approximation</b></td><td>Xấp xỉ posterior bằng phân phối Gaussian quanh \(w_{\text{MAP}}\)</td></tr>
-    <tr><td><b>MCMC</b></td><td>Sinh chuỗi mẫu \(w^{(1)}, \dots, w^{(M)} \sim P(w\mid D)\) trực tiếp từ posterior</td></tr>
-    <tr><td><b>Variational Inference</b></td><td>Tìm phân phối \(q(w)\) gần posterior nhất bằng tối ưu hóa</td></tr>
+    <tr><td><b>Laplace Approximation</b></td><td>Xấp xỉ posterior bằng phân phối Gaussian quanh \(\mathbf{w}_{\text{MAP}}\)</td></tr>
+    <tr><td><b>MCMC</b></td><td>Sinh chuỗi mẫu \(\mathbf{w}^{(1)}, \dots, \mathbf{w}^{(M)} \sim P(\mathbf{w}\mid \mathcal{D})\) trực tiếp từ posterior</td></tr>
+    <tr><td><b>Variational Inference</b></td><td>Tìm phân phối \(q(\mathbf{w})\) gần posterior nhất bằng tối ưu hóa</td></tr>
   </table></div>
 </section>
 
 <!-- 8 -->
 <section class="slide">
   <h2>8. Laplace Approximation: Xấp xỉ Posterior bằng Gaussian</h2>
-  <p>Đặt \(f(w) = \ln P(D \mid w) + \ln P(w)\). Khai triển Taylor bậc 2 quanh cực đại \(w_{\text{MAP}}\) (nơi \(\nabla f(w_{\text{MAP}}) = 0\)):</p>
-  <div class="eq">$$f(w) \approx f(w_{\text{MAP}}) + \frac{1}{2}(w - w_{\text{MAP}})^\top H (w - w_{\text{MAP}}), \quad H = \nabla^2 f(w_{\text{MAP}})$$</div>
-  <p>Đặt \(A = -H = -\nabla^2 f(w_{\text{MAP}})\), lấy hàm mũ ta thu được dạng chuẩn tắc Gaussian:</p>
-  <div class="eq">$$P(w \mid D) \approx \mathcal{N}\!\left(w_{\text{MAP}},\, A^{-1}\right)$$</div>
+  <p>Đặt \(f(\mathbf{w}) = \ln P(\mathcal{D} \mid \mathbf{w}) + \ln P(\mathbf{w})\). Khai triển Taylor bậc 2 quanh cực đại \(\mathbf{w}_{\text{MAP}}\) (nơi \(\nabla f(\mathbf{w}_{\text{MAP}}) = \mathbf{0}\)):</p>
+  <div class="eq">$$f(\mathbf{w}) \approx f(\mathbf{w}_{\text{MAP}}) + \frac{1}{2}(\mathbf{w} - \mathbf{w}_{\text{MAP}})^\top \mathbf{H} (\mathbf{w} - \mathbf{w}_{\text{MAP}}), \quad \mathbf{H} = \nabla^2 f(\mathbf{w}_{\text{MAP}})$$</div>
+  <p>Đặt \(\mathbf{A} = -\mathbf{H} = -\nabla^2 f(\mathbf{w}_{\text{MAP}})\), lấy hàm mũ ta thu được dạng chuẩn tắc Gaussian:</p>
+  <div class="eq">$$P(\mathbf{w} \mid \mathcal{D}) \approx \mathcal{N}\!\left(\mathbf{w}_{\text{MAP}},\, \mathbf{A}^{-1}\right)$$</div>
   <div class="row">
-    <div class="box"><p><b>Mean \(w_{\text{MAP}}\):</b> vị trí trung tâm posterior</p></div>
-    <div class="box"><p><b>Covariance \(A^{-1}\):</b> độ phân tán, mức độ không chắc chắn</p></div>
+    <div class="box"><p><b>Kỳ vọng (Mean) \(\mathbf{w}_{\text{MAP}}\):</b> vị trí trung tâm posterior</p></div>
+    <div class="box"><p><b>Hiệp phương sai (Covariance) \(\mathbf{A}^{-1}\):</b> độ phân tán, mức độ không chắc chắn</p></div>
   </div>
 </section>
 
 <!-- 9 -->
 <section class="slide">
   <h2>9. Hessian trong Bayesian Logistic Regression</h2>
-  <p>Với Gaussian prior \(w \sim \mathcal{N}(0, \sigma^2 I)\), negative log-posterior (tổng trên \(n\) mẫu) là:</p>
-  <div class="eq">$$J(w) = -\sum_{i=1}^n \bigl[y_i\ln p_i + (1-y_i)\ln(1-p_i)\bigr] + \frac{1}{2\sigma^2}w^\top w$$</div>
+  <p>Với Gaussian prior \(\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \sigma^2 \mathbf{I})\), negative log-posterior (tổng trên \(N\) mẫu) là:</p>
+  <div class="eq">$$J(\mathbf{w}) = -\sum_{i=1}^N \bigl[y_i\ln p_i + (1-y_i)\ln(1-p_i)\bigr] + \frac{1}{2\sigma^2}\mathbf{w}^\top \mathbf{w}$$</div>
   <div class="row">
-    <div class="box eq">\(\nabla J(w) = X^\top(p - y) + \frac{1}{\sigma^2}w\)</div>
-    <div class="box eq">\(\nabla^2 J(w) = X^\top R X + \frac{1}{\sigma^2}I\)</div>
+    <div class="box eq">\(\nabla J(\mathbf{w}) = \mathbf{X}^\top(\mathbf{p} - \mathbf{y}) + \frac{1}{\sigma^2}\mathbf{w}\)</div>
+    <div class="box eq">\(\nabla^2 J(\mathbf{w}) = \mathbf{X}^\top \mathbf{R} \mathbf{X} + \frac{1}{\sigma^2}\mathbf{I}\)</div>
   </div>
-  <div class="eq">$$\Sigma = \left(X^\top R X + \frac{1}{\sigma^2}I\right)^{-1}, \qquad P(w \mid D) \approx \mathcal{N}(w_{\text{MAP}}, \Sigma)$$</div>
-  <p class="sub">Trong đó \(R = \mathrm{diag}\bigl(p_i(1-p_i)\bigr)\) và toàn bộ biểu thức được tính tại \(w = w_{\text{MAP}}\).</p>
+  <div class="eq">$$\boldsymbol{\Sigma} = \left(\mathbf{X}^\top \mathbf{R} \mathbf{X} + \frac{1}{\sigma^2}\mathbf{I}\right)^{-1}, \qquad P(\mathbf{w} \mid \mathcal{D}) \approx \mathcal{N}(\mathbf{w}_{\text{MAP}}, \boldsymbol{\Sigma})$$</div>
+  <p class="sub">Trong đó \(\mathbf{R} = \mathrm{diag}\bigl(p_i(1-p_i)\bigr)\) và toàn bộ biểu thức được tính tại \(\mathbf{w} = \mathbf{w}_{\text{MAP}}\).</p>
 </section>
 
 <!-- 10 -->
@@ -235,17 +235,17 @@ nav button:hover{background:var(--sky)}
     <div class="box">
       <h3>a) MCMC (Metropolis–Hastings)</h3>
       <ol style="margin-top:6px">
-        <li>Khởi tạo \(w^{(0)}\), sinh ứng viên \(w^* \sim q(w^* \mid w^{(m)})\)</li>
+        <li>Khởi tạo \(\mathbf{w}^{(0)}\), sinh ứng viên \(\mathbf{w}^* \sim q(\mathbf{w}^* \mid \mathbf{w}^{(t)})\)</li>
         <li>Tính xác suất chấp nhận:
-          <div class="eq">$$\alpha = \min\!\left(1,\, \frac{P(w^*\mid D)\,q(w^{(m)}\mid w^*)}{P(w^{(m)}\mid D)\,q(w^*\mid w^{(m)})}\right)$$</div>
+          <div class="eq">$$\alpha = \min\!\left(1,\, \frac{P(\mathbf{w}^*\mid \mathcal{D})\,q(\mathbf{w}^{(t)}\mid \mathbf{w}^*)}{P(\mathbf{w}^{(t)}\mid \mathcal{D})\,q(\mathbf{w}^*\mid \mathbf{w}^{(t)})}\right)$$</div>
         </li>
-        <li>Chấp nhận \(w^*\) với xác suất \(\alpha\); bỏ giai đoạn <span class="nw">warm-up</span></li>
+        <li>Chấp nhận \(\mathbf{w}^*\) với xác suất \(\alpha\); bỏ giai đoạn khởi động (warm-up)</li>
       </ol>
       <p class="sub" style="margin-top:4px">Biến thể hiệu quả nhiều chiều: <b>HMC</b>, <b>NUTS</b>.</p>
     </div>
     <div class="box">
       <h3>b) Variational Inference (VI)</h3>
-      <p style="margin-top:6px">Biến bài toán tính tích phân thành <b>tối ưu hóa</b>: tìm phân phối đơn giản \(q(w)\) gần posterior \(P(w\mid D)\) nhất (cực tiểu hóa <span class="nw">KL-divergence</span>).</p>
+      <p style="margin-top:6px">Biến bài toán tính tích phân thành <b>tối ưu hóa</b>: tìm phân phối đơn giản \(q(\mathbf{w})\) gần posterior \(P(\mathbf{w}\mid \mathcal{D})\) nhất (cực tiểu hóa độ phân kỳ KL / KL-divergence).</p>
       <p class="sub" style="margin-top:8px">Tốc độ nhanh hơn MCMC, phù hợp tập dữ liệu lớn.</p>
     </div>
   </div>
@@ -258,19 +258,19 @@ nav button:hover{background:var(--sky)}
     <div>
       <div class="box">
         <h3>a) Dự đoán MAP</h3>
-        <div class="eq">$$P(y^*=1 \mid x^*, w_{\text{MAP}}) = \sigma(w_{\text{MAP}}^\top x^*)$$</div>
+        <div class="eq">$$P(y^*=1 \mid \mathbf{x}^*, \mathbf{w}_{\text{MAP}}) = \sigma(\mathbf{w}_{\text{MAP}}^\top \mathbf{x}^*)$$</div>
       </div>
       <div class="box" style="margin-top:10px">
         <h3>b) Posterior Predictive (Bayesian)</h3>
-        <div class="eq">$$P(y^*=1 \mid x^*, D) = \int \sigma(w^\top x^*)\,P(w \mid D)\,dw \approx \frac{1}{M}\sum_{m=1}^M \sigma\!\bigl((w^{(m)})^\top x^*\bigr)$$</div>
+        <div class="eq">$$P(y^*=1 \mid \mathbf{x}^*, \mathcal{D}) = \int \sigma(\mathbf{w}^\top \mathbf{x}^*)\,P(\mathbf{w} \mid \mathcal{D})\,d\mathbf{w} \approx \frac{1}{M}\sum_{m=1}^M \sigma\!\bigl((\mathbf{w}^{(m)})^\top \mathbf{x}^*\bigr)$$</div>
       </div>
       <div class="box bad" style="margin-top:10px">
-        <p>\(\mathbb{E}_{w\mid D}[\sigma(w^\top x^*)] \neq \sigma(\mathbb{E}_{w\mid D}[w]^\top x^*)\) — phải trung bình hóa xác suất!</p>
+        <p>\(\mathbb{E}_{\mathbf{w}\mid \mathcal{D}}[\sigma(\mathbf{w}^\top \mathbf{x}^*)] \neq \sigma(\mathbb{E}_{\mathbf{w}\mid \mathcal{D}}[\mathbf{w}]^\top \mathbf{x}^*)\) — phải trung bình hóa xác suất!</p>
       </div>
     </div>
     <div>
       <svg id="p11" viewBox="0 0 400 240"></svg>
-      <div class="ctl" style="margin-top:8px"><label for="unc11">Độ bất định σ_w</label><input id="unc11" type="range" min="0.1" max="1.6" step="0.1" value="0.9"><output id="uo11"></output></div>
+      <div class="ctl" style="margin-top:8px"><label for="unc11">Độ bất định \(\sigma_w\)</label><input id="unc11" type="range" min="0.1" max="1.6" step="0.1" value="0.9"><output id="uo11">0.9</output></div>
       <p id="t11" class="sub" style="margin-top:4px;text-align:center"></p>
     </div>
   </div>
@@ -281,14 +281,14 @@ nav button:hover{background:var(--sky)}
   <h2>12. Tóm tắt Phần 5: MAP &amp; Bayesian Inference</h2>
   <div class="tw"><table>
     <tr><th>Khái niệm</th><th>Công thức</th><th>Ý nghĩa</th></tr>
-    <tr><td><b>Định lý Bayes</b></td><td>\(P(w\mid D) \propto P(D\mid w)\,P(w)\)</td><td>Posterior = Likelihood × Prior</td></tr>
-    <tr><td><b>MAP</b></td><td>\(w_{\text{MAP}} = \arg\max_w[\ln P(D\mid w) + \ln P(w)]\)</td><td>Điểm cực đại hậu nghiệm</td></tr>
-    <tr><td><b>Gaussian Prior</b></td><td>\(w \sim \mathcal{N}(0, \sigma^2 I)\)</td><td>\(\equiv\) L2 Regularization</td></tr>
-    <tr><td><b>Laplace Prior</b></td><td>\(P(w_j) \propto e^{-|w_j|/b}\)</td><td>\(\equiv\) L1 Regularization (sparse)</td></tr>
-    <tr><td><b>Laplace Approx.</b></td><td>\(P(w\mid D) \approx \mathcal{N}(w_{\text{MAP}}, \Sigma)\)</td><td>Xấp xỉ Gaussian quanh MAP</td></tr>
-    <tr><td><b>Posterior Predictive</b></td><td>\(\int \sigma(w^\top x^*)\,P(w\mid D)\,dw\)</td><td>Dự đoán trung bình trên hậu nghiệm</td></tr>
+    <tr><td><b>Định lý Bayes</b></td><td>\(P(\mathbf{w}\mid \mathcal{D}) \propto P(\mathcal{D}\mid \mathbf{w})\,P(\mathbf{w})\)</td><td>Posterior = Likelihood × Prior</td></tr>
+    <tr><td><b>MAP</b></td><td>\(\mathbf{w}_{\text{MAP}} = \arg\max_{\mathbf{w}}[\ln P(\mathcal{D}\mid \mathbf{w}) + \ln P(\mathbf{w})]\)</td><td>Điểm cực đại hậu nghiệm</td></tr>
+    <tr><td><b>Gaussian Prior</b></td><td>\(\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \sigma^2 \mathbf{I})\)</td><td>\(\equiv\) L2 Regularization</td></tr>
+    <tr><td><b>Laplace Prior</b></td><td>\(P(w_j) \propto e^{-|w_j|/b}\)</td><td>\(\equiv\) L1 Regularization (thưa)</td></tr>
+    <tr><td><b>Laplace Approx.</b></td><td>\(P(\mathbf{w}\mid \mathcal{D}) \approx \mathcal{N}(\mathbf{w}_{\text{MAP}}, \boldsymbol{\Sigma})\)</td><td>Xấp xỉ Gaussian quanh MAP</td></tr>
+    <tr><td><b>Posterior Predictive</b></td><td>\(\int \sigma(\mathbf{w}^\top \mathbf{x}^*)\,P(\mathbf{w}\mid \mathcal{D})\,d\mathbf{w}\)</td><td>Dự đoán trung bình trên hậu nghiệm</td></tr>
   </table></div>
-  <p class="sub"><b>Thông điệp chính:</b> Bayesian = MLE + Prior + Uncertainty; dự đoán trung bình trên nhiều bộ trọng số giúp mô hình thận trọng hơn ở vùng ít dữ liệu.</p>
+  <p class="sub"><b>Thông điệp chính:</b> Bayesian = MLE + Prior + Độ bất định; dự đoán trung bình trên nhiều bộ trọng số giúp mô hình thận trọng hơn ở vùng ít dữ liệu.</p>
 </section>
 
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
@@ -397,6 +397,7 @@ let tx=null;document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{p
 document.addEventListener('touchend',e=>{if(tx===null||e.target.tagName==='INPUT')return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(i+(d<0?1:-1));tx=null});
 sig3.oninput=up3;unc11.oninput=up11;
 addEventListener('load',()=>{render(document.body);go((parseInt(location.hash.slice(1))||1)-1)});
+up3();up11();
 go(0);
 </script>
 </body>
