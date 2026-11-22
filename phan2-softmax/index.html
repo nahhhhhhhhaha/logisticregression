@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Softmax Regression – Phần 2: Đạo hàm và Gradient</title>
+<title>Softmax Regression – Đạo hàm và Gradient</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&display=swap">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
@@ -39,12 +39,6 @@ ul{padding-left:20px;display:flex;flex-direction:column;gap:5px}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .card{background:var(--sky);border-radius:6px;padding:12px 14px}
 .card b.title{color:var(--navy);display:block;margin-bottom:6px;font-size:clamp(15px,1.65vw,19px)}
-.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;font-size:clamp(13px,1.5vw,16px)}
-.ctl output{font-variant-numeric:tabular-nums;min-width:46px;text-align:right;color:var(--navy);font-weight:700}
-input[type=range]{width:100%;accent-color:var(--blue)}
-.mat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;font-variant-numeric:tabular-nums}
-.mat-cell{background:#fff;border:1px solid var(--line);border-radius:4px;padding:6px 4px;text-align:center;font-size:13.5px}
-.mat-cell.diag{background:#dbeafe;border-color:var(--blue);font-weight:700;color:var(--navy)}
 nav{position:fixed;bottom:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:center;gap:16px;background:#fff;border-top:1px solid var(--line);z-index:5;font-size:13px;color:var(--mute)}
 nav button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;width:40px;height:32px;font-size:16px;cursor:pointer}
 nav button:hover{background:var(--sky)}
@@ -55,186 +49,134 @@ nav button:hover{background:var(--sky)}
 </head>
 <body>
 <div id="bar"></div>
-<header><a href="../index.html">← Mục lục</a><span>Softmax Regression · 2. Đạo hàm và Gradient</span></header>
+<header><a href="../index.html">← Mục lục</a><span>Softmax Regression · Đạo hàm và Gradient</span></header>
 
-<!-- 1: BÌA -->
+<!-- BÌA -->
 <section class="slide cover">
   <h1>Softmax Regression</h1>
-  <p class="big sub">Phần 2 · Đạo hàm và Gradient</p>
-  <p class="sub">Từ đạo hàm hàm Softmax, ma trận Jacobi đến Gradient theo $\mathbf{W}$ và $\mathbf{b}$</p>
+  <p class="big sub">Đạo hàm và Gradient</p>
+  <p class="sub">Đạo hàm hàm Softmax, Ma trận Jacobi và Gradient theo $\mathbf{W}$, $\mathbf{b}$</p>
 </section>
 
-<!-- 2: BÀI TOÁN ĐẠO HÀM SOFTMAX -->
+<!-- ĐẠO HÀM SOFTMAX -->
 <section class="slide">
-  <h2>2.1. Bài toán đạo hàm của hàm Softmax</h2>
+  <h2>Đạo hàm hàm Softmax</h2>
   <div class="body-wrap">
-    <p>Cho vector điểm số (logits) $\mathbf{z} = [z_1, z_2, \dots, z_K]$ và hàm kích hoạt Softmax:</p>
-    <div class="eq">$$a_i = \frac{e^{z_i}}{\sum_{k=1}^{K} e^{z_k}} = \frac{e^{z_i}}{S}, \qquad \text{với } S = \sum_{k=1}^{K} e^{z_k}$$</div>
+    <p>Cho vector điểm số $\mathbf{z} = [z_1, z_2, \dots, z_K]^\top$ và hàm kích hoạt Softmax:</p>
+    <div class="eq">$$p_k = \frac{e^{z_k}}{\sum_{m=1}^{K} e^{z_m}} = \frac{e^{z_k}}{S}, \qquad S = \sum_{m=1}^{K} e^{z_m}$$</div>
     <div class="box">
-      <p><b>Mục tiêu:</b> Tính đạo hàm riêng của xác suất đầu ra $a_i$ theo từng logit đầu vào $z_j$, ký hiệu là $\dfrac{\partial a_i}{\partial z_j}$.</p>
+      <p><b>Mục tiêu:</b> Tính đạo hàm riêng $\dfrac{\partial p_k}{\partial z_j}$ của xác suất lớp $k$ theo logit $z_j$.</p>
     </div>
     <div class="grid2">
       <div class="card">
-        <b class="title">Trường hợp 1: $i = j$</b>
-        <p>Đạo hàm của xác suất lớp $i$ theo chính logit $z_i$ của lớp đó.</p>
+        <b class="title">Khi $k = j$</b>
+        <p>Đạo hàm của xác suất lớp $k$ theo chính logit $z_k$ của lớp đó.</p>
       </div>
       <div class="card">
-        <b class="title">Trường hợp 2: $i \neq j$</b>
-        <p>Đạo hàm của xác suất lớp $i$ theo logit $z_j$ của một lớp khác.</p>
+        <b class="title">Khi $k \neq j$</b>
+        <p>Đạo hàm của xác suất lớp $k$ theo logit $z_j$ của lớp khác.</p>
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> Toàn bộ ký hiệu $\hat{y}_i$ được chuẩn hóa thành $a_i$ để biểu diễn xác suất dự đoán đầu ra của lớp $i$; $S = \sum_{k=1}^{K} e^{z_k}$ là tổng hàm mũ ở mẫu số.</div>
+  <div class="note"><b>Ký hiệu:</b> $p_k$ là xác suất dự đoán cho lớp $k \in \{1, \dots, K\}$; $S = \sum_{m=1}^K e^{z_m}$ là tổng hàm mũ ở mẫu số.</div>
 </section>
 
-<!-- 3: ĐẠO HÀM SOFTMAX TRƯỜNG HỢP i = j -->
+<!-- ĐẠO HÀM KHI k = j -->
 <section class="slide">
-  <h2>Đạo hàm Softmax · Trường hợp 1 ($i = j$)</h2>
+  <h2>Đạo hàm khi $k = j$</h2>
   <div class="body-wrap">
-    <p>Áp dụng quy tắc đạo hàm thương $\left(\dfrac{u}{v}\right)' = \dfrac{u'v - uv'}{v^2}$ với $u = e^{z_i} \Rightarrow u' = e^{z_i}$ và $v = S \Rightarrow \dfrac{\partial S}{\partial z_i} = e^{z_i}$:</p>
-    <div class="eq">$$\frac{\partial a_i}{\partial z_i} = \frac{e^{z_i} \cdot S - e^{z_i} \cdot e^{z_i}}{S^2} = \frac{e^{z_i}}{S} - \left(\frac{e^{z_i}}{S}\right)^2$$</div>
-    <div class="box eq">$$\frac{\partial a_i}{\partial z_i} = a_i - a_i^2 = a_i(1 - a_i)$$</div>
+    <p>Áp dụng quy tắc đạo hàm thương với tử số $e^{z_k}$ và mẫu số $S$ (có $\dfrac{\partial S}{\partial z_k} = e^{z_k}$):</p>
+    <div class="eq">$$\frac{\partial p_k}{\partial z_k} = \frac{e^{z_k} \cdot S - e^{z_k} \cdot e^{z_k}}{S^2} = \frac{e^{z_k}}{S} - \left(\frac{e^{z_k}}{S}\right)^2$$</div>
+    <div class="box eq">$$\frac{\partial p_k}{\partial z_k} = p_k - p_k^2 = p_k(1 - p_k)$$</div>
     <div class="box good">
-      <p><b>Ý nghĩa:</b> Khi logit $z_i$ tăng, xác suất $a_i$ của chính lớp đó tăng (vì $a_i(1-a_i) > 0$), tốc độ tăng phụ thuộc vào xác suất hiện tại $a_i$.</p>
+      <p><b>Ý nghĩa:</b> Khi $z_k$ tăng, xác suất $p_k$ tăng ($p_k(1 - p_k) > 0$), mức tăng phụ thuộc vào $p_k$ hiện tại.</p>
     </div>
   </div>
-  <div class="note"><b>Ký hiệu:</b> $a_i \in (0, 1)$ là xác suất đầu ra của lớp $i$; đạo hàm riêng tại đường chéo có dạng tương tự đạo hàm hàm Sigmoid $\sigma(z)(1-\sigma(z))$.</div>
+  <div class="note"><b>Ký hiệu:</b> $p_k \in (0, 1)$; biểu thức $p_k(1 - p_k)$ tương tự dạng đạo hàm của hàm Sigmoid.</div>
 </section>
 
-<!-- 4: ĐẠO HÀM SOFTMAX TRƯỜNG HỢP i != j -->
+<!-- ĐẠO HÀM KHI k != j -->
 <section class="slide">
-  <h2>Đạo hàm Softmax · Trường hợp 2 ($i \neq j$)</h2>
+  <h2>Đạo hàm khi $k \neq j$</h2>
   <div class="body-wrap">
-    <p>Khi $i \neq j$, tử số $u = e^{z_i}$ không phụ thuộc vào $z_j$ nên $\dfrac{\partial e^{z_i}}{\partial z_j} = 0$, nhưng mẫu số $S$ vẫn chứa $e^{z_j}$ nên $\dfrac{\partial S}{\partial z_j} = e^{z_j}$:</p>
-    <div class="eq">$$\frac{\partial a_i}{\partial z_j} = \frac{0 \cdot S - e^{z_i} \cdot e^{z_j}}{S^2} = -\frac{e^{z_i}}{S} \cdot \frac{e^{z_j}}{S}$$</div>
-    <div class="box eq">$$\frac{\partial a_i}{\partial z_j} = -a_i a_j \qquad (i \neq j)$$</div>
+    <p>Khi $k \neq j$, tử số $e^{z_k}$ không phụ thuộc $z_j$ ($\dfrac{\partial e^{z_k}}{\partial z_j} = 0$), còn mẫu số có $\dfrac{\partial S}{\partial z_j} = e^{z_j}$:</p>
+    <div class="eq">$$\frac{\partial p_k}{\partial z_j} = \frac{0 \cdot S - e^{z_k} \cdot e^{z_j}}{S^2} = -\frac{e^{z_k}}{S} \cdot \frac{e^{z_j}}{S}$$</div>
+    <div class="box eq">$$\frac{\partial p_k}{\partial z_j} = -p_k p_j \qquad (k \neq j)$$</div>
     <div class="box bad">
-      <p><b>Ý nghĩa cạnh tranh:</b> Khi logit $z_j$ tăng, xác suất $a_j$ tăng kéo theo xác suất $a_i$ của các lớp khác giảm ($-a_i a_j < 0$) để giữ tổng xác suất luôn bằng 1.</p>
+      <p><b>Ý nghĩa cạnh tranh:</b> Khi $z_j$ tăng làm $p_j$ tăng, xác suất $p_k$ của các lớp khác giảm ($-p_k p_j < 0$) để tổng xác suất bằng $1$.</p>
     </div>
   </div>
-  <div class="note"><b>Chuyển đổi ký hiệu:</b> Công thức trong tài liệu gốc $\dfrac{\partial \hat{y}_i}{\partial z_j} = -\hat{y}_i \hat{y}_j$ được chuyển thống nhất thành $\dfrac{\partial a_i}{\partial z_j} = -a_i a_j$.</div>
+  <div class="note"><b>Ký hiệu:</b> $p_k, p_j$ là xác suất dự đoán của lớp $k$ và lớp $j$.</div>
 </section>
 
-<!-- 5: KRONECKER DELTA & MA TRẬN JACOBI -->
+<!-- MA TRẬN JACOBI -->
 <section class="slide">
-  <h2>2.2. Kronecker Delta và Ma trận Jacobi</h2>
+  <h2>Kronecker Delta &amp; Ma trận Jacobi</h2>
   <div class="body-wrap">
     <div class="row">
       <div>
-        <p>Gộp 2 trường hợp bằng ký hiệu <b>Kronecker Delta</b> $\delta_{ij}$:</p>
-        <div class="eq">$$\frac{\partial a_i}{\partial z_j} = a_i(\delta_{ij} - a_j), \quad \delta_{ij} = \begin{cases} 1, & i = j \\ 0, & i \neq j \end{cases}$$</div>
-        <p style="margin-top:8px">Tổ chức $K \times K$ đạo hàm thành <b>Ma trận Jacobi</b> $\mathbf{J}_{\text{Softmax}} \in \mathbb{R}^{K \times K}$:</p>
-        <div class="box eq">$$\mathbf{J}_{\text{Softmax}} = \frac{\partial \mathbf{a}}{\partial \mathbf{z}} = \operatorname{diag}(\mathbf{a}) - \mathbf{a}\mathbf{a}^\top$$</div>
+        <p>Gộp hai trường hợp bằng ký hiệu <b>Kronecker Delta</b> $\delta_{kj}$:</p>
+        <div class="eq">$$\frac{\partial p_k}{\partial z_j} = p_k(\delta_{kj} - p_j), \quad \delta_{kj} = \begin{cases} 1, & k = j \\ 0, & k \neq j \end{cases}$$</div>
+        <p style="margin-top:8px">Tập hợp $K \times K$ đạo hàm thành <b>Ma trận Jacobi</b> $\mathbf{J}_{\text{Softmax}} \in \mathbb{R}^{K \times K}$:</p>
+        <div class="box eq">$$\mathbf{J}_{\text{Softmax}} = \frac{\partial \mathbf{p}}{\partial \mathbf{z}} = \operatorname{diag}(\mathbf{p}) - \mathbf{p}\mathbf{p}^\top$$</div>
       </div>
       <div class="box" style="font-size:14px">
-        <p><b>Khai triển thành phần ma trận ($K \times K$):</b></p>
-        <div class="eq" style="font-size:clamp(12px,1.35vw,16px)">$$\operatorname{diag}(\mathbf{a}) - \mathbf{a}\mathbf{a}^\top = \begin{bmatrix} a_1 & 0 & \dots & 0 \\ 0 & a_2 & \dots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \dots & a_K \end{bmatrix} - \begin{bmatrix} a_1^2 & a_1 a_2 & \dots & a_1 a_K \\ a_2 a_1 & a_2^2 & \dots & a_2 a_K \\ \vdots & \vdots & \ddots & \vdots \\ a_K a_1 & a_K a_2 & \dots & a_K^2 \end{bmatrix}$$</div>
+        <p><b>Khai triển ma trận ($K \times K$):</b></p>
+        <div class="eq" style="font-size:clamp(12px,1.35vw,16px)">$$\operatorname{diag}(\mathbf{p}) - \mathbf{p}\mathbf{p}^\top = \begin{bmatrix} p_1 & 0 & \dots & 0 \\ 0 & p_2 & \dots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \dots & p_K \end{bmatrix} - \begin{bmatrix} p_1^2 & p_1 p_2 & \dots & p_1 p_K \\ p_2 p_1 & p_2^2 & \dots & p_2 p_K \\ \vdots & \vdots & \ddots & \vdots \\ p_K p_1 & p_K p_2 & \dots & p_K^2 \end{bmatrix}$$</div>
       </div>
     </div>
   </div>
-  <div class="note"><b>Bổ sung ký hiệu:</b> $\delta_{ij}$ là hàm Kronecker Delta; $\mathbf{a} = [a_1, \dots, a_K]^\top$ là vector xác suất dự đoán (thay cho $\hat{\mathbf{y}}$); $\operatorname{diag}(\mathbf{a})$ là ma trận đường chéo chứa các phần tử của $\mathbf{a}$.</div>
+  <div class="note"><b>Ký hiệu:</b> $\mathbf{p} = [p_1, \dots, p_K]^\top$ là vector xác suất dự đoán; $\operatorname{diag}(\mathbf{p})$ là ma trận đường chéo từ $\mathbf{p}$.</div>
 </section>
 
-<!-- 6: TƯƠNG TÁC MA TRẬN JACOBI -->
+<!-- ĐẠO HÀM LOSS THEO LOGITS -->
 <section class="slide">
-  <h2>Trực quan hóa Ma trận Jacobi $\mathbf{J}_{\text{Softmax}}$ ($K = 3$)</h2>
+  <h2>Đạo hàm Cross-Entropy theo Logits</h2>
   <div class="body-wrap">
-    <div class="row">
-      <div>
-        <p class="sub" style="margin-bottom:8px">Thay đổi logits $z_1, z_2, z_3$ để quan sát sự thay đổi của vector xác suất $\mathbf{a}$ và ma trận đạo hàm $\mathbf{J}_{\text{Softmax}}$:</p>
-        <div class="ctl">
-          <label for="jz1">$z_1$</label><input id="jz1" type="range" min="-3" max="4" step="0.1" value="1.5"><output id="jz1o"></output>
-          <label for="jz2">$z_2$</label><input id="jz2" type="range" min="-3" max="4" step="0.1" value="0.5"><output id="jz2o"></output>
-          <label for="jz3">$z_3$</label><input id="jz3" type="range" min="-3" max="4" step="0.1" value="-0.5"><output id="jz3o"></output>
-        </div>
-        <div class="box" style="margin-top:12px">
-          <p id="probLine" style="font-size:14.5px;font-weight:500"></p>
-          <p class="sub" style="font-size:13px;margin-top:4px">Ô xanh đậm trên đường chéo ($a_i(1-a_i) > 0$) luôn dương; các ô ngoài đường chéo ($-a_i a_j < 0$) luôn âm.</p>
-        </div>
-      </div>
-      <div class="card">
-        <b class="title">Ma trận $\mathbf{J}_{\text{Softmax}} = \operatorname{diag}(\mathbf{a}) - \mathbf{a}\mathbf{a}^\top$</b>
-        <div id="jacGrid" class="mat-grid"></div>
-        <p class="sub" style="font-size:12.5px;margin-top:8px;text-align:center">Tổng mỗi hàng và mỗi cột của $\mathbf{J}_{\text{Softmax}}$ luôn bằng $0$.</p>
-      </div>
-    </div>
-  </div>
-  <div class="note"><b>Ghi chú tương tác:</b> Phần tử tại hàng $i$, cột $j$ của lưới trên biểu diễn giá trị đạo hàm riêng $\dfrac{\partial a_i}{\partial z_j}$.</div>
-</section>
-
-<!-- 7: ĐẠO HÀM CROSS-ENTROPY THEO LOGITS -->
-<section class="slide">
-  <h2>2.3. Đạo hàm hàm mất mát Cross-Entropy theo Logits</h2>
-  <div class="body-wrap">
-    <p>Xét hàm mất mát Cross-Entropy trên một mẫu có nhãn One-Hot $\mathbf{y}$ và dự đoán $\mathbf{a}$: $L = -\sum_{i=1}^{K} y_i \ln a_i$.</p>
-    <p>Áp dụng <b>Quy tắc dây chuyền (Chain Rule)</b> để tính $\dfrac{\partial L}{\partial z_j}$:</p>
-    <div class="eq">$$\frac{\partial L}{\partial z_j} = \sum_{i=1}^{K} \frac{\partial L}{\partial a_i} \frac{\partial a_i}{\partial z_j} = \sum_{i=1}^{K} \left(-\frac{y_i}{a_i}\right) a_i(\delta_{ij} - a_j) = -\sum_{i=1}^{K} y_i \delta_{ij} + a_j \sum_{i=1}^{K} y_i$$</div>
+    <p>Với nhãn One-Hot $\mathbf{y} \in \{0, 1\}^K$ và dự đoán $\mathbf{p}$, xét loss trên một mẫu: $J_i = -\sum_{k=1}^{K} y_{i,k} \ln p_k$.</p>
+    <p>Áp dụng <b>Quy tắc chuỗi (Chain Rule)</b> cho $\dfrac{\partial J_i}{\partial z_j}$:</p>
+    <div class="eq">$$\frac{\partial J_i}{\partial z_j} = \sum_{k=1}^{K} \frac{\partial J_i}{\partial p_k} \frac{\partial p_k}{\partial z_j} = \sum_{k=1}^{K} \left(-\frac{y_{i,k}}{p_k}\right) p_k(\delta_{kj} - p_j) = -\sum_{k=1}^{K} y_{i,k} \delta_{kj} + p_j \sum_{k=1}^{K} y_{i,k}$$</div>
     <div class="row">
       <div class="box">
-        <p>Sử dụng tính chất $\sum_{i=1}^{K} y_i \delta_{ij} = y_j$ và tổng nhãn One-Hot $\sum_{i=1}^{K} y_i = 1$:</p>
-        <div class="eq">$$\frac{\partial L}{\partial z_j} = -y_j + a_j = a_j - y_j$$</div>
+        <p>Với $\sum_{k=1}^{K} y_{i,k} \delta_{kj} = y_{i,j}$ và $\sum_{k=1}^{K} y_{i,k} = 1$:</p>
+        <div class="eq">$$\frac{\partial J_i}{\partial z_j} = -y_{i,j} + p_j = p_j - y_{i,j}$$</div>
       </div>
       <div class="box good">
-        <p><b>Biểu diễn dạng vector:</b></p>
-        <div class="eq">$$\frac{\partial L}{\partial \mathbf{z}} = \mathbf{a} - \mathbf{y}$$</div>
-        <p class="sub">Chính là sai số giữa dự đoán và nhãn thật!</p>
+        <p><b>Dạng vector:</b></p>
+        <div class="eq">$$\frac{\partial J_i}{\partial \mathbf{z}} = \mathbf{p} - \mathbf{y}_i$$</div>
+        <p class="sub">Chính là hiệu giữa xác suất dự đoán và nhãn One-Hot.</p>
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $L$ là hàm mất mát Cross-Entropy của một mẫu; $y_i \in \{0, 1\}$ là nhãn thực tế dạng One-Hot; $a_i$ là xác suất dự đoán thay cho $\hat{y}_i$.</div>
+  <div class="note"><b>Ký hiệu:</b> $J_i$ là mất mát của mẫu $i$; $\mathbf{y}_i \in \{0, 1\}^K$ là vector One-Hot của mẫu $i$.</div>
 </section>
 
-<!-- 8: ĐẠO HÀM THEO W VÀ b -->
+<!-- GRADIENT THEO W VÀ b -->
 <section class="slide">
-  <h2>2.4. Gradient của hàm mất mát theo $\mathbf{W}$ và $\mathbf{b}$</h2>
+  <h2>Gradient theo $\mathbf{W}$ và $\mathbf{b}$</h2>
   <div class="body-wrap">
-    <p>Với một mẫu hàng $\mathbf{x} = [x_1, \dots, x_d] \in \mathbb{R}^{1 \times d}$, điểm số tuyến tính là $\mathbf{z} = \mathbf{x}\mathbf{W} + \mathbf{b}$ hay $z_k = \sum_{j=1}^{d} x_j w_{jk} + b_k$.</p>
+    <p>Với mẫu hàng $\mathbf{x}_i \in \mathbb{R}^{1 \times d}$ và $\mathbf{z} = \mathbf{x}_i\mathbf{W} + \mathbf{b}$ (tức $z_k = \sum_{j=1}^{d} x_{i,j} w_{j,k} + b_k$):</p>
     <div class="grid2">
       <div class="card">
-        <b class="title">Gradient theo trọng số $\mathbf{W} \in \mathbb{R}^{d \times K}$</b>
-        <p>Vì $\dfrac{\partial z_k}{\partial w_{jk}} = x_j$, theo Chain Rule:</p>
-        <div class="eq">$$\frac{\partial L}{\partial w_{jk}} = \frac{\partial L}{\partial z_k}\frac{\partial z_k}{\partial w_{jk}} = (a_k - y_k)x_j$$</div>
-        <div class="box eq">$$\frac{\partial L}{\partial \mathbf{W}} = \underbrace{\mathbf{x}^\top}_{d \times 1} \underbrace{(\mathbf{a} - \mathbf{y})}_{1 \times K} \in \mathbb{R}^{d \times K}$$</div>
+        <b class="title">Gradient theo $\mathbf{W} \in \mathbb{R}^{d \times K}$</b>
+        <p>Vì $\dfrac{\partial z_k}{\partial w_{j,k}} = x_{i,j}$, theo quy tắc chuỗi:</p>
+        <div class="eq">$$\frac{\partial J_i}{\partial w_{j,k}} = \frac{\partial J_i}{\partial z_k}\frac{\partial z_k}{\partial w_{j,k}} = (p_k - y_{i,k})x_{i,j}$$</div>
+        <div class="box eq">$$\frac{\partial J_i}{\partial \mathbf{W}} = \underbrace{\mathbf{x}_i^\top}_{d \times 1} \underbrace{(\mathbf{p} - \mathbf{y}_i)}_{1 \times K} \in \mathbb{R}^{d \times K}$$</div>
       </div>
       <div class="card">
-        <b class="title">Gradient theo hệ số bias $\mathbf{b} \in \mathbb{R}^{1 \times K}$</b>
-        <p>Vì $\dfrac{\partial z_k}{\partial b_k} = 1$, theo Chain Rule:</p>
-        <div class="eq">$$\frac{\partial L}{\partial b_k} = \frac{\partial L}{\partial z_k}\frac{\partial z_k}{\partial b_k} = (a_k - y_k)\cdot 1$$</div>
-        <div class="box eq">$$\frac{\partial L}{\partial \mathbf{b}} = \mathbf{a} - \mathbf{y} \in \mathbb{R}^{1 \times K}$$</div>
+        <b class="title">Gradient theo $\mathbf{b} \in \mathbb{R}^{1 \times K}$</b>
+        <p>Vì $\dfrac{\partial z_k}{\partial b_k} = 1$, theo quy tắc chuỗi:</p>
+        <div class="eq">$$\frac{\partial J_i}{\partial b_k} = \frac{\partial J_i}{\partial z_k}\frac{\partial z_k}{\partial b_k} = p_k - y_{i,k}$$</div>
+        <div class="box eq">$$\frac{\partial J_i}{\partial \mathbf{b}} = \mathbf{p} - \mathbf{y}_i \in \mathbb{R}^{1 \times K}$$</div>
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu &amp; chiều:</b> Theo quy ước vector hàng trong tài liệu ($\mathbf{x} \in \mathbb{R}^{1 \times d}$, $\mathbf{a}, \mathbf{y}, \mathbf{b} \in \mathbb{R}^{1 \times K}$), tích ngoài $\mathbf{x}^\top(\mathbf{a} - \mathbf{y})$ cho ma trận Gradient khớp đúng kích thước $d \times K$ của $\mathbf{W}$.</div>
+  <div class="note"><b>Ký hiệu:</b> $\mathbf{W} \in \mathbb{R}^{d \times K}$ là ma trận trọng số; $\mathbf{b} \in \mathbb{R}^{1 \times K}$ là vector bias.</div>
 </section>
 
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
 
 <script>
-// Tương tác ma trận Jacobi trên Slide 6
-const jz1=document.getElementById('jz1'),jz2=document.getElementById('jz2'),jz3=document.getElementById('jz3');
-function upJac(){
-  const v=[+jz1.value,+jz2.value,+jz3.value];
-  jz1o.textContent=v[0].toFixed(1);
-  jz2o.textContent=v[1].toFixed(1);
-  jz3o.textContent=v[2].toFixed(1);
-  const mx=Math.max(...v);
-  const ex=v.map(x=>Math.exp(x-mx));
-  const sm=ex.reduce((s,c)=>s+c,0);
-  const a=ex.map(e=>e/sm);
-  probLine.textContent=`Vector xác suất a = [${a.map(x=>x.toFixed(3)).join(', ')}]`;
-  let html='';
-  for(let r=0;r<3;r++){
-    for(let c=0;c<3;c++){
-      const val=(r===c)?a[r]*(1-a[c]):-a[r]*a[c];
-      const sign=val>=0?'+':'';
-      html+=`<div class="mat-cell ${r===c?'diag':''}">${sign}${val.toFixed(3)}</div>`;
-    }
-  }
-  jacGrid.innerHTML=html;
-}
-jz1.oninput=jz2.oninput=jz3.oninput=upJac;
-
-// KaTeX render
 const render=el=>window.renderMathInElement&&renderMathInElement(el,{
   delimiters:[
     {left:'$$',right:'$$',display:true},
@@ -244,7 +186,6 @@ const render=el=>window.renderMathInElement&&renderMathInElement(el,{
   throwOnError:false
 });
 
-// Điều hướng slide
 const S=[...document.querySelectorAll('.slide')];let i=0;
 function go(n){
   i=Math.max(0,Math.min(S.length-1,n));
@@ -253,7 +194,6 @@ function go(n){
   bar.style.width=(i+1)/S.length*100+'%';
   S[i].scrollTop=0;
   history.replaceState(null,'','#'+(i+1));
-  if(i===5)upJac();
 }
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')&&!e.shiftKey)e.target.blur();
@@ -274,7 +214,6 @@ addEventListener('load',()=>{
   render(document.body);
   go((parseInt(location.hash.slice(1))||1)-1);
 });
-upJac();
 go(0);
 </script>
 </body>
