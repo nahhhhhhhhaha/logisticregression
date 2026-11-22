@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Softmax Regression – Phần 3: Ma trận Hessian và Tính lồi</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&display=swap">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+:root{--navy:#0b2447;--blue:#1f5fd6;--sky:#e8f0fc;--ink:#16233b;--mute:#5b6b85;--line:#d5deee;--red:#d6453d;--green:#198754;--bg:#fff}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);overflow:hidden}
+header{position:fixed;top:0;left:0;right:0;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,32px);font-size:12.5px;color:var(--mute);z-index:5;background:#fff;border-bottom:1px solid #f0f4fa}
+header a{color:var(--navy);text-decoration:none;font-weight:500}
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--blue);transition:width .25s;z-index:6}
+.slide{display:none;position:absolute;inset:40px 0 48px 0;padding:clamp(10px,2vh,22px) clamp(18px,6vw,90px);overflow-y:auto;flex-direction:column;justify-content:space-between;gap:clamp(8px,1.4vh,16px)}
+.slide.active{display:flex}
+.slide.cover{justify-content:center;gap:clamp(12px,2vh,24px)}
+.body-wrap{display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,1.5vh,16px);flex:1;min-height:0}
+h1{font-size:clamp(28px,5.5vw,64px);font-weight:800;color:var(--navy);line-height:1.1;letter-spacing:-.02em}
+h2{font-size:clamp(20px,2.8vw,32px);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.01em;flex-shrink:0}
+p,li{font-size:clamp(14px,1.55vw,19px);line-height:1.45}
+ul{padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.sub{color:var(--mute)}
+.cover{background:var(--navy);color:#fff}
+.cover h1,.cover .sub{color:#fff}.cover .sub{opacity:.75}
+.big{font-size:clamp(17px,2.2vw,28px)}
+.eq{font-size:clamp(14px,1.75vw,22px);text-align:center;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.eq .katex-display{margin:.32em 0}
+.row{display:flex;gap:clamp(14px,2.5vw,28px);align-items:center;flex-wrap:wrap}
+.row>*{flex:1 1 260px;min-width:0}
+.box{background:var(--sky);border-left:4px solid var(--blue);padding:10px 14px;border-radius:4px}
+.bad{background:#fdeceb;border-color:var(--red)}
+.good{background:#eaf7f0;border-color:var(--green)}
+.note{font-size:clamp(11.5px,1.2vw,13.5px);color:var(--mute);background:#f4f7fc;border-left:3px solid #9fb0cc;padding:6px 12px;border-radius:4px;flex-shrink:0;line-height:1.4}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.card{background:var(--sky);border-radius:6px;padding:12px 14px}
+.card b.title{color:var(--navy);display:block;margin-bottom:6px;font-size:clamp(15px,1.65vw,19px)}
+.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;font-size:clamp(13px,1.5vw,16px)}
+.ctl output{font-variant-numeric:tabular-nums;min-width:46px;text-align:right;color:var(--navy);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--blue)}
+nav{position:fixed;bottom:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:center;gap:16px;background:#fff;border-top:1px solid var(--line);z-index:5;font-size:13px;color:var(--mute)}
+nav button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;width:40px;height:32px;font-size:16px;cursor:pointer}
+nav button:hover{background:var(--sky)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.katex{font-size:1.02em}
+.nowrap{white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<header><a href="../index.html">← Mục lục</a><span>Softmax Regression · 3. Ma trận Hessian</span></header>
+
+<!-- 1: BÌA -->
+<section class="slide cover">
+  <h1>Softmax Regression</h1>
+  <p class="big sub">Phần 3 · Ma trận Hessian và Tính lồi</p>
+  <p class="sub">Đạo hàm bậc hai của Softmax, Hessian theo $\mathbf{W}, \mathbf{b}$ và chứng minh hàm lồi</p>
+</section>
+
+<!-- 2: ĐẠO HÀM BẬC HAI CỦA SOFTMAX -->
+<section class="slide">
+  <h2>3.1. Đạo hàm bậc hai của hàm Softmax</h2>
+  <div class="body-wrap">
+    <p>Xuất phát từ hàm kích hoạt Softmax và đạo hàm bậc nhất đã chứng minh ở Phần 2:</p>
+    <div class="eq">$$a_i = \frac{e^{z_i}}{\sum_{k=1}^{K} e^{z_k}}, \qquad \frac{\partial a_i}{\partial z_j} = a_i(\delta_{ij} - a_j)$$</div>
+    <p>Lấy đạo hàm riêng tiếp theo biến $z_l$ bằng quy tắc đạo hàm tích:</p>
+    <div class="eq">$$\frac{\partial^2 a_i}{\partial z_j \partial z_l} = \frac{\partial}{\partial z_l}\bigl[a_i(\delta_{ij} - a_j)\bigr] = (\delta_{ij} - a_j)\frac{\partial a_i}{\partial z_l} - a_i\frac{\partial a_j}{\partial z_l}$$</div>
+    <div class="box eq">$$\frac{\partial^2 a_i}{\partial z_j \partial z_l} = a_i\bigl[(\delta_{ij} - a_j)(\delta_{il} - a_l) - a_j(\delta_{jl} - a_l)\bigr]$$</div>
+  </div>
+  <div class="note"><b>Chuyển đổi ký hiệu:</b> Toàn bộ ký hiệu xác suất $p_i, \mathbf{p}$ trong tài liệu gốc được đổi thống nhất thành $a_i, \mathbf{a}$ để đồng bộ với Phần 2; $\delta_{ij}$ là Kronecker Delta.</div>
+</section>
+
+<!-- 3: HESSIAN CỦA CROSS-ENTROPY THEO LOGITS -->
+<section class="slide">
+  <h2>3.2. Ma trận Hessian của Cross-Entropy theo Logits</h2>
+  <div class="body-wrap">
+    <div class="row">
+      <div>
+        <p>Từ gradient bậc nhất $\dfrac{\partial L}{\partial z_i} = a_i - y_i$, lấy đạo hàm theo $z_j$ (với nhãn $y_i$ là hằng số nên $\dfrac{\partial y_i}{\partial z_j} = 0$):</p>
+        <div class="eq">$$\frac{\partial^2 L}{\partial z_i \partial z_j} = \frac{\partial a_i}{\partial z_j} = a_i(\delta_{ij} - a_j)$$</div>
+        <div class="box good" style="margin-top:8px">
+          <p><b>Kết quả đặc biệt:</b> Ma trận Hessian $\mathbf{H}_{\mathbf{z}}$ của Cross-Entropy theo logits trùng khớp hoàn toàn với <b>Ma trận Jacobi</b> của Softmax!</p>
+        </div>
+      </div>
+      <div class="card">
+        <b class="title">Biểu diễn ma trận $\mathbf{H}_{\mathbf{z}} \in \mathbb{R}^{K \times K}$</b>
+        <div class="eq" style="font-size:clamp(13px,1.45vw,17px)">$$\mathbf{H}_{\mathbf{z}} = \begin{bmatrix} \frac{\partial^2 L}{\partial z_1^2} & \dots & \frac{\partial^2 L}{\partial z_1 \partial z_K} \\ \vdots & \ddots & \vdots \\ \frac{\partial^2 L}{\partial z_K \partial z_1} & \dots & \frac{\partial^2 L}{\partial z_K^2} \end{bmatrix} = \operatorname{diag}(\mathbf{a}) - \mathbf{a}\mathbf{a}^\top$$</div>
+        <p class="sub" style="font-size:13px;margin-top:6px">• Đường chéo: $H_{ii} = a_i(1 - a_i)$<br>• Ngoài đường chéo: $H_{ij} = -a_i a_j \;(i \neq j)$</p>
+      </div>
+    </div>
+  </div>
+  <div class="note"><b>Quy ước ký hiệu:</b> $\mathbf{H}_{\mathbf{z}} = \nabla_{\mathbf{z}}^2 L \in \mathbb{R}^{K \times K}$ là ma trận Hessian của hàm mất mát $L$ theo vector logits $\mathbf{z}$; $\mathbf{a} = [a_1, \dots, a_K]^\top$ thay cho $\mathbf{p}$.</div>
+</section>
+
+<!-- 4: HESSIAN TỔNG QUÁT THEO THAM SỐ -->
+<section class="slide">
+  <h2>3.3. Ma trận Hessian theo tham số $\mathbf{W}$ và $\mathbf{b}$</h2>
+  <div class="body-wrap">
+    <p>Gom các tham số $\mathbf{W}, \mathbf{b}$ thành vector $\boldsymbol{\theta}$. Với hàm hợp $L = L(\mathbf{z})$ và $\mathbf{z} = f(\boldsymbol{\theta})$, Chain Rule bậc hai cho:</p>
+    <div class="eq">$$\mathbf{H}_{\boldsymbol{\theta}} = \mathbf{J}^\top \mathbf{H}_{\mathbf{z}} \mathbf{J} + \sum_{k=1}^{K} \frac{\partial L}{\partial z_k} \mathbf{H}_{z_k}$$</div>
+    <div class="row">
+      <div class="box">
+        <p><b>Tính chất tuyến tính của Logits:</b></p>
+        <p style="margin-top:4px">Vì $\mathbf{z} = \mathbf{W}^\top \mathbf{x} + \mathbf{b}$ là hàm tuyến tính theo $\mathbf{W}, \mathbf{b}$ nên đạo hàm bậc hai của từng logit bằng không: $\mathbf{H}_{z_k} = \mathbf{0}$.</p>
+      </div>
+      <div class="box good">
+        <p><b>Công thức Hessian rút gọn (Gauss-Newton):</b></p>
+        <div class="eq">$$\mathbf{H}_{\boldsymbol{\theta}} = \mathbf{J}^\top \mathbf{H}_{\mathbf{z}} \mathbf{J}$$</div>
+        <p class="sub">Trong đó $\mathbf{J} = \dfrac{\partial \mathbf{z}}{\partial \boldsymbol{\theta}}$ là Jacobian của logits theo tham số.</p>
+      </div>
+    </div>
+  </div>
+  <div class="note"><b>Quy ước ký hiệu:</b> $\boldsymbol{\theta}$ là vector tham số gộp từ $\mathbf{W} \in \mathbb{R}^{d \times K}$ và $\mathbf{b} \in \mathbb{R}^{K}$; $\mathbf{H}_{z_k}$ là ma trận Hessian của logit thứ $k$ theo $\boldsymbol{\theta}$.</div>
+</section>
+
+<!-- 5: CÁC THÀNH PHẦN HESSIAN THEO W, b VÀ NHIỀU MẪU -->
+<section class="slide">
+  <h2>Các khối thành phần của Hessian &amp; Mở rộng cho $N$ mẫu</h2>
+  <div class="body-wrap">
+    <div class="grid3">
+      <div class="card">
+        <b class="title">1. Khối theo trọng số $\mathbf{W}$</b>
+        <div class="eq" style="font-size:clamp(13px,1.4vw,17px)">$$\frac{\partial^2 L}{\partial w_{jk} \partial w_{ml}} = x_j x_m a_k(\delta_{kl} - a_l)$$</div>
+        <p class="sub" style="font-size:13px">Kết hợp tương quan 2 đặc trưng ($x_j x_m$) và 2 lớp ($a_k(\delta_{kl}-a_l)$).</p>
+      </div>
+      <div class="card">
+        <b class="title">2. Khối theo Bias $\mathbf{b}$</b>
+        <div class="eq" style="font-size:clamp(13px,1.4vw,17px)">$$\frac{\partial^2 L}{\partial b_k \partial b_l} = a_k(\delta_{kl} - a_l)$$</div>
+        <p class="sub" style="font-size:13px">Ma trận khối $\mathbf{H}_{\mathbf{bb}}$ trùng với $\mathbf{H}_{\mathbf{z}}$.</p>
+      </div>
+      <div class="card">
+        <b class="title">3. Đạo hàm hỗn hợp $\mathbf{W}, \mathbf{b}$</b>
+        <div class="eq" style="font-size:clamp(13px,1.4vw,17px)">$$\frac{\partial^2 L}{\partial w_{jk} \partial b_l} = x_j a_k(\delta_{kl} - a_l)$$</div>
+        <p class="sub" style="font-size:13px">Thể hiện sự tương tác chéo giữa trọng số và bias.</p>
+      </div>
+    </div>
+    <div class="box">
+      <p><b>Mở rộng cho $N$ mẫu với Mean Cross-Entropy:</b> $\mathbf{H}_{\boldsymbol{\theta}} = \dfrac{1}{N} \sum_{i=1}^{N} \mathbf{H}_{\boldsymbol{\theta}, i} = \dfrac{1}{N} \sum_{i=1}^{N} \mathbf{J}_i^\top \mathbf{H}_{\mathbf{z}, i} \mathbf{J}_i$.</p>
+    </div>
+  </div>
+  <div class="note"><b>Quy ước ký hiệu:</b> $w_{jk}, w_{ml}$ là các phần tử của ma trận trọng số $\mathbf{W}$; $a_k, a_l$ là xác suất dự đoán thay cho $p_k, p_l$; $\mathbf{H}_{\boldsymbol{\theta}, i}$ là Hessian tính trên mẫu thứ $i$.</div>
+</section>
+
+<!-- 6: CHỨNG MINH HESSIAN LÀ PSD -->
+<section class="slide">
+  <h2>3.4a. Chứng minh $\mathbf{H}_{\mathbf{z}}$ là Nửa xác định dương (PSD)</h2>
+  <div class="body-wrap">
+    <p>Cần chứng minh $\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} \ge 0$ với mọi vector $\mathbf{v} = [v_1, v_2, \dots, v_K]^\top \in \mathbb{R}^K$:</p>
+    <div class="eq">$$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \mathbf{v}^\top \bigl[\operatorname{diag}(\mathbf{a}) - \mathbf{a}\mathbf{a}^\top\bigr] \mathbf{v} = \mathbf{v}^\top \operatorname{diag}(\mathbf{a})\mathbf{v} - (\mathbf{a}^\top \mathbf{v})^2$$</div>
+    <div class="eq">$$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \sum_{i=1}^{K} a_i v_i^2 - \left(\sum_{i=1}^{K} a_i v_i\right)^2$$</div>
+    <div class="box good">
+      <p><b>Liên hệ Xác suất Thống kê:</b> Vì $a_i \ge 0$ và $\sum_{i=1}^{K} a_i = 1$, coi $V$ là biến ngẫu nhiên nhận giá trị $v_i$ với xác suất $a_i$. Biểu thức trên chính là <b>Phương sai (Variance)</b> của $V$:</p>
+      <div class="eq">$$\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \mathbb{E}[V^2] - (\mathbb{E}[V])^2 = \operatorname{Var}(V) \ge 0 \implies \mathbf{H}_{\mathbf{z}} \succeq 0 \text{ (PSD)}$$</div>
+    </div>
+  </div>
+  <div class="note"><b>Quy ước ký hiệu:</b> $\mathbf{v} \in \mathbb{R}^K$ là vector kiểm tra bất kỳ; $V$ là biến ngẫu nhiên rời rạc phân phối theo $\mathbf{a} = [a_1, \dots, a_K]^\top$; ký hiệu $\succeq 0$ chỉ ma trận nửa xác định dương (PSD).</div>
+</section>
+
+<!-- 7: TÍNH LỒI & TƯƠNG TÁC -->
+<section class="slide">
+  <h2>3.4b. Tính lồi của hàm mất mát &amp; Kiểm chứng dạng toàn phương</h2>
+  <div class="body-wrap">
+    <div class="row">
+      <div>
+        <p>Hàm khả vi hai lần $f$ là <b>hàm lồi (Convex)</b> khi $\nabla^2 f \succeq 0$. Vì $\mathbf{H}_{\mathbf{z}} \succeq 0$ và $\mathbf{H}_{\boldsymbol{\theta}} = \mathbf{J}^\top \mathbf{H}_{\mathbf{z}} \mathbf{J} \succeq 0$:</p>
+        <div class="box good" style="margin:8px 0">
+          <p><b>Hệ quả:</b> Hàm Cross-Entropy $L(\mathbf{z})$ và $J(\mathbf{W}, \mathbf{b})$ là <b>hàm lồi</b> $\Rightarrow$ mọi cực tiểu địa phương đều là cực tiểu toàn cục!</p>
+        </div>
+        <p class="sub" style="font-size:13.5px">Thử thay đổi vector $\mathbf{v}$ với $\mathbf{a} = [0.6, 0.3, 0.1]^\top$ để kiểm chứng $\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} = \operatorname{Var}(V) \ge 0$:</p>
+      </div>
+      <div class="card">
+        <b class="title">Kiểm chứng $\mathbf{v}^\top \mathbf{H}_{\mathbf{z}} \mathbf{v} \ge 0$ ($\mathbf{a} = [0.6, 0.3, 0.1]^\top$)</b>
+        <div class="ctl" style="margin-top:8px">
+          <label for="v1">$v_1$</label><input id="v1" type="range" min="-3" max="3" step="0.2" value="2.0"><output id="v1o"></output>
+          <label for="v2">$v_2$</label><input id="v2" type="range" min="-3" max="3" step="0.2" value="-1.0"><output id="v2o"></output>
+          <label for="v3">$v_3$</label><input id="v3" type="range" min="-3" max="3" step="0.2" value="0.4"><output id="v3o"></output>
+        </div>
+        <div class="box" style="margin-top:12px;font-size:14px">
+          <p id="evOut"></p>
+          <p id="quadOut" style="font-weight:700;color:var(--navy);margin-top:4px"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><b>Quy ước ký hiệu:</b> $L(\mathbf{z}) = -\sum_{k=1}^{K} y_k \ln a_k$ là hàm mất mát theo logits với vector xác suất $\mathbf{a}$ (thay cho $\mathbf{p}$).</div>
+</section>
+
+<nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
+
+<script>
+// Tương tác kiểm chứng PSD trên Slide 7
+const v1=document.getElementById('v1'),v2=document.getElementById('v2'),v3=document.getElementById('v3');
+function upPSD(){
+  const a=[0.6,0.3,0.1];
+  const v=[+v1.value,+v2.value,+v3.value];
+  v1o.textContent=v[0].toFixed(1);
+  v2o.textContent=v[1].toFixed(1);
+  v3o.textContent=v[2].toFixed(1);
+  const ev=a[0]*v[0]+a[1]*v[1]+a[2]*v[2];
+  const ev2=a[0]*v[0]*v[0]+a[1]*v[1]*v[1]+a[2]*v[2]*v[2];
+  const quad=Math.max(0,ev2-ev*ev);
+  evOut.textContent=`E[V²] = ${ev2.toFixed(3)},   (E[V])² = ${(ev*ev).toFixed(3)}`;
+  quadOut.textContent=`vᵀ H_z v = Var(V) = ${quad.toFixed(3)} ≥ 0 (Luôn không âm)`;
+}
+v1.oninput=v2.oninput=v3.oninput=upPSD;
+
+// KaTeX render
+const render=el=>window.renderMathInElement&&renderMathInElement(el,{
+  delimiters:[
+    {left:'$$',right:'$$',display:true},
+    {left:'$',right:'$',display:false},
+    {left:'\\(',right:'\\)',display:false}
+  ],
+  throwOnError:false
+});
+
+// Điều hướng slide
+const S=[...document.querySelectorAll('.slide')];let i=0;
+function go(n){
+  i=Math.max(0,Math.min(S.length-1,n));
+  S.forEach((e,k)=>e.classList.toggle('active',k===i));
+  cnt.textContent=`${i+1} / ${S.length}`;
+  bar.style.width=(i+1)/S.length*100+'%';
+  S[i].scrollTop=0;
+  history.replaceState(null,'','#'+(i+1));
+  if(i===6)upPSD();
+}
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')&&!e.shiftKey)e.target.blur();
+  if(e.key==='ArrowRight'||e.key==='PageDown')go(i+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp')go(i-1);
+});
+pv.onclick=()=>go(i-1);
+nx.onclick=()=>go(i+1);
+let tx=null;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{
+  if(tx===null||e.target.tagName==='INPUT')return;
+  const d=e.changedTouches[0].clientX-tx;
+  if(Math.abs(d)>60)go(i+(d<0?1:-1));
+  tx=null;
+});
+addEventListener('load',()=>{
+  render(document.body);
+  go((parseInt(location.hash.slice(1))||1)-1);
+});
+upPSD();
+go(0);
+</script>
+</body>
+</html>
