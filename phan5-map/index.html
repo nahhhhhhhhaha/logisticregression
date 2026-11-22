@@ -52,6 +52,11 @@ ul,ol{padding-left:1.25em}
 
 .row{display:flex;gap:clamp(12px,2.5vw,32px);align-items:center;flex-wrap:wrap}
 .row>*{flex:1 1 260px;min-width:0}
+.row.eq-cols{align-items:stretch}
+.row.eq-cols>*{flex:1 1 0;display:flex;flex-direction:column}
+.slide-pred .row>*:first-child{flex:1.35 1 400px}
+.slide-pred .row>*:last-child{flex:0.85 1 260px}
+.slide-pred .eq-pred{font-size:clamp(12px,min(1.45vw,2vh),17px)}
 
 .box{background:var(--sky);border-left:4px solid var(--blue);padding:clamp(8px,1.3vh,13px) clamp(12px,2vw,18px);border-radius:4px}
 .bad{background:#fdeceb;border-color:var(--red)}
@@ -90,19 +95,19 @@ nav button:hover{background:var(--sky)}
 
 <!-- 1 -->
 <section class="slide">
-  <h2>1. Ba hạn chế của MLE: Tại sao cần Bayesian?</h2>
+  <h2>Ba hạn chế của MLE: Tại sao cần Bayesian?</h2>
   <p>MLE chỉ tối đa hóa \(P(\mathcal{D} \mid \mathbf{w}, b)\) dựa trên dữ liệu, bỏ qua hiểu biết ban đầu về tham số:</p>
-  <div class="row">
+  <div class="row eq-cols">
     <div class="box bad">
-      <h3>1. Dữ liệu ít → thiếu ổn định</h3>
+      <h3>Dữ liệu ít → thiếu ổn định</h3>
       <p class="sub">Với 5 sinh viên (thay vì 1.000), thêm/bớt 1 mẫu làm trọng số \(\mathbf{w}\) biến động mạnh.</p>
     </div>
     <div class="box bad">
-      <h3>2. Tách bạch hoàn toàn (complete separation)</h3>
+      <h3>Tách bạch hoàn toàn (complete separation)</h3>
       <p class="sub">Phân tách hoàn hảo 2 lớp: \(\mathbf{w}' = c\mathbf{w}\) với \(c\to\infty\) làm \(P(\mathcal{D}\mid \mathbf{w}')\to 1\Rightarrow \|\mathbf{w}_{\text{MLE}}\|_2\to\infty\).</p>
     </div>
     <div class="box bad">
-      <h3>3. Thiếu độ bất định (uncertainty)</h3>
+      <h3>Thiếu độ bất định (uncertainty)</h3>
       <p class="sub">\(p = 0.8\) từ 10.000 SV vs 5 SV có cùng kết quả điểm nhưng độ tin cậy khác hẳn.</p>
     </div>
   </div>
@@ -252,7 +257,7 @@ nav button:hover{background:var(--sky)}
 </section>
 
 <!-- 11 -->
-<section class="slide">
+<section class="slide slide-pred">
   <h2>11. Dự đoán: MAP vs Posterior Predictive</h2>
   <div class="row">
     <div>
@@ -262,7 +267,7 @@ nav button:hover{background:var(--sky)}
       </div>
       <div class="box" style="margin-top:10px">
         <h3>b) Posterior Predictive (Bayesian)</h3>
-        <div class="eq">$$P(y^*=1 \mid \mathbf{x}^*, \mathcal{D}) = \int \sigma(\mathbf{w}^\top \mathbf{x}^*)\,P(\mathbf{w} \mid \mathcal{D})\,d\mathbf{w} \approx \frac{1}{M}\sum_{m=1}^M \sigma\!\bigl((\mathbf{w}^{(m)})^\top \mathbf{x}^*\bigr)$$</div>
+        <div class="eq eq-pred">$$P(y^*=1 \mid \mathbf{x}^*, \mathcal{D}) = \int \sigma(\mathbf{w}^\top \mathbf{x}^*)\,P(\mathbf{w} \mid \mathcal{D})\,d\mathbf{w} \approx \frac{1}{M}\sum_{m=1}^M \sigma\!\bigl((\mathbf{w}^{(m)})^\top \mathbf{x}^*\bigr)$$</div>
       </div>
       <div class="box bad" style="margin-top:10px">
         <p>\(\mathbb{E}_{\mathbf{w}\mid \mathcal{D}}[\sigma(\mathbf{w}^\top \mathbf{x}^*)] \neq \sigma(\mathbb{E}_{\mathbf{w}\mid \mathcal{D}}[\mathbf{w}]^\top \mathbf{x}^*)\) — phải trung bình hóa xác suất!</p>
