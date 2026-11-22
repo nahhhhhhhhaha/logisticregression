@@ -193,6 +193,16 @@ nav button:hover{background:var(--sky)}
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
 
 <script>
+// KaTeX render
+const render=el=>window.renderMathInElement&&renderMathInElement(el,{
+  delimiters:[
+    {left:'$$',right:'$$',display:true},
+    {left:'$',right:'$',display:false},
+    {left:'\\(',right:'\\)',display:false}
+  ],
+  throwOnError:false
+});
+
 // Tương tác kiểm chứng PSD trên Slide 7
 const v1=document.getElementById('v1'),v2=document.getElementById('v2'),v3=document.getElementById('v3');
 function upPSD(){
@@ -204,20 +214,12 @@ function upPSD(){
   const ev=a[0]*v[0]+a[1]*v[1]+a[2]*v[2];
   const ev2=a[0]*v[0]*v[0]+a[1]*v[1]*v[1]+a[2]*v[2]*v[2];
   const quad=Math.max(0,ev2-ev*ev);
-  evOut.textContent=`E[V²] = ${ev2.toFixed(3)},   (E[V])² = ${(ev*ev).toFixed(3)}`;
-  quadOut.textContent=`vᵀ H_z v = Var(V) = ${quad.toFixed(3)} ≥ 0 (Luôn không âm)`;
+  evOut.innerHTML=`$\\mathbb{E}[V^2] = ${ev2.toFixed(3)}, \\quad (\\mathbb{E}[V])^2 = ${(ev*ev).toFixed(3)}$`;
+  quadOut.innerHTML=`$\\mathbf{v}^\\top \\mathbf{H}_{\\mathbf{z}} \\mathbf{v} = \\operatorname{Var}(V) = ${quad.toFixed(3)} \\ge 0$ (Luôn không âm)`;
+  render(evOut);
+  render(quadOut);
 }
 v1.oninput=v2.oninput=v3.oninput=upPSD;
-
-// KaTeX render
-const render=el=>window.renderMathInElement&&renderMathInElement(el,{
-  delimiters:[
-    {left:'$$',right:'$$',display:true},
-    {left:'$',right:'$',display:false},
-    {left:'\\(',right:'\\)',display:false}
-  ],
-  throwOnError:false
-});
 
 // Điều hướng slide
 const S=[...document.querySelectorAll('.slide')];let i=0;
