@@ -95,7 +95,7 @@ nav button:hover{background:var(--sky)}
 <!-- 2 -->
 <section class="slide">
   <h2>1. Đặt vấn đề: Từ phân loại 2 lớp sang đa lớp</h2>
-  <p>Trong <b>Logistic Regression nhị phân</b>, mô hình sử dụng phân phối Bernoulli cho nhãn \(Y \in \{0, 1\}\), điểm số tuyến tính \(z = w^	op x + b\) và hàm Sigmoid \(\sigma(z) = rac{1}{1+e^{-z}}\) để dự đoán xác suất cho 2 lớp.</p>
+  <p>Trong <b>Logistic Regression nhị phân</b>, mô hình sử dụng phân phối Bernoulli cho nhãn \(Y \in \{0, 1\}\), điểm số tuyến tính \(z = w^\top x + b\) và hàm Sigmoid \(\sigma(z) = \frac{1}{1+e^{-z}}\) để dự đoán xác suất cho 2 lớp.</p>
   <div class="row">
     <div class="box">
       <h3>Bài toán phân loại 3 lớp</h3>
@@ -105,7 +105,7 @@ nav button:hover{background:var(--sky)}
     <div class="box bad">
       <h3>Tại sao không dùng \(K\) mô hình Logistic độc lập?</h3>
       <p class="sub" style="margin-top:4px">Nếu huấn luyện riêng 3 bộ tham số \((w_k, b_k)\) với Sigmoid độc lập:</p>
-      <div class="eq">$$p_k = \sigma(z_k) = rac{1}{1+e^{-(w_k^	op x + b_k)}} \in (0, 1), \quad k = 1, 2, 3$$</div>
+      <div class="eq">$$p_k = \sigma(z_k) = \frac{1}{1+e^{-(w_k^\top x + b_k)}} \in (0, 1), \quad k = 1, 2, 3$$</div>
       <p><b>Vấn đề:</b> không đảm bảo được ràng buộc tổng xác suất \(p_1 + p_2 + p_3 = 1\).</p>
     </div>
   </div>
@@ -118,25 +118,21 @@ nav button:hover{background:var(--sky)}
   <div class="row">
     <div class="box">
       <h3>Điều kiện xác suất có điều kiện</h3>
-      <p class="sub" style="margin-top:4px">Ký hiệu \(p_k = P(Y = k \mid X = x; W, b)\) là xác suất mẫu \(x\) thuộc lớp \(k\). Vector \(p = (p_1, \dots, p_K)^	op\) phải thỏa mãn:</p>
-      <div class="eq">$$p_k \ge 0 \;orall k \in \{1,\dots,K\}, \qquad \sum_{k=1}^{K} p_k = 1$$</div>
+      <p class="sub" style="margin-top:4px">Ký hiệu \(p_k = P(Y = k \mid X = x; W, b)\) là xác suất mẫu \(x\) thuộc lớp \(k\). Vector \(p = (p_1, \dots, p_K)^\top\) phải thỏa mãn:</p>
+      <div class="eq">$$p_k \ge 0 \;\forall k \in \{1,\dots,K\}, \qquad \sum_{k=1}^{K} p_k = 1$$</div>
     </div>
     <div class="box">
       <h3>Biểu diễn nhãn One-Hot \(t \in \{0, 1\}^K\)</h3>
-      <p class="sub" style="margin-top:4px">Nhãn thực tế của mỗi mẫu được biểu diễn bằng vector \(t = (t_1, t_2, \dots, t_K)^	op\) thỏa \(\sum_{k=1}^K t_k = 1\):</p>
+      <p class="sub" style="margin-top:4px">Nhãn thực tế của mỗi mẫu được biểu diễn bằng vector \(t = (t_1, t_2, \dots, t_K)^\top\) thỏa \(\sum_{k=1}^K t_k = 1\):</p>
       <ul>
-        <li><b>Mèo</b> (\(y=1\)) \(
-ightarrow t = [1, 0, 0]^	op\)</li>
-        <li><b>Chó</b> (\(y=2\)) \(
-ightarrow t = [0, 1, 0]^	op\)</li>
-        <li><b>Chim</b> (\(y=3\)) \(
-ightarrow t = [0, 0, 1]^	op\)</li>
+        <li><b>Mèo</b> (\(y=1\)) \(\rightarrow t = [1, 0, 0]^\top\)</li>
+        <li><b>Chó</b> (\(y=2\)) \(\rightarrow t = [0, 1, 0]^\top\)</li>
+        <li><b>Chim</b> (\(y=3\)) \(\rightarrow t = [0, 0, 1]^\top\)</li>
       </ul>
     </div>
   </div>
   <div class="box">
-    <p><b>Hàm khối xác suất (PMF) có điều kiện:</b> Nếu mẫu thuộc lớp \(c\) (duy nhất \(t_c = 1\) và \(t_{k
-eq c} = 0\)), xác suất nhãn quan sát viết gọn thành tích lũy thừa:</p>
+    <p><b>Hàm khối xác suất (PMF) có điều kiện:</b> Nếu mẫu thuộc lớp \(c\) (duy nhất \(t_c = 1\) và \(t_{k\neq c} = 0\)), xác suất nhãn quan sát viết gọn thành tích lũy thừa:</p>
     <div class="eq">$$P(Y = y \mid X = x; W, b) = \prod_{k=1}^{K} p_k^{t_k} = p_1^{t_1} p_2^{t_2} \cdots p_K^{t_K} = p_c$$</div>
   </div>
 </section>
@@ -148,24 +144,24 @@ eq c} = 0\)), xác suất nhãn quan sát viết gọn thành tích lũy thừa:
   <div class="row">
     <div class="box">
       <h3>Điểm số cho từng lớp \(k\)</h3>
-      <div class="eq">$$z_k = w_k^	op x + b_k = \sum_{m=1}^{d} w_{mk} x_m + b_k$$</div>
-      <p class="sub"><b>Ý nghĩa hình học:</b> \(w_k^	op x\) đo độ chiếu của \(x\) lên hướng đặc trưng \(w_k\) (khác Cosine Similarity vì phụ thuộc cả chuẩn \(\|w_k\|_2\) và \(\|x\|_2\)).</p>
+      <div class="eq">$$z_k = w_k^\top x + b_k = \sum_{m=1}^{d} w_{mk} x_m + b_k$$</div>
+      <p class="sub"><b>Ý nghĩa hình học:</b> \(w_k^\top x\) đo độ chiếu của \(x\) lên hướng đặc trưng \(w_k\) (khác Cosine Similarity vì phụ thuộc cả chuẩn \(\|w_k\|_2\) và \(\|x\|_2\)).</p>
     </div>
     <div class="box">
       <h3>Biểu diễn ma trận cho \(1\) mẫu và \(n\) mẫu</h3>
-      <div class="eq">$$W = [w_1, w_2, \dots, w_K] \in \mathbb{R}^{d 	imes K}, \quad b = [b_1, \dots, b_K]^	op \in \mathbb{R}^K$$</div>
-      <div class="eq">$$z = W^	op x + b \in \mathbb{R}^K, \qquad Z = XW + \mathbf{1}_n b^	op \in \mathbb{R}^{n 	imes K}$$</div>
-      <p class="sub">Với \(X \in \mathbb{R}^{n 	imes d}\), mỗi hàng thứ \(i\) của \(Z\) là vector \(K\) logit \(z^{(i)	op}\) của mẫu \(x_i\).</p>
+      <div class="eq">$$W = [w_1, w_2, \dots, w_K] \in \mathbb{R}^{d \times K}, \quad b = [b_1, \dots, b_K]^\top \in \mathbb{R}^K$$</div>
+      <div class="eq">$$z = W^\top x + b \in \mathbb{R}^K, \qquad Z = XW + \mathbf{1}_n b^\top \in \mathbb{R}^{n \times K}$$</div>
+      <p class="sub">Với \(X \in \mathbb{R}^{n \times d}\), mỗi hàng thứ \(i\) của \(Z\) là vector \(K\) logit \(z^{(i)\top}\) của mẫu \(x_i\).</p>
     </div>
   </div>
 </section>
 
 <!-- 5 -->
 <section class="slide">
-  <h2>4. Suy dẫn hàm Softmax: \(\mathbb{R}^K 	o \Delta^{K-1}\)</h2>
-  <p>Vector logit \(z = (z_1, \dots, z_K)^	op \in \mathbb{R}^K\) nhận giá trị thực tùy ý (có thể âm và tổng khác \(1\)). Hàm Softmax ánh xạ \(z\) vào <b>Simplex xác suất</b> \(\Delta^{K-1} =  igl\{p \in \mathbb{R}^K : p_k \ge 0,\; \sum_{k=1}^K p_k = 1 igr\}\) qua hai bước:</p>
+  <h2>4. Suy dẫn hàm Softmax: \(\mathbb{R}^K \to \Delta^{K-1}\)</h2>
+  <p>Vector logit \(z = (z_1, \dots, z_K)^\top \in \mathbb{R}^K\) nhận giá trị thực tùy ý (có thể âm và tổng khác \(1\)). Hàm Softmax ánh xạ \(z\) vào <b>Simplex xác suất</b> \(\Delta^{K-1} = \bigl\{p \in \mathbb{R}^K : p_k \ge 0,\; \sum_{k=1}^K p_k = 1\bigr\}\) qua hai bước:</p>
   <div class="chain">
-    <div><b>Bước 1: Hàm mũ hóa</b><small>\(a_k = e^{z_k} > 0\;orall z_k \in \mathbb{R}\)<br>Đồng biến nghiêm ngặt, khả vi trơn</small></div>
+    <div><b>Bước 1: Hàm mũ hóa</b><small>\(a_k = e^{z_k} > 0\;\forall z_k \in \mathbb{R}\)<br>Đồng biến nghiêm ngặt, khả vi trơn</small></div>
     <div class="ar">→</div>
     <div><b>Bước 2: Chuẩn hóa tổng</b><small>\(p_k = \dfrac{a_k}{\sum_{j=1}^K a_j}\)<br>Chia cho tổng để tổng bằng \(1\)</small></div>
     <div class="ar">→</div>
@@ -176,7 +172,7 @@ eq c} = 0\)), xác suất nhãn quan sát viết gọn thành tích lũy thừa:
       <p><b>Tại sao chọn hàm mũ \(e^{z_k}\)?</b> Luôn dương (\(e^{z_k} > 0\)), bảo toàn thứ tự điểm số (\(z_a > z_b \Leftrightarrow e^{z_a} > e^{z_b}\)) và có đạo hàm trơn tại mọi điểm.</p>
     </div>
     <div class="box">
-      <p><b>Kiểm chứng chuẩn hóa:</b> \(\sum_{k=1}^K p_k = \sum_{k=1}^K rac{e^{z_k}}{\sum_{j=1}^K e^{z_j}} = rac{\sum_{k=1}^K e^{z_k}}{\sum_{j=1}^K e^{z_j}} = 1\).</p>
+      <p><b>Kiểm chứng chuẩn hóa:</b> \(\sum_{k=1}^K p_k = \sum_{k=1}^K \frac{e^{z_k}}{\sum_{j=1}^K e^{z_j}} = \frac{\sum_{k=1}^K e^{z_k}}{\sum_{j=1}^K e^{z_j}} = 1\).</p>
     </div>
   </div>
 </section>
@@ -184,8 +180,8 @@ eq c} = 0\)), xác suất nhãn quan sát viết gọn thành tích lũy thừa:
 <!-- 6 -->
 <section class="slide">
   <h2>5. Kiến trúc Softmax &amp; Tương tác Logits</h2>
-  <p>Kết hợp lớp tuyến tính \(z_k = w_k^	op x + b_k\) và hàm kích hoạt Softmax, mô hình dự đoán phân phối xác suất hậu nghiệm cho từng lớp \(k \in \{1, \dots, K\}\):</p>
-  <div class="eq">$$p_k = P(Y = k \mid X = x; W, b) = rac{e^{w_k^	op x + b_k}}{\sum_{j=1}^{K} e^{w_j^	op x + b_j}}, \qquad \hat{y} = \mathrm{softmax}(W^	op x + b)$$</div>
+  <p>Kết hợp lớp tuyến tính \(z_k = w_k^\top x + b_k\) và hàm kích hoạt Softmax, mô hình dự đoán phân phối xác suất hậu nghiệm cho từng lớp \(k \in \{1, \dots, K\}\):</p>
+  <div class="eq">$$p_k = P(Y = k \mid X = x; W, b) = \frac{e^{w_k^\top x + b_k}}{\sum_{j=1}^{K} e^{w_j^\top x + b_j}}, \qquad \hat{y} = \mathrm{softmax}(W^\top x + b)$$</div>
   <div class="row">
     <svg id="p6" viewBox="0 0 400 240"></svg>
     <div>
@@ -195,10 +191,7 @@ eq c} = 0\)), xác suất nhãn quan sát viết gọn thành tích lũy thừa:
         <label for="z3">\(z_3\) (Chim)</label><input id="z3" type="range" min="-3" max="4" step="0.2" value="0.0"><output id="o3"></output>
       </div>
       <p id="t6" class="box" style="margin-top:10px"></p>
-      <p class="sub" style="margin-top:6px"><b>Luồng tính tiến:</b> \(x 
-ightarrow z_k = w_k^	op x + b_k 
-ightarrow p_k = rac{e^{z_k}}{\sum_j e^{z_j}} 
-ightarrow J(W, b)\).</p>
+      <p class="sub" style="margin-top:6px"><b>Luồng tính tiến:</b> \(x \rightarrow z_k = w_k^\top x + b_k \rightarrow p_k = \frac{e^{z_k}}{\sum_j e^{z_j}} \rightarrow J(W, b)\).</p>
     </div>
   </div>
 </section>
@@ -209,14 +202,14 @@ ightarrow J(W, b)\).</p>
   <div class="row">
     <div class="box">
       <h3>1. Bất biến với phép dịch chuyển đều</h3>
-      <p class="sub" style="margin-top:4px">Với mọi hằng số \(c \in \mathbb{R}\) và vector \(\mathbf{1} = (1, \dots, 1)^	op \in \mathbb{R}^K\):</p>
-      <div class="eq">$$rac{e^{z_k + c}}{\sum_{j=1}^{K} e^{z_j + c}} = rac{e^c e^{z_k}}{e^c \sum_{j=1}^{K} e^{z_j}} = rac{e^{z_k}}{\sum_{j=1}^{K} e^{z_j}}$$</div>
+      <p class="sub" style="margin-top:4px">Với mọi hằng số \(c \in \mathbb{R}\) và vector \(\mathbf{1} = (1, \dots, 1)^\top \in \mathbb{R}^K\):</p>
+      <div class="eq">$$\frac{e^{z_k + c}}{\sum_{j=1}^{K} e^{z_j + c}} = \frac{e^c e^{z_k}}{e^c \sum_{j=1}^{K} e^{z_j}} = \frac{e^{z_k}}{\sum_{j=1}^{K} e^{z_j}}$$</div>
       <p class="sub"><b>Ứng dụng cài đặt:</b> Chọn \(c = -\max_j z_j\) để mọi số mũ \(z_k - \max_j z_j \le 0\), tránh tràn số trên (overflow) khi tính \(e^{z_k}\).</p>
     </div>
     <div class="box">
       <h3>2. Trường hợp \(K = 2\) quy về Sigmoid</h3>
       <p class="sub" style="margin-top:4px">Với \(K = 2\) lớp, xác suất lớp \(1\) phụ thuộc chỉ vào hiệu logit \(\Delta z = z_1 - z_2\):</p>
-      <div class="eq">$$p_1 = rac{e^{z_1}}{e^{z_1} + e^{z_2}} = rac{1}{1 + e^{-(z_1 - z_2)}} = \sigma\! igl((w_1 - w_2)^	op x + (b_1 - b_2) igr)$$</div>
+      <div class="eq">$$p_1 = \frac{e^{z_1}}{e^{z_1} + e^{z_2}} = \frac{1}{1 + e^{-(z_1 - z_2)}} = \sigma\!\bigl((w_1 - w_2)^\top x + (b_1 - b_2)\bigr)$$</div>
       <p class="sub">Khi đặt \(w_2 = 0, b_2 = 0\), Softmax Regression trở về đúng Logistic Regression nhị phân.</p>
     </div>
   </div>
@@ -230,7 +223,7 @@ ightarrow J(W, b)\).</p>
     <div class="box">
       <h3>Xác suất của một mẫu \(x_i\)</h3>
       <div class="eq">$$P(Y_i = y_i \mid x_i; W, b) = \prod_{k=1}^{K} p_{ik}^{t_{ik}}$$</div>
-      <p class="sub"><b>Ví dụ minh họa:</b> Nếu mẫu \(i\) có nhãn Mèo \(t_i = [1, 0, 0]^	op\) và mô hình dự đoán \(p_i = [0.7, 0.2, 0.1]^	op\), xác suất khớp nhãn là \(0.7^1 \cdot 0.2^0 \cdot 0.1^0 = 0.7\).</p>
+      <p class="sub"><b>Ví dụ minh họa:</b> Nếu mẫu \(i\) có nhãn Mèo \(t_i = [1, 0, 0]^\top\) và mô hình dự đoán \(p_i = [0.7, 0.2, 0.1]^\top\), xác suất khớp nhãn là \(0.7^1 \cdot 0.2^0 \cdot 0.1^0 = 0.7\).</p>
     </div>
     <div class="box">
       <h3>Likelihood trên toàn bộ \(n\) mẫu</h3>
@@ -244,12 +237,11 @@ ightarrow J(W, b)\).</p>
 <section class="slide">
   <h2>8. Từ Likelihood sang Log-Likelihood &amp; MLE</h2>
   <p>Vì \(L(W, b)\) là tích của \(n\) xác suất thuộc \((0, 1)\), giá trị tích sẽ tiến rất nhanh về \(0\) khi \(n\) lớn (underflow). Ta lấy logarit tự nhiên hai vế để chuyển tích thành tổng:</p>
-  <div class="eq">$$\ell(W, b) = \ln L(W, b) = \ln\!\left(\prod_{i=1}^{n} \prod_{k=1}^{K} p_{ik}^{t_{ik}}
-ight) = \sum_{i=1}^{n} \sum_{k=1}^{K} t_{ik} \ln p_{ik}$$</div>
+  <div class="eq">$$\ell(W, b) = \ln L(W, b) = \ln\!\left(\prod_{i=1}^{n} \prod_{k=1}^{K} p_{ik}^{t_{ik}}\right) = \sum_{i=1}^{n} \sum_{k=1}^{K} t_{ik} \ln p_{ik}$$</div>
   <div class="row">
     <div class="box">
       <h3>Bài toán hợp lý cực đại (MLE)</h3>
-      <div class="eq">$$(W^*, b^*) =  rg\max_{W, b} \ell(W, b) =  rg\max_{W, b} \sum_{i=1}^{n} \ln p_{i,\, y_i}$$</div>
+      <div class="eq">$$(W^*, b^*) = \arg\max_{W, b} \ell(W, b) = \arg\max_{W, b} \sum_{i=1}^{n} \ln p_{i,\, y_i}$$</div>
     </div>
     <div class="box">
       <h3>Tính đơn điệu của hàm \(\ln(\cdot)\)</h3>
@@ -262,14 +254,13 @@ ight) = \sum_{i=1}^{n} \sum_{k=1}^{K} t_{ik} \ln p_{ik}$$</div>
 <section class="slide">
   <h2>9. Hàm mất mát Categorical Cross-Entropy</h2>
   <p>Trong tối ưu hóa (Gradient Descent), ta quy ước cực tiểu hóa hàm mất mát. Đổi dấu Log-Likelihood và lấy trung bình trên \(n\) mẫu, ta thu được <b>Categorical Cross-Entropy Loss</b>:</p>
-  <div class="eq">$$J(W, b) = -rac{1}{n} \sum_{i=1}^{n} \sum_{k=1}^{K} t_{ik} \ln p_{ik}$$</div>
+  <div class="eq">$$J(W, b) = -\frac{1}{n} \sum_{i=1}^{n} \sum_{k=1}^{K} t_{ik} \ln p_{ik}$$</div>
   <div class="row">
     <svg id="p10" viewBox="0 0 400 240"></svg>
     <div>
       <div class="ctl"><label for="pc">\(p_c\) (lớp đúng)</label><input id="pc" type="range" min="0.02" max="0.99" step="0.01" value="0.7"><output id="pco"></output></div>
       <p id="t10" class="box" style="margin-top:10px"></p>
-      <p class="sub" style="margin-top:6px">Với một mẫu \(i\) có nhãn thực thuộc lớp \(c\) (\(t_{ic} = 1\) và \(t_{ik} = 0\;orall k 
-eq c\)): \(J_i = -\sum_{k=1}^K t_{ik}\ln p_{ik} = -\ln p_{ic}\). Khi \(p_{ic} 	o 0\), \(J_i 	o +\infty\) phạt rất nặng dự đoán sai tự tin.</p>
+      <p class="sub" style="margin-top:6px">Với một mẫu \(i\) có nhãn thực thuộc lớp \(c\) (\(t_{ic} = 1\) và \(t_{ik} = 0\;\forall k \neq c\)): \(J_i = -\sum_{k=1}^K t_{ik}\ln p_{ik} = -\ln p_{ic}\). Khi \(p_{ic} \to 0\), \(J_i \to +\infty\) phạt rất nặng dự đoán sai tự tin.</p>
     </div>
   </div>
 </section>
@@ -282,9 +273,8 @@ eq c\)): \(J_i = -\sum_{k=1}^K t_{ik}\ln p_{ik} = -\ln p_{ic}\). Khi \(p_{ic} 	o
   <div class="row">
     <div class="box">
       <h3>Khi \(t\) là phân phối One-Hot tại lớp \(c\)</h3>
-      <p class="sub" style="margin-top:4px">Với \(t_c = 1\) và \(t_{k
-eq c} = 0\), entropy của nhãn thật bằng \(H(t) = -1\ln 1 = 0\):</p>
-      <div class="eq">$$H(t, p) = - igl(0\ln p_1 + \cdots + 1\ln p_c + \cdots + 0\ln p_K igr) = -\ln p_c$$</div>
+      <p class="sub" style="margin-top:4px">Với \(t_c = 1\) và \(t_{k\neq c} = 0\), entropy của nhãn thật bằng \(H(t) = -1\ln 1 = 0\):</p>
+      <div class="eq">$$H(t, p) = -\bigl(0\ln p_1 + \cdots + 1\ln p_c + \cdots + 0\ln p_K\bigr) = -\ln p_c$$</div>
     </div>
     <div class="box">
       <h3>Sự hội tụ của hai cách tiếp cận</h3>
@@ -301,11 +291,11 @@ eq c} = 0\), entropy của nhãn thật bằng \(H(t) = -1\ln 1 = 0\):</p>
     <tr><th>Thành phần</th><th>Logistic Regression</th><th>Softmax Regression</th></tr>
     <tr><td><b>Bài toán</b></td><td>Phân loại nhị phân (\(2\) lớp)</td><td>Phân loại đa lớp (\(K\) lớp)</td></tr>
     <tr><td><b>Phân phối nhãn</b></td><td>Bernoulli: \(Y \in \{0, 1\}\)</td><td>Categorical: \(Y \in \{1, \dots, K\}\), One-Hot \(t \in \{0,1\}^K\)</td></tr>
-    <tr><td><b>Tham số mô hình</b></td><td>\(w \in \mathbb{R}^d,\; b \in \mathbb{R}\)</td><td>\(W \in \mathbb{R}^{d 	imes K},\; b \in \mathbb{R}^K\)</td></tr>
-    <tr><td><b>Điểm số (Logit)</b></td><td>\(z = w^	op x + b \in \mathbb{R}\)</td><td>\(z_k = w_k^	op x + b_k \;\Longleftrightarrow\; z = W^	op x + b \in \mathbb{R}^K\)</td></tr>
+    <tr><td><b>Tham số mô hình</b></td><td>\(w \in \mathbb{R}^d,\; b \in \mathbb{R}\)</td><td>\(W \in \mathbb{R}^{d \times K},\; b \in \mathbb{R}^K\)</td></tr>
+    <tr><td><b>Điểm số (Logit)</b></td><td>\(z = w^\top x + b \in \mathbb{R}\)</td><td>\(z_k = w_k^\top x + b_k \;\Longleftrightarrow\; z = W^\top x + b \in \mathbb{R}^K\)</td></tr>
     <tr><td><b>Hàm kích hoạt</b></td><td>Sigmoid: \(p = \sigma(z) = \dfrac{1}{1 + e^{-z}}\)</td><td>Softmax: \(p_k = \dfrac{e^{z_k}}{\sum_{j=1}^K e^{z_j}}\)</td></tr>
     <tr><td><b>Đầu ra xác suất</b></td><td>\(p \in (0, 1)\) cho lớp \(1\)</td><td>\(p \in \Delta^{K-1}\): \(p_k > 0,\; \sum_{k=1}^K p_k = 1\)</td></tr>
-    <tr><td><b>Hàm mất mát (Loss)</b></td><td>Binary CE: \(-rac{1}{n}\sum_{i=1}^n [y_i\ln p_i + (1-y_i)\ln(1-p_i)]\)</td><td>Categorical CE: \(-rac{1}{n}\sum_{i=1}^n \sum_{k=1}^K t_{ik}\ln p_{ik}\)</td></tr>
+    <tr><td><b>Hàm mất mát (Loss)</b></td><td>Binary CE: \(-\frac{1}{n}\sum_{i=1}^n [y_i\ln p_i + (1-y_i)\ln(1-p_i)]\)</td><td>Categorical CE: \(-\frac{1}{n}\sum_{i=1}^n \sum_{k=1}^K t_{ik}\ln p_{ik}\)</td></tr>
     <tr><td><b>Loss trên 1 mẫu</b></td><td>\(-\ln p_i\) (nếu \(y_i=1\)) hoặc \(-\ln(1-p_i)\) (nếu \(y_i=0\))</td><td>\(J_i = -\ln p_{ic}\) (với \(c\) là lớp thực tế)</td></tr>
   </table></div>
 </section>
@@ -313,7 +303,7 @@ eq c} = 0\), entropy của nhãn thật bằng \(H(t) = -1\ln 1 = 0\):</p>
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
 
 <script>
-const render=el=>window.renderMathInElement&&renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\(',right:'\)',display:false}],throwOnError:false});
+const render=el=>window.renderMathInElement&&renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});
 
 /* Demo Slide 6: Softmax probabilities trên 3 lớp Mèo / Chó / Chim */
 const p6=document.getElementById('p6'),z1=document.getElementById('z1'),z2=document.getElementById('z2'),z3=document.getElementById('z3');
@@ -334,7 +324,7 @@ function up6(){
   });
   p6.innerHTML=h;
   const sumP=probs.reduce((a,b)=>a+b,0);
-  t6.innerHTML=`\(p = [${probs.map(v=>v.toFixed(2)).join(',\; ')}]^	op\), tổng \(\sum_{k=1}^3 p_k = ${sumP.toFixed(2)}\)`;
+  t6.innerHTML=`\\(p = [${probs.map(v=>v.toFixed(2)).join(',\\; ')}]^\\top\\), tổng \\(\\sum_{k=1}^3 p_k = ${sumP.toFixed(2)}\\)`;
   render(t6);
 }
 
@@ -352,7 +342,7 @@ function up10(){
   const loss=-Math.log(p);
   h+=`<path d="${d}" fill="none" stroke="#1f5fd6" stroke-width="2.8"/><circle cx="${sx(p)}" cy="${sy(loss)}" r="5.5" fill="#d6453d"/>`;
   p10.innerHTML=h;
-  t10.innerHTML=`Khi \(p_c = ${p.toFixed(2)}\), loss một mẫu \(J_i = -\ln p_c = ${loss.toFixed(2)}\).`;
+  t10.innerHTML=`Khi \\(p_c = ${p.toFixed(2)}\\), loss một mẫu \\(J_i = -\\ln p_c = ${loss.toFixed(2)}\\).`;
   render(t10);
 }
 
