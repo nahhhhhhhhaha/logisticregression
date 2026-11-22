@@ -88,17 +88,17 @@ nav button:hover{background:var(--sky)}
 <!-- SLIDE 2: BÀI TOÁN TỐI ƯU & TÍNH KHẢ NGHỊCH CỦA HESSIAN -->
 <section class="slide">
   <h2>1.1. Thiết lập bài toán &amp; Hessian khả nghịch</h2>
-  <p>Trong không gian tham số <span class="nw">\(w \in \mathbb{R}^d\)</span> (đã gộp hệ số chặn bias <span class="nw">\(b\)</span> vào vector <span class="nw">\(w\)</span>), xét hàm rủi ro thực nghiệm có điều chuẩn <span class="nw">\(L_2\)</span> (<span class="nw">\(\lambda > 0\)</span>):</p>
-  <div class="eq sm">$$J(w) = -\frac{1}{m}\sum_{i=1}^{m}\Bigl[y_i\ln\sigma(w^\top x_i) + (1-y_i)\ln\bigl(1-\sigma(w^\top x_i)\bigr)\Bigr] + \frac{\lambda}{2}\|w\|_2^2$$</div>
+  <p>Trong không gian tham số <span class="nw">\(\mathbf{w} \in \mathbb{R}^d\)</span> (đã gộp hệ số chặn bias <span class="nw">\(b\)</span> vào vector <span class="nw">\(\mathbf{w}\)</span>), xét hàm rủi ro thực nghiệm có điều chuẩn <span class="nw">\(L_2\)</span> (<span class="nw">\(\lambda > 0\)</span>):</p>
+  <div class="eq sm">$$J(\mathbf{w}) = -\frac{1}{N}\sum_{i=1}^{N}\Bigl[y_i\ln\sigma(\mathbf{w}^\top \mathbf{x}_i) + (1-y_i)\ln\bigl(1-\sigma(\mathbf{w}^\top \mathbf{x}_i)\bigr)\Bigr] + \frac{\lambda}{2}\|\mathbf{w}\|_2^2$$</div>
   <div class="row">
     <div class="box good">
       <p><b>Tại sao Hessian luôn khả nghịch?</b></p>
-      <div class="eq sm">$$\nabla^2 J(w) = \frac{1}{m}X^\top R X + \lambda I_d \succeq \lambda I_d \succ 0$$</div>
-      <p>Mọi giá trị riêng của <span class="nw">\(\nabla^2 J(w)\)</span> đều <span class="nw">\(\ge \lambda > 0\)</span>. Ma trận xác định dương ngặt tại mọi <span class="nw">\(w\)</span> — không bao giờ suy biến ngay cả khi dữ liệu đa cộng tuyến.</p>
+      <div class="eq sm">$$\nabla^2 J(\mathbf{w}) = \frac{1}{N}\mathbf{X}^\top \mathbf{R} \mathbf{X} + \lambda \mathbf{I}_d \succeq \lambda \mathbf{I}_d \succ 0$$</div>
+      <p>Mọi giá trị riêng của <span class="nw">\(\nabla^2 J(\mathbf{w})\)</span> đều <span class="nw">\(\ge \lambda > 0\)</span>. Ma trận xác định dương ngặt tại mọi <span class="nw">\(\mathbf{w}\)</span> — không bao giờ suy biến ngay cả khi dữ liệu đa cộng tuyến.</p>
     </div>
     <div class="box">
       <p><b>Bài toán phương trình siêu việt:</b></p>
-      <p>Ta muốn tìm <span class="nw">\(w^* = \arg\min_w J(w)\)</span> bằng cách giải <span class="nw">\(\nabla J(w) = 0\)</span>. Vì chứa hàm Sigmoid phi tuyến, ta không thể giải trực tiếp bằng đại số tuyến tính.</p>
+      <p>Ta muốn tìm <span class="nw">\(\mathbf{w}^* = \arg\min_{\mathbf{w}} J(\mathbf{w})\)</span> bằng cách giải <span class="nw">\(\nabla J(\mathbf{w}) = 0\)</span>. Vì chứa hàm Sigmoid phi tuyến, ta không thể giải trực tiếp bằng đại số tuyến tính.</p>
     </div>
   </div>
 </section>
@@ -106,23 +106,23 @@ nav button:hover{background:var(--sky)}
 <!-- SLIDE 3: KHAI TRIỂN TAYLOR BẬC 2 & ĐẠO HÀM THEO GIA SỐ -->
 <section class="slide">
   <h2>1.2. Khai triển Taylor bậc 2</h2>
-  <p>Tại bước lặp <span class="nw">\(t\)</span>, phương pháp Newton xấp xỉ mặt cong <span class="nw">\(J(w)\)</span> quanh điểm <span class="nw">\(w^{(t)}\)</span> bằng đa thức <b>Taylor bậc 2</b> theo gia số <span class="nw">\(\Delta w\)</span>:</p>
-  <div class="eq sm">$$J(w^{(t)} + \Delta w) \approx \tilde{J}(\Delta w) = J(w^{(t)}) + \nabla J(w^{(t)})^\top \Delta w + \frac{1}{2}\Delta w^\top \nabla^2 J(w^{(t)})\Delta w$$</div>
+  <p>Tại bước lặp <span class="nw">\(t\)</span>, phương pháp Newton xấp xỉ mặt cong <span class="nw">\(J(\mathbf{w})\)</span> quanh điểm <span class="nw">\(\mathbf{w}^{(t)}\)</span> bằng đa thức <b>Taylor bậc 2</b> theo gia số <span class="nw">\(\Delta \mathbf{w}\)</span>:</p>
+  <div class="eq sm">$$J(\mathbf{w}^{(t)} + \Delta \mathbf{w}) \approx \tilde{J}(\Delta \mathbf{w}) = J(\mathbf{w}^{(t)}) + \nabla J(\mathbf{w}^{(t)})^\top \Delta \mathbf{w} + \frac{1}{2}\Delta \mathbf{w}^\top \nabla^2 J(\mathbf{w}^{(t)})\Delta \mathbf{w}$$</div>
   <div class="stack3">
     <div class="box">
-      <div class="stack-head"><b>1. Hạng tử bậc 0</b><span class="sub">Hằng số đối với biến <span class="nw">\(\Delta w\)</span>.</span></div>
-      <div class="eq sm">$$\nabla_{\Delta w}\bigl(J(w^{(t)})\bigr) = 0$$</div>
+      <div class="stack-head"><b>1. Hạng tử bậc 0</b><span class="sub">Hằng số đối với biến <span class="nw">\(\Delta \mathbf{w}\)</span>.</span></div>
+      <div class="eq sm">$$\nabla_{\Delta \mathbf{w}}\bigl(J(\mathbf{w}^{(t)})\bigr) = 0$$</div>
     </div>
     <div class="box">
-      <div class="stack-head"><b>2. Hạng tử bậc 1 (<span class="nw">\(g = \nabla J(w^{(t)})\)</span>)</b><span class="sub">Đạo hàm tuyến tính theo <span class="nw">\(\Delta w\)</span>.</span></div>
-      <div class="eq sm">$$\nabla_{\Delta w}(g^\top \Delta w) = g$$</div>
+      <div class="stack-head"><b>2. Hạng tử bậc 1 (<span class="nw">\(\mathbf{g} = \nabla J(\mathbf{w}^{(t)})\)</span>)</b><span class="sub">Đạo hàm tuyến tính theo <span class="nw">\(\Delta \mathbf{w}\)</span>.</span></div>
+      <div class="eq sm">$$\nabla_{\Delta \mathbf{w}}(\mathbf{g}^\top \Delta \mathbf{w}) = \mathbf{g}$$</div>
     </div>
     <div class="box">
-      <div class="stack-head"><b>3. Hạng tử bậc 2 (<span class="nw">\(H = \nabla^2 J(w^{(t)})\)</span>)</b><span class="sub">Do <span class="nw">\(H\)</span> đối xứng theo định lý Schwarz.</span></div>
-      <div class="eq sm">$$\nabla_{\Delta w}\Bigl(\tfrac{1}{2}\Delta w^\top H \Delta w\Bigr) = \tfrac{1}{2}(H + H^\top)\Delta w = H\Delta w$$</div>
+      <div class="stack-head"><b>3. Hạng tử bậc 2 (<span class="nw">\(\mathbf{H} = \nabla^2 J(\mathbf{w}^{(t)})\)</span>)</b><span class="sub">Do <span class="nw">\(\mathbf{H}\)</span> đối xứng theo định lý Schwarz.</span></div>
+      <div class="eq sm">$$\nabla_{\Delta \mathbf{w}}\Bigl(\tfrac{1}{2}\Delta \mathbf{w}^\top \mathbf{H} \Delta \mathbf{w}\Bigr) = \tfrac{1}{2}(\mathbf{H} + \mathbf{H}^\top)\Delta \mathbf{w} = \mathbf{H}\Delta \mathbf{w}$$</div>
     </div>
   </div>
-  <div class="box good eq">$$\nabla_{\Delta w}\tilde{J}(\Delta w) = \nabla J(w^{(t)}) + \nabla^2 J(w^{(t)})\Delta w = 0 \;\Longrightarrow\; \Delta w_{\mathrm{nt}} = -\bigl[\nabla^2 J(w^{(t)})\bigr]^{-1}\nabla J(w^{(t)})$$</div>
+  <div class="box good eq">$$\nabla_{\Delta \mathbf{w}}\tilde{J}(\Delta \mathbf{w}) = \nabla J(\mathbf{w}^{(t)}) + \nabla^2 J(\mathbf{w}^{(t)})\Delta \mathbf{w} = 0 \;\Longrightarrow\; \Delta \mathbf{w}_{\mathrm{nt}} = -\bigl[\nabla^2 J(\mathbf{w}^{(t)})\bigr]^{-1}\nabla J(\mathbf{w}^{(t)})$$</div>
 </section>
 
 <!-- SLIDE 4: QUY TẮC CẬP NHẬT & TƯƠNG TÁC PARABOL 1D -->
@@ -132,15 +132,15 @@ nav button:hover{background:var(--sky)}
     <svg id="p4" viewBox="0 0 400 220"></svg>
     <div>
       <div class="ctl">
-        <label for="w4">w⁽ᵗ⁾</label><input id="w4" type="range" min="-2.5" max="2.5" step="0.05" value="-2.0"><output id="o4w"></output>
-        <label for="l4">λ</label><input id="l4" type="range" min="0.05" max="0.5" step="0.05" value="0.15"><output id="o4l"></output>
+        <label for="w4">w⁽ᵗ⁾</label><input id="w4" type="range" min="-2.5" max="2.5" step="0.05" value="-2.0"><output id="o4w">-2.00</output>
+        <label for="l4">λ</label><input id="l4" type="range" min="0.05" max="0.5" step="0.05" value="0.15"><output id="o4l">0.15</output>
       </div>
       <div class="btns">
         <button id="b4_step" class="on">Nhảy 1 bước Newton: w⁽ᵗ⁾ → w⁽ᵗ⁺¹⁾</button>
         <button id="b4_rst">Đặt lại</button>
       </div>
       <p id="t4" class="box" style="margin-top:10px"></p>
-      <p class="sub" style="margin-top:6px">Quy tắc cập nhật: <span class="nw">\(w^{(t+1)} = w^{(t)} - [\nabla^2 J(w^{(t)})]^{-1}\nabla J(w^{(t)})\)</span>. Parabol đỏ khớp giá trị, độ dốc và độ cong tại <span class="nw">\(w^{(t)}\)</span>.</p>
+      <p class="sub" style="margin-top:6px">Quy tắc cập nhật: <span class="nw">\(\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} - [\nabla^2 J(\mathbf{w}^{(t)})]^{-1}\nabla J(\mathbf{w}^{(t)})\)</span>. Parabol đỏ khớp giá trị, độ dốc và độ cong tại <span class="nw">\(\mathbf{w}^{(t)}\)</span>.</p>
     </div>
   </div>
 </section>
@@ -148,14 +148,14 @@ nav button:hover{background:var(--sky)}
 <!-- SLIDE 5: VẤN ĐỀ SCALING & CHỨNG MINH BẤT BIẾN AFFINE -->
 <section class="slide">
   <h2>2.1. Tính bất biến Affine</h2>
-  <p><b>Điểm yếu của Gradient Descent:</b> Nếu các đặc trưng có đơn vị đo chênh lệch (giờ học <span class="nw">\(\in [0,10]\)</span> vs. điểm rèn luyện <span class="nw">\(\in [0,1000]\)</span>), số điều kiện <span class="nw">\(\kappa(H) \gg 1\)</span> làm đường đồng mức kéo dẹt và GD dao động zíc zắc.</p>
-  <p><b>Biến đổi tuyến tính không suy biến:</b> Xét <span class="nw">\(\tilde{X} = XA\)</span> (<span class="nw">\(A \in \mathbb{R}^{d\times d}\)</span> khả nghịch). Để bảo toàn dự đoán <span class="nw">\(\tilde{X}\tilde{w} = Xw\)</span>, tham số mới là <span class="nw">\(\tilde{w} = A^{-1}w\)</span> và hàm mục tiêu <span class="nw">\(\tilde{J}(\tilde{w}) = J(A\tilde{w})\)</span>:</p>
+  <p><b>Điểm yếu của Gradient Descent:</b> Nếu các đặc trưng có đơn vị đo chênh lệch (giờ học <span class="nw">\(\in [0,10]\)</span> vs. điểm rèn luyện <span class="nw">\(\in [0,1000]\)</span>), số điều kiện <span class="nw">\(\kappa(\mathbf{H}) \gg 1\)</span> làm đường đồng mức kéo dẹt và GD dao động zíc zắc.</p>
+  <p><b>Biến đổi tuyến tính không suy biến:</b> Xét <span class="nw">\(\tilde{\mathbf{X}} = \mathbf{X}\mathbf{A}\)</span> (<span class="nw">\(\mathbf{A} \in \mathbb{R}^{d\times d}\)</span> khả nghịch). Để bảo toàn dự đoán <span class="nw">\(\tilde{\mathbf{X}}\tilde{\mathbf{w}} = \mathbf{X}\mathbf{w}\)</span>, tham số mới là <span class="nw">\(\tilde{\mathbf{w}} = \mathbf{A}^{-1}\mathbf{w}\)</span> và hàm mục tiêu <span class="nw">\(\tilde{J}(\tilde{\mathbf{w}}) = J(\mathbf{A}\tilde{\mathbf{w}})\)</span>:</p>
   <div class="box">
-    <p>Áp dụng Chain Rule: <span class="nw">\(\nabla\tilde{J}(\tilde{w}) = A^\top\nabla J(w)\)</span> và <span class="nw">\(\tilde{H}(\tilde{w}) = A^\top H(w) A\)</span>.</p>
-    <div class="eq sm">$$\Delta\tilde{w} = -\tilde{H}^{-1}\nabla\tilde{J} = -(A^\top H A)^{-1}(A^\top\nabla J) = -A^{-1}H^{-1}(A^\top)^{-1}A^\top\nabla J = A^{-1}\Delta w$$</div>
+    <p>Áp dụng Chain Rule: <span class="nw">\(\nabla\tilde{J}(\tilde{\mathbf{w}}) = \mathbf{A}^\top\nabla J(\mathbf{w})\)</span> và <span class="nw">\(\tilde{\mathbf{H}}(\tilde{\mathbf{w}}) = \mathbf{A}^\top \mathbf{H}(\mathbf{w}) \mathbf{A}\)</span>.</p>
+    <div class="eq sm">$$\Delta\tilde{\mathbf{w}} = -\tilde{\mathbf{H}}^{-1}\nabla\tilde{J} = -(\mathbf{A}^\top \mathbf{H} \mathbf{A})^{-1}(\mathbf{A}^\top\nabla J) = -\mathbf{A}^{-1}\mathbf{H}^{-1}(\mathbf{A}^\top)^{-1}\mathbf{A}^\top\nabla J = \mathbf{A}^{-1}\Delta \mathbf{w}$$</div>
   </div>
   <div class="box good">
-    <p><b>Hệ quả:</b> Quỹ đạo <span class="nw">\(\tilde{w}^{(t)} = A^{-1}w^{(t)}\)</span> trùng khớp 100% với không gian gốc tại mọi bước <span class="nw">\(t\)</span>. Phương pháp Newton <b>miễn nhiễm tuyệt đối</b> với Feature Scaling.</p>
+    <p><b>Hệ quả:</b> Quỹ đạo <span class="nw">\(\tilde{\mathbf{w}}^{(t)} = \mathbf{A}^{-1}\mathbf{w}^{(t)}\)</span> trùng khớp 100% với không gian gốc tại mọi bước <span class="nw">\(t\)</span>. Phương pháp Newton <b>miễn nhiễm tuyệt đối</b> với Feature Scaling.</p>
   </div>
 </section>
 
@@ -166,14 +166,14 @@ nav button:hover{background:var(--sky)}
     <svg id="p6" viewBox="0 0 400 220"></svg>
     <div>
       <div class="ctl">
-        <label for="k6">Số điều kiện κ</label><input id="k6" type="range" min="1" max="15" step="0.5" value="9"><output id="o6k"></output>
+        <label for="k6">Số điều kiện κ</label><input id="k6" type="range" min="1" max="15" step="0.5" value="9"><output id="o6k">9.0</output>
       </div>
       <div class="btns">
         <button id="b6_step" class="on">Thêm 6 vòng lặp GD</button>
         <button id="b6_rst">Đặt lại</button>
       </div>
       <p id="t6" class="box" style="margin-top:10px"></p>
-      <p class="sub" style="margin-top:6px"><b style="color:var(--red)">Đỏ</b>: Gradient Descent bị ép dùng bước nhảy nhỏ <span class="nw">\(\alpha < 2/\kappa\)</span> nên dao động zíc zắc · <b style="color:var(--green)">Xanh</b>: Newton khử sạch <span class="nw">\(\kappa\)</span> nhờ nhân <span class="nw">\(H^{-1}\)</span>.</p>
+      <p class="sub" style="margin-top:6px"><b style="color:var(--red)">Đỏ</b>: Gradient Descent bị ép dùng bước nhảy nhỏ <span class="nw">\(\alpha < 2/\kappa\)</span> nên dao động zíc zắc · <b style="color:var(--green)">Xanh</b>: Newton khử sạch <span class="nw">\(\kappa\)</span> nhờ nhân <span class="nw">\(\mathbf{H}^{-1}\)</span>.</p>
     </div>
   </div>
 </section>
@@ -181,20 +181,20 @@ nav button:hover{background:var(--sky)}
 <!-- SLIDE 7: ĐỊNH LÝ KANTOROVICH & VÙNG HỘI TỤ BẬC HAI -->
 <section class="slide">
   <h2>3.1. Định lý Kantorovich &amp; Hội tụ bậc 2</h2>
-  <p>Khi điểm lặp <span class="nw">\(w^{(t)}\)</span> tiến vào lân cận đủ gần nghiệm tối ưu toàn cục <span class="nw">\(w^*\)</span>, phương pháp Newton kích hoạt trạng thái <b>hội tụ bậc hai (Quadratic Convergence)</b>.</p>
+  <p>Khi điểm lặp <span class="nw">\(\mathbf{w}^{(t)}\)</span> tiến vào lân cận đủ gần nghiệm tối ưu toàn cục <span class="nw">\(\mathbf{w}^*\)</span>, phương pháp Newton kích hoạt trạng thái <b>hội tụ bậc hai (Quadratic Convergence)</b>.</p>
   <div class="row">
     <div class="box">
       <p><b>Hai giả thiết của Định lý Kantorovich:</b></p>
       <ul>
-        <li><b>Hessian liên tục Lipschitz (<span class="nw">\(L > 0\)</span>):</b> <span class="nw">\(\|\nabla^2 J(w_1) - \nabla^2 J(w_2)\|_2 \le L\|w_1 - w_2\|_2\)</span>.</li>
-        <li><b>Lồi chặt cục bộ (<span class="nw">\(\mu > 0\)</span>):</b> Giá trị riêng nhỏ nhất <span class="nw">\(\mu = \lambda_{\min}(H(w^*)) > 0\)</span>.</li>
+        <li><b>Hessian liên tục Lipschitz (<span class="nw">\(L > 0\)</span>):</b> <span class="nw">\(\|\nabla^2 J(\mathbf{w}_1) - \nabla^2 J(\mathbf{w}_2)\|_2 \le L\|\mathbf{w}_1 - \mathbf{w}_2\|_2\)</span>.</li>
+        <li><b>Lồi chặt cục bộ (<span class="nw">\(\mu > 0\)</span>):</b> Giá trị riêng nhỏ nhất <span class="nw">\(\mu = \lambda_{\min}(\mathbf{H}(\mathbf{w}^*)) > 0\)</span>.</li>
       </ul>
     </div>
     <div class="box good">
       <p><b>Chặn trên sai số &amp; Quả cầu hội tụ:</b></p>
-      <div class="eq sm">$$\|w^{(t+1)} - w^*\|_2 \le \frac{L}{2\mu}\|w^{(t)} - w^*\|_2^2$$</div>
-      <p>Để sai số thực sự co lại (<span class="nw">\(\|w^{(t+1)}-w^*\|_2 < \|w^{(t)}-w^*\|_2\)</span>), điểm xuất phát phải nằm trong bán kính:</p>
-      <div class="eq sm">$$\|w^{(t)} - w^*\|_2 < \frac{2\mu}{L}$$</div>
+      <div class="eq sm">$$\|\mathbf{w}^{(t+1)} - \mathbf{w}^*\|_2 \le \frac{L}{2\mu}\|\mathbf{w}^{(t)} - \mathbf{w}^*\|_2^2$$</div>
+      <p>Để sai số thực sự co lại (<span class="nw">\(\|\mathbf{w}^{(t+1)}-\mathbf{w}^*\|_2 < \|\mathbf{w}^{(t)}-\mathbf{w}^*\|_2\)</span>), điểm xuất phát phải nằm trong bán kính:</p>
+      <div class="eq sm">$$\|\mathbf{w}^{(t)} - \mathbf{w}^*\|_2 < \frac{2\mu}{L}$$</div>
     </div>
   </div>
 </section>
@@ -202,7 +202,7 @@ nav button:hover{background:var(--sky)}
 <!-- SLIDE 8: ĐỊNH LƯỢNG TỐC ĐỘ HỘI TỤ BẬC 2 VS BẬC 1 -->
 <section class="slide">
   <h2>3.2. Tốc độ hội tụ bậc 2 và bậc 1</h2>
-  <p>Khi đã lọt vào quả cầu hội tụ <span class="nw">\(\|w^{(t)}-w^*\|_2 < \frac{2\mu}{L}\)</span>, sai số ở bước <span class="nw">\(t+1\)</span> tỉ lệ với <b>bình phương</b> sai số bước <span class="nw">\(t\)</span> (từ <span class="nw">\(10^{-3} \to 10^{-6} \to 10^{-12}\)</span>).</p>
+  <p>Khi đã lọt vào quả cầu hội tụ <span class="nw">\(\|\mathbf{w}^{(t)}-\mathbf{w}^*\|_2 < \frac{2\mu}{L}\)</span>, sai số ở bước <span class="nw">\(t+1\)</span> tỉ lệ với <b>bình phương</b> sai số bước <span class="nw">\(t\)</span> (từ <span class="nw">\(10^{-3} \to 10^{-6} \to 10^{-12}\)</span>).</p>
   <div class="row">
     <div>
       <table>
@@ -224,30 +224,30 @@ nav button:hover{background:var(--sky)}
 <!-- SLIDE 9: BIẾN ĐỔI ĐẠI SỐ SANG IRLS -->
 <section class="slide">
   <h2>4.1. Biến đổi Newton sang IRLS</h2>
-  <p>Xét bài toán tối thiểu hóa NLL không điều chuẩn trên <span class="nw">\(X \in \mathbb{R}^{m\times d}\)</span>, <span class="nw">\(y \in \{0,1\}^m\)</span>. Tại bước <span class="nw">\(t\)</span>, xác suất dự báo là <span class="nw">\(a^{(t)} = \sigma(Xw^{(t)})\)</span>:</p>
-  <div class="eq sm">$$g^{(t)} = X^\top(a^{(t)} - y), \qquad H^{(t)} = X^\top R^{(t)} X, \qquad R_{ii}^{(t)} = a_i^{(t)}\bigl(1 - a_i^{(t)}\bigr) > 0$$</div>
-  <p>Áp dụng công thức Newton với bước nhảy <span class="nw">\(\alpha = 1\)</span> và đặt <span class="nw">\((X^\top R^{(t)} X)^{-1} X^\top R^{(t)}\)</span> làm nhân tử chung (vì <span class="nw">\(R^{(t)}\)</span> đường chéo dương nên luôn khả nghịch):</p>
+  <p>Xét bài toán tối thiểu hóa NLL không điều chuẩn trên <span class="nw">\(\mathbf{X} \in \mathbb{R}^{N\times d}\)</span>, <span class="nw">\(\mathbf{y} \in \{0,1\}^N\)</span>. Tại bước <span class="nw">\(t\)</span>, xác suất dự báo là <span class="nw">\(\mathbf{p}^{(t)} = \sigma(\mathbf{X}\mathbf{w}^{(t)})\)</span>:</p>
+  <div class="eq sm">$$\mathbf{g}^{(t)} = \mathbf{X}^\top(\mathbf{p}^{(t)} - \mathbf{y}), \qquad \mathbf{H}^{(t)} = \mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X}, \qquad R_{ii}^{(t)} = p_i^{(t)}\bigl(1 - p_i^{(t)}\bigr) > 0$$</div>
+  <p>Áp dụng công thức Newton với bước nhảy <span class="nw">\(\alpha = 1\)</span> và đặt <span class="nw">\((\mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{R}^{(t)}\)</span> làm nhân tử chung (vì <span class="nw">\(\mathbf{R}^{(t)}\)</span> đường chéo dương nên luôn khả nghịch):</p>
   <div class="eq sm">$$\begin{aligned}
-  w^{(t+1)} &= w^{(t)} - (X^\top R^{(t)} X)^{-1} X^\top(a^{(t)} - y) \\
-  &= (X^\top R^{(t)} X)^{-1}\Bigl[(X^\top R^{(t)} X)w^{(t)} - X^\top(a^{(t)} - y)\Bigr] \\
-  &= (X^\top R^{(t)} X)^{-1} X^\top R^{(t)}\Bigl[Xw^{(t)} + (R^{(t)})^{-1}(y - a^{(t)})\Bigr]
+  \mathbf{w}^{(t+1)} &= \mathbf{w}^{(t)} - (\mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X})^{-1} \mathbf{X}^\top(\mathbf{p}^{(t)} - \mathbf{y}) \\
+  &= (\mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X})^{-1}\Bigl[(\mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X})\mathbf{w}^{(t)} - \mathbf{X}^\top(\mathbf{p}^{(t)} - \mathbf{y})\Bigr] \\
+  &= (\mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{R}^{(t)}\Bigl[\mathbf{X}\mathbf{w}^{(t)} + (\mathbf{R}^{(t)})^{-1}(\mathbf{y} - \mathbf{p}^{(t)})\Bigr]
   \end{aligned}$$</div>
 </section>
 
 <!-- SLIDE 10: NGHIỆM DẠNG ĐÓNG WLS & CHU TRÌNH IRLS -->
 <section class="slide">
   <h2>4.2. Nghiệm dạng đóng WLS</h2>
-  <p>Định nghĩa vector <b>biến phản hồi làm việc (working response vector)</b> <span class="nw">\(z^{(t)} \in \mathbb{R}^m\)</span> theo từng mẫu <span class="nw">\(i\)</span>:</p>
-  <div class="eq">$$z^{(t)} \triangleq Xw^{(t)} + (R^{(t)})^{-1}(y - a^{(t)}) \quad\Longleftrightarrow\quad z_i^{(t)} = (w^{(t)})^\top x_i + \frac{y_i - a_i^{(t)}}{a_i^{(t)}\bigl(1 - a_i^{(t)}\bigr)}$$</div>
+  <p>Định nghĩa vector <b>biến phản hồi làm việc (working response vector)</b> <span class="nw">\(\tilde{\mathbf{y}}^{(t)} \in \mathbb{R}^N\)</span> theo từng mẫu <span class="nw">\(i\)</span>:</p>
+  <div class="eq">$$\tilde{\mathbf{y}}^{(t)} \triangleq \mathbf{X}\mathbf{w}^{(t)} + (\mathbf{R}^{(t)})^{-1}(\mathbf{y} - \mathbf{p}^{(t)}) \quad\Longleftrightarrow\quad \tilde{y}_i^{(t)} = (\mathbf{w}^{(t)})^\top \mathbf{x}_i + \frac{y_i - p_i^{(t)}}{p_i^{(t)}\bigl(1 - p_i^{(t)}\bigr)}$$</div>
   <div class="box good">
     <p><b>Bản chất IRLS (Iteratively Reweighted Least Squares):</b> Mỗi bước Newton chính là nghiệm giải tích của một bài toán Hồi quy tuyến tính có trọng số:</p>
-    <div class="eq sm">$$w^{(t+1)} = (X^\top R^{(t)} X)^{-1} X^\top R^{(t)} z^{(t)} = \arg\min_{w\in\mathbb{R}^d}\sum_{i=1}^{m} R_{ii}^{(t)}\bigl(z_i^{(t)} - w^\top x_i\bigr)^2$$</div>
+    <div class="eq sm">$$\mathbf{w}^{(t+1)} = (\mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{R}^{(t)} \tilde{\mathbf{y}}^{(t)} = \arg\min_{\mathbf{w}\in\mathbb{R}^d}\sum_{i=1}^{N} R_{ii}^{(t)}\bigl(\tilde{y}_i^{(t)} - \mathbf{w}^\top \mathbf{x}_i\bigr)^2$$</div>
   </div>
   <div class="chain" style="margin-top:4px">
-    <div>\(w^{(t)}\)<small>tham số hiện tại</small></div><div class="ar">→</div>
-    <div>\(a^{(t)} = \sigma(Xw^{(t)})\)<small>xác suất dự báo</small></div><div class="ar">→</div>
-    <div>\(R^{(t)},\; z^{(t)}\)<small>trọng số &amp; phản hồi</small></div><div class="ar">→</div>
-    <div>Giải WLS<small>\(w^{(t+1)}\) (5–10 vòng)</small></div>
+    <div>\(\mathbf{w}^{(t)}\)<small>tham số hiện tại</small></div><div class="ar">→</div>
+    <div>\(\mathbf{p}^{(t)} = \sigma(\mathbf{X}\mathbf{w}^{(t)})\)<small>xác suất dự báo</small></div><div class="ar">→</div>
+    <div>\(\mathbf{R}^{(t)},\; \tilde{\mathbf{y}}^{(t)}\)<small>trọng số &amp; phản hồi</small></div><div class="ar">→</div>
+    <div>Giải WLS<small>\(\mathbf{w}^{(t+1)}\) (5–10 vòng)</small></div>
   </div>
 </section>
 
@@ -258,17 +258,17 @@ nav button:hover{background:var(--sky)}
     <div class="box bad">
       <p><b>Chi phí đắt đỏ của Newton thuần túy</b></p>
       <ul>
-        <li>Tính ma trận Hessian <span class="nw">\(X^\top R^{(t)} X\)</span>: tốn <span class="nw">\(\mathcal{O}(m\cdot d^2)\)</span>.</li>
-        <li>Nghịch đảo ma trận <span class="nw">\((H^{(t)})^{-1}\)</span>: tốn <span class="nw">\(\mathcal{O}(d^3)\)</span>.</li>
+        <li>Tính ma trận Hessian <span class="nw">\(\mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X}\)</span>: tốn <span class="nw">\(\mathcal{O}(N\cdot d^2)\)</span>.</li>
+        <li>Nghịch đảo ma trận <span class="nw">\((\mathbf{H}^{(t)})^{-1}\)</span>: tốn <span class="nw">\(\mathcal{O}(d^3)\)</span>.</li>
       </ul>
       <p>Khi <span class="nw">\(d \sim 10^4 - 10^7\)</span> (TF-IDF, One-Hot, tương tác đa thức), lặp lại <span class="nw">\(\mathcal{O}(d^3)\)</span> là bất khả thi.</p>
     </div>
     <div class="box good">
       <p><b>Triết lý Quasi-Newton (BFGS / L-BFGS)</b></p>
       <ul>
-        <li><b>Không tính</b> ma trận Hessian <span class="nw">\(\nabla^2 J(w)\)</span>.</li>
+        <li><b>Không tính</b> ma trận Hessian <span class="nw">\(\nabla^2 J(\mathbf{w})\)</span>.</li>
         <li><b>Không nghịch đảo</b> ma trận hệ số.</li>
-        <li><b>Xấp xỉ trực tiếp</b> nghịch đảo Hessian <span class="nw">\(H_k \approx (\nabla^2 J)^{-1}\)</span> chỉ từ lịch sử dịch chuyển <span class="nw">\(s_k\)</span> và biến thiên Gradient <span class="nw">\(y_k\)</span>.</li>
+        <li><b>Xấp xỉ trực tiếp</b> nghịch đảo Hessian <span class="nw">\(\mathbf{H}_t \approx (\nabla^2 J)^{-1}\)</span> chỉ từ lịch sử dịch chuyển <span class="nw">\(\mathbf{s}_t\)</span> và biến thiên Gradient <span class="nw">\(\mathbf{y}_{\mathrm{g},t}\)</span>.</li>
       </ul>
     </div>
   </div>
@@ -277,26 +277,26 @@ nav button:hover{background:var(--sky)}
 <!-- SLIDE 12: PHƯƠNG TRÌNH CÁT TUYẾN TRONG HỒI QUY LOGISTIC -->
 <section class="slide">
   <h2>5.2. Phương trình Cát tuyến (Secant Equation)</h2>
-  <p>Ghi nhận độ dịch chuyển trọng số <span class="nw">\(s_k = w_{k+1} - w_k\)</span> và độ biến thiên Gradient <span class="nw">\(y_k = \nabla J(w_{k+1}) - \nabla J(w_k)\)</span>. Thay công thức <span class="nw">\(\nabla J(w) = \frac{1}{m}X^\top(a-y) + \lambda w\)</span> vào <span class="nw">\(y_k\)</span>:</p>
-  <div class="eq sm">$$y_k = \Bigl[\frac{1}{m}X^\top(a_{k+1} - y) + \lambda w_{k+1}\Bigr] - \Bigl[\frac{1}{m}X^\top(a_k - y) + \lambda w_k\Bigr]$$</div>
+  <p>Ghi nhận độ dịch chuyển trọng số <span class="nw">\(\mathbf{s}_t = \mathbf{w}^{(t+1)} - \mathbf{w}^{(t)}\)</span> và độ biến thiên Gradient <span class="nw">\(\mathbf{y}_{\mathrm{g},t} = \nabla J(\mathbf{w}^{(t+1)}) - \nabla J(\mathbf{w}^{(t)})\)</span>. Thay công thức <span class="nw">\(\nabla J(\mathbf{w}) = \frac{1}{N}\mathbf{X}^\top(\mathbf{p}-\mathbf{y}) + \lambda \mathbf{w}\)</span> vào <span class="nw">\(\mathbf{y}_{\mathrm{g},t}\)</span>:</p>
+  <div class="eq sm">$$\mathbf{y}_{\mathrm{g},t} = \Bigl[\frac{1}{N}\mathbf{X}^\top(\mathbf{p}^{(t+1)} - \mathbf{y}) + \lambda \mathbf{w}^{(t+1)}\Bigr] - \Bigl[\frac{1}{N}\mathbf{X}^\top(\mathbf{p}^{(t)} - \mathbf{y}) + \lambda \mathbf{w}^{(t)}\Bigr]$$</div>
   <div class="box good">
-    <p><b>Triệt tiêu nhãn thực tế <span class="nw">\(y\)</span>, ta thu được bản chất của <span class="nw">\(y_k\)</span>:</b></p>
-    <div class="eq">$$y_k = \frac{1}{m}X^\top(a_{k+1} - a_k) + \lambda s_k$$</div>
+    <p><b>Triệt tiêu nhãn thực tế <span class="nw">\(\mathbf{y}\)</span>, ta thu được bản chất của <span class="nw">\(\mathbf{y}_{\mathrm{g},t}\)</span>:</b></p>
+    <div class="eq">$$\mathbf{y}_{\mathrm{g},t} = \frac{1}{N}\mathbf{X}^\top(\mathbf{p}^{(t+1)} - \mathbf{p}^{(t)}) + \lambda \mathbf{s}_t$$</div>
   </div>
-  <p class="box"><b>Ý nghĩa học thuật:</b> Trái với mạng nơ-ron (hộp đen hỗn loạn), trong Logistic Regression, <span class="nw">\(y_k\)</span> tỉ lệ thuận tuyến tính tuyệt đối với <b>độ chênh lệch xác suất dự đoán (probability divergence)</b> <span class="nw">\(a_{k+1} - a_k\)</span> giữa hai bước lặp.</p>
+  <p class="box"><b>Ý nghĩa học thuật:</b> Trái với mạng nơ-ron (hộp đen hỗn loạn), trong Logistic Regression, <span class="nw">\(\mathbf{y}_{\mathrm{g},t}\)</span> tỉ lệ thuận tuyến tính tuyệt đối với <b>độ chênh lệch xác suất dự đoán (probability divergence)</b> <span class="nw">\(\mathbf{p}^{(t+1)} - \mathbf{p}^{(t)}\)</span> giữa hai bước lặp.</p>
 </section>
 
 <!-- SLIDE 13: TƯƠNG TÁC PROBABILITY DIVERGENCE -->
 <section class="slide" data-fn="up13">
-  <h2>5.3. Chênh lệch xác suất <span class="nw">\(a_{k+1} - a_k\)</span></h2>
+  <h2>5.3. Chênh lệch xác suất <span class="nw">\(p_i^{(t+1)} - p_i^{(t)}\)</span></h2>
   <div class="row">
     <svg id="p13" viewBox="0 0 400 220"></svg>
     <div>
       <div class="ctl">
-        <label for="s13">Bước dịch sₖ</label><input id="s13" type="range" min="0.1" max="1.5" step="0.05" value="0.6"><output id="o13s"></output>
+        <label for="s13">Bước dịch sₜ</label><input id="s13" type="range" min="0.1" max="1.5" step="0.05" value="0.6"><output id="o13s">0.60</output>
       </div>
       <p id="t13" class="box" style="margin-top:12px"></p>
-      <p class="sub" style="margin-top:8px">Vùng ranh giới quyết định (nơi <span class="nw">\(a \approx 0.5\)</span>) có độ chênh lệch xác suất <span class="nw">\(a_{k+1}-a_k\)</span> lớn nhất, cung cấp nhiều thông tin độ cong nhất cho <span class="nw">\(y_k\)</span>.</p>
+      <p class="sub" style="margin-top:8px">Vùng ranh giới quyết định (nơi <span class="nw">\(p_i \approx 0.5\)</span>) có độ chênh lệch xác suất <span class="nw">\(p_i^{(t+1)}-p_i^{(t)}\)</span> lớn nhất, cung cấp nhiều thông tin độ cong nhất cho <span class="nw">\(\mathbf{y}_{\mathrm{g},t}\)</span>.</p>
     </div>
   </div>
 </section>
@@ -304,29 +304,29 @@ nav button:hover{background:var(--sky)}
 <!-- SLIDE 14: ĐỊNH LÝ LỒI NGẶT & SỰ BẤT TỬ CỦA BFGS -->
 <section class="slide">
   <h2>6.1. Điều kiện độ cong &amp; Tính ổn định BFGS</h2>
-  <p>Để ma trận xấp xỉ nghịch đảo Hessian <span class="nw">\(H_{k+1}\)</span> luôn xác định dương (<span class="nw">\(H_{k+1} \succ 0\)</span>, đảm bảo hướng bước nhảy luôn lao dốc), điều kiện bắt buộc là <b>Điều kiện Độ cong (Curvature Condition)</b>: <span class="nw">\(s_k^\top y_k > 0\)</span>.</p>
-  <p><b>Chứng minh giải tích:</b> Theo Định lý Giá trị Trung bình trên đa tạp, tồn tại <span class="nw">\(\xi = \theta w_k + (1-\theta)w_{k+1}\)</span> (<span class="nw">\(\theta \in (0,1)\)</span>) sao cho:</p>
-  <div class="eq sm">$$y_k = \nabla^2 J(\xi) s_k = \Bigl[\frac{1}{m}X^\top R(\xi) X + \lambda I_d\Bigr] s_k, \qquad R(\xi) = \operatorname{diag}\bigl(\sigma(X\xi)\odot(1-\sigma(X\xi))\bigr)$$</div>
+  <p>Để ma trận xấp xỉ nghịch đảo Hessian <span class="nw">\(\mathbf{H}_{t+1}\)</span> luôn xác định dương (<span class="nw">\(\mathbf{H}_{t+1} \succ 0\)</span>, đảm bảo hướng bước nhảy luôn lao dốc), điều kiện bắt buộc là <b>Điều kiện Độ cong (Curvature Condition)</b>: <span class="nw">\(\mathbf{s}_t^\top \mathbf{y}_{\mathrm{g},t} > 0\)</span>.</p>
+  <p><b>Chứng minh giải tích:</b> Theo Định lý Giá trị Trung bình (Mean Value Theorem), tồn tại <span class="nw">\(\boldsymbol{\xi} = \tau \mathbf{w}^{(t)} + (1-\tau)\mathbf{w}^{(t+1)}\)</span> (<span class="nw">\(\tau \in (0,1)\)</span>) sao cho:</p>
+  <div class="eq sm">$$\mathbf{y}_{\mathrm{g},t} = \nabla^2 J(\boldsymbol{\xi}) \mathbf{s}_t = \Bigl[\frac{1}{N}\mathbf{X}^\top \mathbf{R}(\boldsymbol{\xi}) \mathbf{X} + \lambda \mathbf{I}_d\Bigr] \mathbf{s}_t, \qquad \mathbf{R}(\boldsymbol{\xi}) = \operatorname{diag}\bigl(\sigma(\mathbf{X}\boldsymbol{\xi})\odot(1-\sigma(\mathbf{X}\boldsymbol{\xi}))\bigr)$$</div>
   <div class="box good">
-    <p>Nhân vô hướng <span class="nw">\(s_k^\top\)</span> vào hai vế:</p>
-    <div class="eq">$$s_k^\top y_k = s_k^\top\Bigl[\frac{1}{m}X^\top R(\xi) X + \lambda I_d\Bigr]s_k = \frac{1}{m}\bigl\|\sqrt{R(\xi)}\,X s_k\bigr\|_2^2 + \lambda\|s_k\|_2^2 > 0$$</div>
-    <p>Vì <span class="nw">\(R(\xi) \succ 0\)</span> và <span class="nw">\(\lambda > 0\)</span>, <span class="nw">\(s_k^\top y_k > 0\)</span> là <b>chân lý tuyệt đối</b> — không bao giờ cần bỏ qua bước cập nhật (skip updates) như trong Deep Learning.</p>
+    <p>Nhân vô hướng <span class="nw">\(\mathbf{s}_t^\top\)</span> vào hai vế:</p>
+    <div class="eq">$$\mathbf{s}_t^\top \mathbf{y}_{\mathrm{g},t} = \mathbf{s}_t^\top\Bigl[\frac{1}{N}\mathbf{X}^\top \mathbf{R}(\boldsymbol{\xi}) \mathbf{X} + \lambda \mathbf{I}_d\Bigr]\mathbf{s}_t = \frac{1}{N}\bigl\|\sqrt{\mathbf{R}(\boldsymbol{\xi})}\,\mathbf{X} \mathbf{s}_t\bigr\|_2^2 + \lambda\|\mathbf{s}_t\|_2^2 > 0$$</div>
+    <p>Vì <span class="nw">\(\mathbf{R}(\boldsymbol{\xi}) \succ 0\)</span> và <span class="nw">\(\lambda > 0\)</span>, <span class="nw">\(\mathbf{s}_t^\top \mathbf{y}_{\mathrm{g},t} > 0\)</span> là <b>chân lý tuyệt đối</b> — không bao giờ cần bỏ qua bước cập nhật (skip updates) như trong Deep Learning.</p>
   </div>
 </section>
 
 <!-- SLIDE 15: CÔNG THỨC CẬP NHẬT BFGS RANK-2 -->
 <section class="slide">
   <h2>6.2. Cập nhật BFGS hạng 2 (Rank-2)</h2>
-  <p>Nhờ điều kiện độ cong <span class="nw">\(s_k^\top y_k > 0\)</span> luôn thỏa mãn, tại mỗi bước BFGS tìm ma trận đối xứng <span class="nw">\(H_{k+1}\)</span> gần <span class="nw">\(H_k\)</span> nhất thỏa mãn phương trình cát tuyến <span class="nw">\(H_{k+1} y_k = s_k\)</span>.</p>
-  <div class="box good eq sm">$$H_{k+1} = (I_d - \rho_k s_k y_k^\top) H_k (I_d - \rho_k y_k s_k^\top) + \rho_k s_k s_k^\top, \qquad \rho_k = \frac{1}{y_k^\top s_k}$$</div>
+  <p>Nhờ điều kiện độ cong <span class="nw">\(\mathbf{s}_t^\top \mathbf{y}_{\mathrm{g},t} > 0\)</span> luôn thỏa mãn, tại mỗi bước BFGS tìm ma trận đối xứng <span class="nw">\(\mathbf{H}_{t+1}\)</span> gần <span class="nw">\(\mathbf{H}_t\)</span> nhất thỏa mãn phương trình cát tuyến <span class="nw">\(\mathbf{H}_{t+1} \mathbf{y}_{\mathrm{g},t} = \mathbf{s}_t\)</span>.</p>
+  <div class="box good eq sm">$$\mathbf{H}_{t+1} = (\mathbf{I}_d - \rho_t \mathbf{s}_t \mathbf{y}_{\mathrm{g},t}^\top) \mathbf{H}_t (\mathbf{I}_d - \rho_t \mathbf{y}_{\mathrm{g},t} \mathbf{s}_t^\top) + \rho_t \mathbf{s}_t \mathbf{s}_t^\top, \qquad \rho_t = \frac{1}{\mathbf{y}_{\mathrm{g},t}^\top \mathbf{s}_t}$$</div>
   <div class="row">
     <div class="box">
       <p><b>Bổ đề Sherman–Morrison hạng 2:</b></p>
       <p>Cập nhật trực tiếp nghịch đảo Hessian chỉ tốn <span class="nw">\(\mathcal{O}(d^2)\)</span> phép nhân vector–ma trận thay vì <span class="nw">\(\mathcal{O}(d^3)\)</span> nghịch đảo ma trận.</p>
     </div>
     <div class="box">
-      <p><b>Vai trò hệ số hấp thụ <span class="nw">\(\rho_k\)</span> (Damping factor):</b></p>
-      <p>Kiểm soát mức độ mà thông tin chênh lệch xác suất phân lớp mới <span class="nw">\((a_{k+1} - a_k)\)</span> bẻ cong không gian đặc trưng hiện tại.</p>
+      <p><b>Vai trò hệ số hấp thụ <span class="nw">\(\rho_t\)</span> (Damping factor):</b></p>
+      <p>Kiểm soát mức độ mà thông tin chênh lệch xác suất phân lớp mới <span class="nw">\((\mathbf{p}^{(t+1)} - \mathbf{p}^{(t)})\)</span> bẻ cong không gian đặc trưng hiện tại.</p>
     </div>
   </div>
 </section>
@@ -334,18 +334,18 @@ nav button:hover{background:var(--sky)}
 <!-- SLIDE 16: BÀI TOÁN SIÊU CHIỀU & Ý TƯỞNG L-BFGS -->
 <section class="slide">
   <h2>7.1. Bài toán siêu chiều &amp; Ý tưởng L-BFGS</h2>
-  <p>Trong Phân loại văn bản (TF-IDF) hoặc Tin sinh học (Genomics), số chiều đặc trưng <span class="nw">\(d\)</span> có thể lên tới <span class="nw">\(10^7\)</span>. Lúc này ngay cả ma trận BFGS dày đặc <span class="nw">\(H_k \in \mathbb{R}^{10^7 \times 10^7}\)</span> cũng tiêu tốn hàng <b>Terabyte RAM</b>.</p>
+  <p>Trong Phân loại văn bản (TF-IDF) hoặc Tin sinh học (Genomics), số chiều đặc trưng <span class="nw">\(d\)</span> có thể lên tới <span class="nw">\(10^7\)</span>. Lúc này ngay cả ma trận BFGS dày đặc <span class="nw">\(\mathbf{H}_t \in \mathbb{R}^{10^7 \times 10^7}\)</span> cũng tiêu tốn hàng <b>Terabyte RAM</b>.</p>
   <div class="row">
     <div class="box bad">
       <p><b>BFGS chuẩn:</b></p>
-      <p>Lưu toàn bộ ma trận <span class="nw">\(H_k\)</span> kích thước <span class="nw">\(d \times d\)</span> → Bộ nhớ <span class="nw">\(\mathcal{O}(d^2)\)</span>, bùng nổ RAM khi <span class="nw">\(d > 10^5\)</span>.</p>
+      <p>Lưu toàn bộ ma trận <span class="nw">\(\mathbf{H}_t\)</span> kích thước <span class="nw">\(d \times d\)</span> → Bộ nhớ <span class="nw">\(\mathcal{O}(d^2)\)</span>, bùng nổ RAM khi <span class="nw">\(d > 10^5\)</span>.</p>
     </div>
     <div class="box good">
       <p><b>L-BFGS (Limited-memory BFGS):</b></p>
-      <p><b>Tuyệt đối không dựng ma trận <span class="nw">\(H_k\)</span></b>, chỉ lưu <span class="nw">\(c\)</span> cặp vector lịch sử gần nhất <span class="nw">\(\{(s_i, y_i)\}_{i=k-c}^{k-1}\)</span> (thường <span class="nw">\(c = 10\)</span>) → Bộ nhớ chỉ còn <span class="nw">\(\mathcal{O}(c\cdot d)\)</span>.</p>
+      <p><b>Tuyệt đối không dựng ma trận <span class="nw">\(\mathbf{H}_t\)</span></b>, chỉ lưu <span class="nw">\(c\)</span> cặp vector lịch sử gần nhất <span class="nw">\(\{(\mathbf{s}_k, \mathbf{y}_{\mathrm{g},k})\}_{k=t-c}^{t-1}\)</span> (thường <span class="nw">\(c = 10\)</span>) → Bộ nhớ chỉ còn <span class="nw">\(\mathcal{O}(c\cdot d)\)</span>.</p>
     </div>
   </div>
-  <p class="box"><b>Mục tiêu thuật toán Đệ quy hai vòng (Two-Loop Recursion):</b> Tính trực tiếp tích <span class="nw">\(r = H_k q\)</span> từ Gradient hiện tại <span class="nw">\(q = \nabla J(w_k)\)</span> và <span class="nw">\(c\)</span> cặp lịch sử mà không tạo bất kỳ ma trận vuông nào.</p>
+  <p class="box"><b>Mục tiêu thuật toán Đệ quy hai vòng (Two-Loop Recursion):</b> Tính trực tiếp tích <span class="nw">\(\mathbf{r} = \mathbf{H}_t \mathbf{q}\)</span> từ Gradient hiện tại <span class="nw">\(\mathbf{q} = \nabla J(\mathbf{w}^{(t)})\)</span> và <span class="nw">\(c\)</span> cặp lịch sử mà không tạo bất kỳ ma trận vuông nào.</p>
 </section>
 
 <!-- SLIDE 17: CHI TIẾT THUẬT TOÁN TWO-LOOP RECURSION (BƯỚC 1-3) -->
@@ -353,22 +353,22 @@ nav button:hover{background:var(--sky)}
   <h2>7.2. Two-Loop Recursion: Vòng lùi &amp; Scaling</h2>
   <div class="row tri">
     <div class="box">
-      <p><b>Bước 1 · Khởi tạo Vector <span class="nw">\(q\)</span></b></p>
+      <p><b>Bước 1 · Khởi tạo Vector <span class="nw">\(\mathbf{q}\)</span></b></p>
       <p>Lấy Gradient thực tại từ hàm Cross-Entropy có điều chuẩn:</p>
-      <div class="eq sm">$$q = \frac{1}{m}X^\top(a_k - y) + \lambda w_k$$</div>
-      <p class="sub">Vector cần được nắn thành hướng Newton <span class="nw">\(p_k = -H_k q\)</span>.</p>
+      <div class="eq sm">$$\mathbf{q} = \frac{1}{N}\mathbf{X}^\top(\mathbf{p}^{(t)} - \mathbf{y}) + \lambda \mathbf{w}^{(t)}$$</div>
+      <p class="sub">Vector cần được nắn thành hướng Newton <span class="nw">\(\mathbf{d}_t = -\mathbf{H}_t \mathbf{q}\)</span>.</p>
     </div>
     <div class="box">
       <p><b>Bước 2 · Vòng lùi (Backward Pass)</b></p>
-      <p>Chạy ngược lịch sử từ <span class="nw">\(i = k-1\)</span> về <span class="nw">\(k-c\)</span>:</p>
-      <div class="eq sm">$$\alpha_i = \rho_i(s_i^\top q), \quad q \leftarrow q - \alpha_i y_i$$</div>
-      <p class="sub">Đo lường độ "đụng độ" với các hướng đi cũ và gọt giũa <span class="nw">\(q\)</span>.</p>
+      <p>Chạy ngược lịch sử từ <span class="nw">\(k = t-1\)</span> về <span class="nw">\(t-c\)</span>:</p>
+      <div class="eq sm">$$\delta_k = \rho_k(\mathbf{s}_k^\top \mathbf{q}), \quad \mathbf{q} \leftarrow \mathbf{q} - \delta_k \mathbf{y}_{\mathrm{g},k}$$</div>
+      <p class="sub">Đo lường độ "đụng độ" với các hướng đi cũ và gọt giũa <span class="nw">\(\mathbf{q}\)</span>.</p>
     </div>
     <div class="box good">
-      <p><b>Bước 3 · Độ cong nền tảng (<span class="nw">\(H_k^{(0)}\)</span>)</b></p>
-      <p>Dùng ma trận vô hướng <span class="nw">\(H_k^{(0)} = \gamma_k I_d\)</span>:</p>
-      <div class="eq sm">$$\gamma_k = \frac{s_{k-1}^\top y_{k-1}}{y_{k-1}^\top y_{k-1}}, \quad r = \gamma_k q$$</div>
-      <p class="sub">Xấp xỉ nghịch đảo <span class="nw">\(\lambda_{\max}(X^\top R X)\)</span>, triệt tiêu gradient nổ.</p>
+      <p><b>Bước 3 · Độ cong nền tảng (<span class="nw">\(\mathbf{H}_t^{(0)}\)</span>)</b></p>
+      <p>Dùng ma trận vô hướng <span class="nw">\(\mathbf{H}_t^{(0)} = \gamma_t \mathbf{I}_d\)</span>:</p>
+      <div class="eq sm">$$\gamma_t = \frac{\mathbf{s}_{t-1}^\top \mathbf{y}_{\mathrm{g},t-1}}{\mathbf{y}_{\mathrm{g},t-1}^\top \mathbf{y}_{\mathrm{g},t-1}}, \quad \mathbf{r} = \gamma_t \mathbf{q}$$</div>
+      <p class="sub">Xấp xỉ nghịch đảo <span class="nw">\(\lambda_{\max}(\mathbf{X}^\top \mathbf{R} \mathbf{X})\)</span>, triệt tiêu gradient nổ.</p>
     </div>
   </div>
 </section>
@@ -379,13 +379,13 @@ nav button:hover{background:var(--sky)}
   <div class="row">
     <div class="box">
       <p><b>Bước 4 · Vòng tiến (Forward Pass)</b></p>
-      <p>Chạy xuôi lịch sử từ <span class="nw">\(i = k-c\)</span> tới <span class="nw">\(k-1\)</span>, đắp lại thông tin độ cong bậc 2 bằng cách chiếu <span class="nw">\(r\)</span> lên vector chênh lệch xác suất <span class="nw">\(y_i\)</span>:</p>
-      <div class="eq sm">$$\beta = \rho_i(y_i^\top r), \qquad r \leftarrow r + s_i(\alpha_i - \beta)$$</div>
+      <p>Chạy xuôi lịch sử từ <span class="nw">\(k = t-c\)</span> tới <span class="nw">\(t-1\)</span>, đắp lại thông tin độ cong bậc 2 bằng cách chiếu <span class="nw">\(\mathbf{r}\)</span> lên vector chênh lệch xác suất <span class="nw">\(\mathbf{y}_{\mathrm{g},k}\)</span>:</p>
+      <div class="eq sm">$$\beta_k = \rho_k(\mathbf{y}_{\mathrm{g},k}^\top \mathbf{r}), \qquad \mathbf{r} \leftarrow \mathbf{r} + \mathbf{s}_k(\delta_k - \beta_k)$$</div>
     </div>
     <div class="box good">
       <p><b>Bước 5 · Xuất hướng &amp; Line Search Wolfe</b></p>
-      <p>Vector kết quả <span class="nw">\(r = H_k q\)</span> cho hướng bước nhảy <span class="nw">\(p_k = -r\)</span>, cập nhật <span class="nw">\(w_{k+1} = w_k + \alpha_k p_k\)</span>.</p>
-      <p>Vì hàm mất mát Logistic rất mượt, Line Search thỏa mãn điều kiện Wolfe thường chấp nhận <b><span class="nw">\(\alpha_k = 1\)</span> ngay lần thử đầu tiên</b>, đẩy tốc độ tính toán lên cực đại.</p>
+      <p>Vector kết quả <span class="nw">\(\mathbf{r} = \mathbf{H}_t \mathbf{q}\)</span> cho hướng bước nhảy <span class="nw">\(\mathbf{d}_t = -\mathbf{r}\)</span>, cập nhật <span class="nw">\(\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} + \alpha_t \mathbf{d}_t\)</span>.</p>
+      <p>Vì hàm mất mát Logistic rất mượt, Line Search thỏa mãn điều kiện Wolfe thường chấp nhận <b><span class="nw">\(\alpha_t = 1\)</span> ngay lần thử đầu tiên</b>, đẩy tốc độ tính toán lên cực đại.</p>
     </div>
   </div>
 </section>
@@ -395,11 +395,11 @@ nav button:hover{background:var(--sky)}
   <h2>7.4. Mô phỏng Đệ quy hai vòng L-BFGS</h2>
   <div class="row">
     <div class="steps" id="st19">
-      <div class="step" data-i="0"><b>1. Khởi tạo <span class="nw">\(q\)</span>:</b> Nhận Gradient thực tại <span class="nw">\(q = \frac{1}{m}X^\top(a_k - y) + \lambda w_k\)</span>.</div>
-      <div class="step" data-i="1"><b>2. Vòng lùi (Backward <span class="nw">\(i=k-1 \to k-c\)</span>):</b> Chiếu <span class="nw">\(\alpha_i = \rho_i(s_i^\top q)\)</span>, gọt giũa <span class="nw">\(q \leftarrow q - \alpha_i y_i\)</span>.</div>
-      <div class="step" data-i="2"><b>3. Độ cong nền tảng (<span class="nw">\(H_k^{(0)}\)</span>):</b> Hệ số vô hướng <span class="nw">\(\gamma_k = \frac{s_{k-1}^\top y_{k-1}}{y_{k-1}^\top y_{k-1}}\)</span>, biến đổi tâm <span class="nw">\(r = \gamma_k q\)</span>.</div>
-      <div class="step" data-i="3"><b>4. Vòng tiến (Forward <span class="nw">\(i=k-c \to k-1\)</span>):</b> Phục dựng độ cong <span class="nw">\(\beta = \rho_i(y_i^\top r)\)</span>, cập nhật <span class="nw">\(r \leftarrow r + s_i(\alpha_i - \beta)\)</span>.</div>
-      <div class="step" data-i="4"><b>5. Xuất hướng cập nhật:</b> <span class="nw">\(p_k = -r\)</span>. Line Search Wolfe chọn <span class="nw">\(\alpha_k = 1 \Rightarrow w_{k+1} = w_k + p_k\)</span>.</div>
+      <div class="step" data-i="0"><b>1. Khởi tạo <span class="nw">\(\mathbf{q}\)</span>:</b> Nhận Gradient thực tại <span class="nw">\(\mathbf{q} = \frac{1}{N}\mathbf{X}^\top(\mathbf{p}^{(t)} - \mathbf{y}) + \lambda \mathbf{w}^{(t)}\)</span>.</div>
+      <div class="step" data-i="1"><b>2. Vòng lùi (Backward <span class="nw">\(k=t-1 \to t-c\)</span>):</b> Chiếu <span class="nw">\(\delta_k = \rho_k(\mathbf{s}_k^\top \mathbf{q})\)</span>, gọt giũa <span class="nw">\(\mathbf{q} \leftarrow \mathbf{q} - \delta_k \mathbf{y}_{\mathrm{g},k}\)</span>.</div>
+      <div class="step" data-i="2"><b>3. Độ cong nền tảng (<span class="nw">\(\mathbf{H}_t^{(0)}\)</span>):</b> Hệ số vô hướng <span class="nw">\(\gamma_t = \frac{\mathbf{s}_{t-1}^\top \mathbf{y}_{\mathrm{g},t-1}}{\mathbf{y}_{\mathrm{g},t-1}^\top \mathbf{y}_{\mathrm{g},t-1}}\)</span>, biến đổi tâm <span class="nw">\(\mathbf{r} = \gamma_t \mathbf{q}\)</span>.</div>
+      <div class="step" data-i="3"><b>4. Vòng tiến (Forward <span class="nw">\(k=t-c \to t-1\)</span>):</b> Phục dựng độ cong <span class="nw">\(\beta_k = \rho_k(\mathbf{y}_{\mathrm{g},k}^\top \mathbf{r})\)</span>, cập nhật <span class="nw">\(\mathbf{r} \leftarrow \mathbf{r} + \mathbf{s}_k(\delta_k - \beta_k)\)</span>.</div>
+      <div class="step" data-i="4"><b>5. Xuất hướng cập nhật:</b> <span class="nw">\(\mathbf{d}_t = -\mathbf{r}\)</span>. Line Search Wolfe chọn <span class="nw">\(\alpha_t = 1 \Rightarrow \mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} + \mathbf{d}_t\)</span>.</div>
     </div>
     <div>
       <svg id="p19" viewBox="0 0 400 220"></svg>
@@ -428,28 +428,28 @@ nav button:hover{background:var(--sky)}
     <tbody>
       <tr>
         <td><b>Gradient Descent</b></td>
-        <td><span class="nw">\(\mathcal{O}(m\cdot d)\)</span></td>
+        <td><span class="nw">\(\mathcal{O}(N\cdot d)\)</span></td>
         <td><span class="nw">\(\mathcal{O}(d)\)</span></td>
         <td>Tuyến tính (Bậc 1)</td>
         <td>Dữ liệu chuẩn hóa tốt, cần triển khai đơn giản.</td>
       </tr>
       <tr>
         <td><b>Newton / IRLS</b></td>
-        <td><span class="nw">\(\mathcal{O}(m\cdot d^2 + d^3)\)</span></td>
+        <td><span class="nw">\(\mathcal{O}(N\cdot d^2 + d^3)\)</span></td>
         <td><span class="nw">\(\mathcal{O}(d^2)\)</span></td>
         <td>Bậc hai (5–10 vòng)</td>
         <td>Số đặc trưng nhỏ/vừa (<span class="nw">\(d \le 10^3\)</span>), bất biến scaling.</td>
       </tr>
       <tr>
         <td><b>BFGS chuẩn</b></td>
-        <td><span class="nw">\(\mathcal{O}(m\cdot d + d^2)\)</span></td>
+        <td><span class="nw">\(\mathcal{O}(N\cdot d + d^2)\)</span></td>
         <td><span class="nw">\(\mathcal{O}(d^2)\)</span></td>
         <td>Siêu tuyến tính</td>
         <td>Số đặc trưng trung bình (<span class="nw">\(d \sim 10^3 - 10^4\)</span>).</td>
       </tr>
       <tr style="background:#eaf7f0">
         <td><b>L-BFGS (<span class="nw">\(c \approx 10\)</span>)</b></td>
-        <td><span class="nw">\(\mathcal{O}(m\cdot d + c\cdot d)\)</span></td>
+        <td><span class="nw">\(\mathcal{O}(N\cdot d + c\cdot d)\)</span></td>
         <td><span class="nw">\(\mathcal{O}(c\cdot d)\)</span></td>
         <td>Siêu tuyến tính</td>
         <td><b>Mặc định trong scikit-learn</b> (<span class="nw">\(d\)</span> lên tới <span class="nw">\(10^7\)</span>, TF-IDF).</td>
@@ -457,7 +457,7 @@ nav button:hover{background:var(--sky)}
     </tbody>
   </table>
   <div class="box good" style="margin-top:6px">
-    <p><b>Điểm cốt lõi:</b> Nhờ tính lồi ngặt của Cross-Entropy + <span class="nw">\(L_2\)</span>, điều kiện độ cong <span class="nw">\(s_k^\top y_k > 0\)</span> luôn được bảo toàn tuyệt đối, giúp <b>L-BFGS</b> trở thành tiêu chuẩn vàng cho Logistic Regression quy mô lớn.</p>
+    <p><b>Điểm cốt lõi:</b> Nhờ tính lồi ngặt của Cross-Entropy + <span class="nw">\(L_2\)</span>, điều kiện độ cong <span class="nw">\(\mathbf{s}_t^\top \mathbf{y}_{\mathrm{g},t} > 0\)</span> luôn được bảo toàn tuyệt đối, giúp <b>L-BFGS</b> trở thành tiêu chuẩn vàng cho Logistic Regression quy mô lớn.</p>
   </div>
 </section>
 
@@ -467,7 +467,7 @@ nav button:hover{background:var(--sky)}
 const sig=z=>1/(1+Math.exp(-z));
 const el=id=>document.getElementById(id);
 const RED='#d6453d',BLUE='#1f5fd6',GREEN='#198754',AMBER='#d9822b',NAVY='#0b2447';
-const MACROS={"\\tw":"\\tilde{w}","\\tx":"\\tilde{x}","\\tX":"\\tilde{X}","\\norm":"\\left\\lVert#1\\right\\rVert","\\diag":"\\operatorname{diag}","\\R":"\\mathbb{R}"};
+const MACROS={"\\tw":"\\tilde{\\mathbf{w}}","\\tx":"\\tilde{\\mathbf{x}}","\\tX":"\\tilde{\\mathbf{X}}","\\norm":"\\left\\lVert#1\\right\\rVert","\\diag":"\\operatorname{diag}","\\R":"\\mathbb{R}"};
 const render=e=>{window.renderMathInElement&&renderMathInElement(e,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],macros:MACROS,throwOnError:false})};
 
 function chart(id,o){
@@ -531,7 +531,7 @@ function up6(){
   h+=`<text x="12" y="18" style="fill:${RED};font-weight:700">Gradient Descent (${gdSteps} bước)</text>`;
   h+=`<text x="12" y="35" style="fill:${GREEN};font-weight:700">Newton Method (bất biến Affine)</text>`;
   s.innerHTML=h;
-  el('t6').innerHTML=`Với \\(\\kappa=${kap.toFixed(1)}\\), GD bị giới hạn \\(\\alpha < 2/\\kappa = ${(2/kap).toFixed(3)}\\) nên dao động zíc zắc, còn Newton nhân \\(H^{-1}\\) khử sạch \\(\\kappa\\).`;
+  el('t6').innerHTML=`Với \\(\\kappa=${kap.toFixed(1)}\\), GD bị giới hạn \\(\\alpha < 2/\\kappa = ${(2/kap).toFixed(3)}\\) nên dao động zíc zắc, còn Newton nhân \\(\\mathbf{H}^{-1}\\) khử sạch \\(\\kappa\\).`;
   render(el('t6'));
 }
 k6.oninput=up6;
@@ -568,9 +568,9 @@ function up13(){
     x0:0,x1:10,y0:0,y1:1,xl:'giờ học x',
     hl:[{v:0.5,c:'#9fb0cc',t:'ngưỡng 0.5'}],
     lines:[{p:c0,c:'#8898b5',dash:true},{p:c1,c:BLUE},{p:cd,c:GREEN}],
-    labels:[[52,26,'aₖ₊₁(x) sau bước dịch',BLUE],[52,42,'Chênh lệch (aₖ₊₁ − aₖ)',GREEN]]
+    labels:[[52,26,'p⁽ᵗ⁺¹⁾(x) sau bước dịch',BLUE],[52,42,'Chênh lệch (p⁽ᵗ⁺¹⁾ − p⁽ᵗ⁾)',GREEN]]
   });
-  el('t13').innerHTML=`Khi trọng số dịch \\(s_k = ${dw.toFixed(2)}\\), chênh lệch xác suất cực đại đạt <b>${mx.toFixed(3)}</b>. Vector \\(y_k = \\frac{1}{m}X^\\top(a_{k+1}-a_k) + \\lambda s_k\\) dùng dải chênh lệch xanh này để cập nhật Hessian.`;
+  el('t13').innerHTML=`Khi trọng số dịch \\(s_t = ${dw.toFixed(2)}\\), chênh lệch xác suất cực đại đạt <b>${mx.toFixed(3)}</b>. Vector \\(\\mathbf{y}_{\\mathrm{g},t} = \\frac{1}{N}\\mathbf{X}^\\top(\\mathbf{p}^{(t+1)}-\\mathbf{p}^{(t)}) + \\lambda \\mathbf{s}_t\\) dùng dải chênh lệch xanh này để cập nhật Hessian.`;
   render(el('t13'));
 }
 s13.oninput=up13;
@@ -578,11 +578,11 @@ s13.oninput=up13;
 /* SLIDE 19: L-BFGS Two-Loop Recursion */
 let st19=0;
 const desc19=[
-  '<b>Bước 1 · Khởi tạo:</b> Lấy Gradient thực tại \\(q = \\nabla J(w_k)\\) (mũi tên đỏ). Mục tiêu là biến \\(q\\) thành hướng Newton \\(p_k = -H_k q\\) mà không tạo ma trận vuông.',
-  '<b>Bước 2 · Vòng lùi (Backward):</b> Duyệt ngược \\(i=k-1 \\to k-c\\), chiết khấu các thành phần gradient đã gặp: \\(q \\leftarrow q - \\alpha_i y_i\\).',
-  '<b>Bước 3 · Độ cong nền tảng:</b> Nhân với hệ số vô hướng \\(\\gamma_k = \\frac{s_{k-1}^\\top y_{k-1}}{y_{k-1}^\\top y_{k-1}}\\) để chuẩn hóa tỉ lệ: \\(r = \\gamma_k q\\) (chống nổ gradient).',
-  '<b>Bước 4 · Vòng tiến (Forward):</b> Duyệt xuôi \\(i=k-c \\to k-1\\), bơm lại độ cong bậc 2 từ chênh lệch xác suất: \\(r \\leftarrow r + s_i(\\alpha_i - \\beta)\\).',
-  '<b>Bước 5 · Xuất hướng bước nhảy:</b> Đảo dấu \\(p_k = -r\\) (mũi tên xanh). Hàm loss Logistic mượt nên Line Search Wolfe thường chọn \\(\\alpha_k=1\\) ngay lần đầu!'
+  '<b>Bước 1 · Khởi tạo:</b> Lấy Gradient thực tại \\(\\mathbf{q} = \\nabla J(\\mathbf{w}^{(t)})\\) (mũi tên đỏ). Mục tiêu là biến \\(\\mathbf{q}\\) thành hướng Newton \\(\\mathbf{d}_t = -\\mathbf{H}_t \\mathbf{q}\\) mà không tạo ma trận vuông.',
+  '<b>Bước 2 · Vòng lùi (Backward):</b> Duyệt ngược \\(k=t-1 \\to t-c\\), chiết khấu các thành phần gradient đã gặp: \\(\\mathbf{q} \\leftarrow \\mathbf{q} - \\delta_k \\mathbf{y}_{\\mathrm{g},k}\\).',
+  '<b>Bước 3 · Độ cong nền tảng:</b> Nhân với hệ số vô hướng \\(\\gamma_t = \\frac{\\mathbf{s}_{t-1}^\\top \\mathbf{y}_{\\mathrm{g},t-1}}{\\mathbf{y}_{\\mathrm{g},t-1}^\\top \\mathbf{y}_{\\mathrm{g},t-1}}\\) để chuẩn hóa tỉ lệ: \\(\\mathbf{r} = \\gamma_t \\mathbf{q}\\) (chống nổ gradient).',
+  '<b>Bước 4 · Vòng tiến (Forward):</b> Duyệt xuôi \\(k=t-c \\to t-1\\), bơm lại độ cong bậc 2 từ chênh lệch xác suất: \\(\\mathbf{r} \\leftarrow \\mathbf{r} + \\mathbf{s}_k(\\delta_k - \\beta_k)\\).',
+  '<b>Bước 5 · Xuất hướng bước nhảy:</b> Đảo dấu \\(\\mathbf{d}_t = -\\mathbf{r}\\) (mũi tên xanh). Hàm loss Logistic mượt nên Line Search Wolfe thường chọn \\(\\alpha_t=1\\) ngay lần đầu!'
 ];
 function up19(){
   [...el('st19').children].forEach((e,idx)=>e.classList.toggle('on',idx===st19));
@@ -594,11 +594,11 @@ function up19(){
     return `<g opacity="${op}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="2.6"/><polygon points="${x2},${y2} ${p1x.toFixed(1)},${p1y.toFixed(1)} ${p2x.toFixed(1)},${p2y.toFixed(1)}" fill="${col}"/><text x="${x2+7}" y="${y2-5}" style="fill:${col};font-weight:700">${lbl}</text></g>`;
   };
   let h=`<line x1="${cx}" y1="15" x2="${cx}" y2="205" stroke="#d5deee"/><line x1="20" y1="${cy}" x2="385" y2="${cy}" stroke="#d5deee"/>`;
-  h+=arr(cx,cy,310,45,RED,'q = ∇J(wₖ)',st19>0);
+  h+=arr(cx,cy,310,45,RED,'q = ∇J(w⁽ᵗ⁾)',st19>0);
   if(st19>=1)h+=arr(cx,cy,255,105,AMBER,'q (sau Backward)',st19>1);
-  if(st19>=2)h+=arr(cx,cy,185,130,BLUE,'r = γₖ·q',st19>2);
+  if(st19>=2)h+=arr(cx,cy,185,130,BLUE,'r = γₜ·q',st19>2);
   if(st19>=3)h+=arr(cx,cy,280,68,GREEN,'r (sau Forward)',st19>3);
-  if(st19>=4)h+=arr(cx,cy,32,202,GREEN,'pₖ = −r',false);
+  if(st19>=4)h+=arr(cx,cy,32,202,GREEN,'dₜ = −r',false);
   s.innerHTML=h;
   el('t19').innerHTML=desc19[st19];
   render(el('t19'));
@@ -626,6 +626,7 @@ el('pv').onclick=()=>go(i-1);el('nx').onclick=()=>go(i+1);
 let tx=null;document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
 document.addEventListener('touchend',e=>{if(tx===null||e.target.tagName==='INPUT')return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(i+(d<0?1:-1));tx=null});
 addEventListener('load',()=>{render(document.body);go((parseInt(location.hash.slice(1))||1)-1)});
+up4();up6();up13();up19();
 go(0);
 </script>
 </body>
