@@ -87,7 +87,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 2: BÀI TOÁN TỐI ƯU & TÍNH KHẢ NGHỊCH CỦA HESSIAN -->
 <section class="slide">
-  <h2>1.1. Thiết lập bài toán &amp; Hessian khả nghịch</h2>
+  <h2>Thiết lập bài toán &amp; Hessian khả nghịch</h2>
   <p>Trong không gian tham số <span class="nw">\(\mathbf{w} \in \mathbb{R}^d\)</span> (đã gộp hệ số chặn bias <span class="nw">\(b\)</span> vào vector <span class="nw">\(\mathbf{w}\)</span>), xét hàm rủi ro thực nghiệm có điều chuẩn <span class="nw">\(L_2\)</span> (<span class="nw">\(\lambda > 0\)</span>):</p>
   <div class="eq sm">$$J(\mathbf{w}) = -\frac{1}{N}\sum_{i=1}^{N}\Bigl[y_i\ln\sigma(\mathbf{w}^\top \mathbf{x}_i) + (1-y_i)\ln\bigl(1-\sigma(\mathbf{w}^\top \mathbf{x}_i)\bigr)\Bigr] + \frac{\lambda}{2}\|\mathbf{w}\|_2^2$$</div>
   <div class="row">
@@ -105,7 +105,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 3: KHAI TRIỂN TAYLOR BẬC 2 & ĐẠO HÀM THEO GIA SỐ -->
 <section class="slide">
-  <h2>1.2. Khai triển Taylor bậc 2</h2>
+  <h2>Khai triển Taylor bậc 2</h2>
   <p>Tại bước lặp <span class="nw">\(t\)</span>, phương pháp Newton xấp xỉ mặt cong <span class="nw">\(J(\mathbf{w})\)</span> quanh điểm <span class="nw">\(\mathbf{w}^{(t)}\)</span> bằng đa thức <b>Taylor bậc 2</b> theo gia số <span class="nw">\(\Delta \mathbf{w}\)</span>:</p>
   <div class="eq sm">$$J(\mathbf{w}^{(t)} + \Delta \mathbf{w}) \approx \tilde{J}(\Delta \mathbf{w}) = J(\mathbf{w}^{(t)}) + \nabla J(\mathbf{w}^{(t)})^\top \Delta \mathbf{w} + \frac{1}{2}\Delta \mathbf{w}^\top \nabla^2 J(\mathbf{w}^{(t)})\Delta \mathbf{w}$$</div>
   <div class="stack3">
@@ -127,7 +127,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 4: QUY TẮC CẬP NHẬT & TƯƠNG TÁC PARABOL 1D -->
 <section class="slide" data-fn="up4">
-  <h2>1.3. Trực quan hóa bước nhảy Newton</h2>
+  <h2>Trực quan hóa bước nhảy Newton</h2>
   <div class="row">
     <svg id="p4" viewBox="0 0 400 220"></svg>
     <div>
@@ -147,7 +147,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 5: VẤN ĐỀ SCALING & CHỨNG MINH BẤT BIẾN AFFINE -->
 <section class="slide">
-  <h2>2.1. Tính bất biến Affine</h2>
+  <h2>Tính bất biến Affine</h2>
   <p><b>Điểm yếu của Gradient Descent:</b> Nếu các đặc trưng có đơn vị đo chênh lệch (giờ học <span class="nw">\(\in [0,10]\)</span> vs. điểm rèn luyện <span class="nw">\(\in [0,1000]\)</span>), số điều kiện <span class="nw">\(\kappa(\mathbf{H}) \gg 1\)</span> làm đường đồng mức kéo dẹt và GD dao động zíc zắc.</p>
   <p><b>Biến đổi tuyến tính không suy biến:</b> Xét <span class="nw">\(\tilde{\mathbf{X}} = \mathbf{X}\mathbf{A}\)</span> (<span class="nw">\(\mathbf{A} \in \mathbb{R}^{d\times d}\)</span> khả nghịch). Để bảo toàn dự đoán <span class="nw">\(\tilde{\mathbf{X}}\tilde{\mathbf{w}} = \mathbf{X}\mathbf{w}\)</span>, tham số mới là <span class="nw">\(\tilde{\mathbf{w}} = \mathbf{A}^{-1}\mathbf{w}\)</span> và hàm mục tiêu <span class="nw">\(\tilde{J}(\tilde{\mathbf{w}}) = J(\mathbf{A}\tilde{\mathbf{w}})\)</span>:</p>
   <div class="box">
@@ -161,7 +161,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 6: TƯƠNG TÁC GD VS NEWTON KHI KÉO GIÃN HỆ TRỤC -->
 <section class="slide" data-fn="up6">
-  <h2>2.2. GD vs. Newton khi kéo giãn hệ trục</h2>
+  <h2>GD vs. Newton khi kéo giãn hệ trục</h2>
   <div class="row">
     <svg id="p6" viewBox="0 0 400 220"></svg>
     <div>
@@ -180,7 +180,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 7: ĐỊNH LÝ KANTOROVICH & VÙNG HỘI TỤ BẬC HAI -->
 <section class="slide">
-  <h2>3.1. Định lý Kantorovich &amp; Hội tụ bậc 2</h2>
+  <h2>Định lý Kantorovich &amp; Hội tụ bậc 2</h2>
   <p>Khi điểm lặp <span class="nw">\(\mathbf{w}^{(t)}\)</span> tiến vào lân cận đủ gần nghiệm tối ưu toàn cục <span class="nw">\(\mathbf{w}^*\)</span>, phương pháp Newton kích hoạt trạng thái <b>hội tụ bậc hai (Quadratic Convergence)</b>.</p>
   <div class="row">
     <div class="box">
@@ -201,7 +201,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 8: ĐỊNH LƯỢNG TỐC ĐỘ HỘI TỤ BẬC 2 VS BẬC 1 -->
 <section class="slide">
-  <h2>3.2. Tốc độ hội tụ bậc 2 và bậc 1</h2>
+  <h2>Tốc độ hội tụ bậc 2 và bậc 1</h2>
   <p>Khi đã lọt vào quả cầu hội tụ <span class="nw">\(\|\mathbf{w}^{(t)}-\mathbf{w}^*\|_2 < \frac{2\mu}{L}\)</span>, sai số ở bước <span class="nw">\(t+1\)</span> tỉ lệ với <b>bình phương</b> sai số bước <span class="nw">\(t\)</span> (từ <span class="nw">\(10^{-3} \to 10^{-6} \to 10^{-12}\)</span>).</p>
   <div class="row">
     <div>
@@ -223,7 +223,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 9: BIẾN ĐỔI ĐẠI SỐ SANG IRLS -->
 <section class="slide">
-  <h2>4.1. Biến đổi Newton sang IRLS</h2>
+  <h2>Biến đổi Newton sang IRLS</h2>
   <p>Xét bài toán tối thiểu hóa NLL không điều chuẩn trên <span class="nw">\(\mathbf{X} \in \mathbb{R}^{N\times d}\)</span>, <span class="nw">\(\mathbf{y} \in \{0,1\}^N\)</span>. Tại bước <span class="nw">\(t\)</span>, xác suất dự báo là <span class="nw">\(\mathbf{p}^{(t)} = \sigma(\mathbf{X}\mathbf{w}^{(t)})\)</span>:</p>
   <div class="eq sm">$$\mathbf{g}^{(t)} = \mathbf{X}^\top(\mathbf{p}^{(t)} - \mathbf{y}), \qquad \mathbf{H}^{(t)} = \mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X}, \qquad R_{ii}^{(t)} = p_i^{(t)}\bigl(1 - p_i^{(t)}\bigr) > 0$$</div>
   <p>Áp dụng công thức Newton với bước nhảy <span class="nw">\(\alpha = 1\)</span> và đặt <span class="nw">\((\mathbf{X}^\top \mathbf{R}^{(t)} \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{R}^{(t)}\)</span> làm nhân tử chung (vì <span class="nw">\(\mathbf{R}^{(t)}\)</span> đường chéo dương nên luôn khả nghịch):</p>
@@ -236,7 +236,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 10: NGHIỆM DẠNG ĐÓNG WLS & CHU TRÌNH IRLS -->
 <section class="slide">
-  <h2>4.2. Nghiệm dạng đóng WLS</h2>
+  <h2>Nghiệm dạng đóng WLS</h2>
   <p>Định nghĩa vector <b>biến phản hồi làm việc (working response vector)</b> <span class="nw">\(\tilde{\mathbf{y}}^{(t)} \in \mathbb{R}^N\)</span> theo từng mẫu <span class="nw">\(i\)</span>:</p>
   <div class="eq">$$\tilde{\mathbf{y}}^{(t)} \triangleq \mathbf{X}\mathbf{w}^{(t)} + (\mathbf{R}^{(t)})^{-1}(\mathbf{y} - \mathbf{p}^{(t)}) \quad\Longleftrightarrow\quad \tilde{y}_i^{(t)} = (\mathbf{w}^{(t)})^\top \mathbf{x}_i + \frac{y_i - p_i^{(t)}}{p_i^{(t)}\bigl(1 - p_i^{(t)}\bigr)}$$</div>
   <div class="box good">
@@ -253,7 +253,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 11: NÚT THẮT CỔ CHAI CỦA NEWTON & TRIẾT LÝ QUASI-NEWTON -->
 <section class="slide">
-  <h2>5.1. Hạn chế Newton &amp; Ý tưởng Quasi-Newton</h2>
+  <h2>Hạn chế Newton &amp; Ý tưởng Quasi-Newton</h2>
   <div class="row tri">
     <div class="box bad">
       <p><b>Chi phí đắt đỏ của Newton thuần túy</b></p>
@@ -276,7 +276,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 12: PHƯƠNG TRÌNH CÁT TUYẾN TRONG HỒI QUY LOGISTIC -->
 <section class="slide">
-  <h2>5.2. Phương trình Cát tuyến (Secant Equation)</h2>
+  <h2>Phương trình Cát tuyến (Secant Equation)</h2>
   <p>Ghi nhận độ dịch chuyển trọng số <span class="nw">\(\mathbf{s}_t = \mathbf{w}^{(t+1)} - \mathbf{w}^{(t)}\)</span> và độ biến thiên Gradient <span class="nw">\(\mathbf{y}_{\mathrm{g},t} = \nabla J(\mathbf{w}^{(t+1)}) - \nabla J(\mathbf{w}^{(t)})\)</span>. Thay công thức <span class="nw">\(\nabla J(\mathbf{w}) = \frac{1}{N}\mathbf{X}^\top(\mathbf{p}-\mathbf{y}) + \lambda \mathbf{w}\)</span> vào <span class="nw">\(\mathbf{y}_{\mathrm{g},t}\)</span>:</p>
   <div class="eq sm">$$\mathbf{y}_{\mathrm{g},t} = \Bigl[\frac{1}{N}\mathbf{X}^\top(\mathbf{p}^{(t+1)} - \mathbf{y}) + \lambda \mathbf{w}^{(t+1)}\Bigr] - \Bigl[\frac{1}{N}\mathbf{X}^\top(\mathbf{p}^{(t)} - \mathbf{y}) + \lambda \mathbf{w}^{(t)}\Bigr]$$</div>
   <div class="box good">
@@ -288,7 +288,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 13: TƯƠNG TÁC PROBABILITY DIVERGENCE -->
 <section class="slide" data-fn="up13">
-  <h2>5.3. Chênh lệch xác suất <span class="nw">\(p_i^{(t+1)} - p_i^{(t)}\)</span></h2>
+  <h2>Chênh lệch xác suất <span class="nw">\(p_i^{(t+1)} - p_i^{(t)}\)</span></h2>
   <div class="row">
     <svg id="p13" viewBox="0 0 400 220"></svg>
     <div>
@@ -303,7 +303,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 14: ĐỊNH LÝ LỒI NGẶT & SỰ BẤT TỬ CỦA BFGS -->
 <section class="slide">
-  <h2>6.1. Điều kiện độ cong &amp; Tính ổn định BFGS</h2>
+  <h2>Điều kiện độ cong &amp; Tính ổn định BFGS</h2>
   <p>Để ma trận xấp xỉ nghịch đảo Hessian <span class="nw">\(\mathbf{H}_{t+1}\)</span> luôn xác định dương (<span class="nw">\(\mathbf{H}_{t+1} \succ 0\)</span>, đảm bảo hướng bước nhảy luôn lao dốc), điều kiện bắt buộc là <b>Điều kiện Độ cong (Curvature Condition)</b>: <span class="nw">\(\mathbf{s}_t^\top \mathbf{y}_{\mathrm{g},t} > 0\)</span>.</p>
   <p><b>Chứng minh giải tích:</b> Theo Định lý Giá trị Trung bình (Mean Value Theorem), tồn tại <span class="nw">\(\boldsymbol{\xi} = \tau \mathbf{w}^{(t)} + (1-\tau)\mathbf{w}^{(t+1)}\)</span> (<span class="nw">\(\tau \in (0,1)\)</span>) sao cho:</p>
   <div class="eq sm">$$\mathbf{y}_{\mathrm{g},t} = \nabla^2 J(\boldsymbol{\xi}) \mathbf{s}_t = \Bigl[\frac{1}{N}\mathbf{X}^\top \mathbf{R}(\boldsymbol{\xi}) \mathbf{X} + \lambda \mathbf{I}_d\Bigr] \mathbf{s}_t, \qquad \mathbf{R}(\boldsymbol{\xi}) = \operatorname{diag}\bigl(\sigma(\mathbf{X}\boldsymbol{\xi})\odot(1-\sigma(\mathbf{X}\boldsymbol{\xi}))\bigr)$$</div>
@@ -316,7 +316,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 15: CÔNG THỨC CẬP NHẬT BFGS RANK-2 -->
 <section class="slide">
-  <h2>6.2. Cập nhật BFGS hạng 2 (Rank-2)</h2>
+  <h2>Cập nhật BFGS hạng 2 (Rank-2)</h2>
   <p>Nhờ điều kiện độ cong <span class="nw">\(\mathbf{s}_t^\top \mathbf{y}_{\mathrm{g},t} > 0\)</span> luôn thỏa mãn, tại mỗi bước BFGS tìm ma trận đối xứng <span class="nw">\(\mathbf{H}_{t+1}\)</span> gần <span class="nw">\(\mathbf{H}_t\)</span> nhất thỏa mãn phương trình cát tuyến <span class="nw">\(\mathbf{H}_{t+1} \mathbf{y}_{\mathrm{g},t} = \mathbf{s}_t\)</span>.</p>
   <div class="box good eq sm">$$\mathbf{H}_{t+1} = (\mathbf{I}_d - \rho_t \mathbf{s}_t \mathbf{y}_{\mathrm{g},t}^\top) \mathbf{H}_t (\mathbf{I}_d - \rho_t \mathbf{y}_{\mathrm{g},t} \mathbf{s}_t^\top) + \rho_t \mathbf{s}_t \mathbf{s}_t^\top, \qquad \rho_t = \frac{1}{\mathbf{y}_{\mathrm{g},t}^\top \mathbf{s}_t}$$</div>
   <div class="row">
@@ -333,7 +333,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 16: BÀI TOÁN SIÊU CHIỀU & Ý TƯỞNG L-BFGS -->
 <section class="slide">
-  <h2>7.1. Bài toán siêu chiều &amp; Ý tưởng L-BFGS</h2>
+  <h2>Bài toán siêu chiều &amp; Ý tưởng L-BFGS</h2>
   <p>Trong Phân loại văn bản (TF-IDF) hoặc Tin sinh học (Genomics), số chiều đặc trưng <span class="nw">\(d\)</span> có thể lên tới <span class="nw">\(10^7\)</span>. Lúc này ngay cả ma trận BFGS dày đặc <span class="nw">\(\mathbf{H}_t \in \mathbb{R}^{10^7 \times 10^7}\)</span> cũng tiêu tốn hàng <b>Terabyte RAM</b>.</p>
   <div class="row">
     <div class="box bad">
@@ -350,7 +350,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 17: CHI TIẾT THUẬT TOÁN TWO-LOOP RECURSION (BƯỚC 1-3) -->
 <section class="slide">
-  <h2>7.2. Two-Loop Recursion: Vòng lùi &amp; Scaling</h2>
+  <h2>Two-Loop Recursion: Vòng lùi &amp; Scaling</h2>
   <div class="row tri">
     <div class="box">
       <p><b>Bước 1 · Khởi tạo Vector <span class="nw">\(\mathbf{q}\)</span></b></p>
@@ -375,7 +375,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 18: CHI TIẾT TWO-LOOP RECURSION (BƯỚC 4-5) & WOLFE LINE SEARCH -->
 <section class="slide">
-  <h2>7.3. Two-Loop Recursion: Vòng tiến &amp; Wolfe</h2>
+  <h2>Two-Loop Recursion: Vòng tiến &amp; Wolfe</h2>
   <div class="row">
     <div class="box">
       <p><b>Bước 4 · Vòng tiến (Forward Pass)</b></p>
@@ -392,7 +392,7 @@ nav button:hover{background:var(--sky)}
 
 <!-- SLIDE 19: MÔ PHỎNG TƯƠNG TÁC L-BFGS TWO-LOOP RECURSION -->
 <section class="slide" data-fn="up19">
-  <h2>7.4. Mô phỏng Đệ quy hai vòng L-BFGS</h2>
+  <h2>Mô phỏng Đệ quy hai vòng L-BFGS</h2>
   <div class="row">
     <div class="steps" id="st19">
       <div class="step" data-i="0"><b>1. Khởi tạo <span class="nw">\(\mathbf{q}\)</span>:</b> Nhận Gradient thực tại <span class="nw">\(\mathbf{q} = \frac{1}{N}\mathbf{X}^\top(\mathbf{p}^{(t)} - \mathbf{y}) + \lambda \mathbf{w}^{(t)}\)</span>.</div>
