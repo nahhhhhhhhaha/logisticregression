@@ -3,305 +3,298 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Softmax Regression – Phần 1: Hàm Softmax và Loss Function</title>
+<title>Logistic Regression – Phần 1: Hàm Sigmoid và Loss Function</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&display=swap">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
 <style>
-:root{--navy:#0b2447;--blue:#1f5fd6;--sky:#e8f0fc;--ink:#16233b;--mute:#5b6b85;--line:#d5deee;--red:#d6453d;--green:#198754;--bg:#fff}
+:root{--navy:#0b2447;--blue:#1f5fd6;--sky:#e8f0fc;--ink:#16233b;--mute:#5b6b85;--line:#d5deee;--red:#d6453d;--bg:#fff}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%}
 body{font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);overflow:hidden}
 header{position:fixed;top:0;left:0;right:0;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,32px);font-size:13px;color:var(--mute);z-index:5;background:#fff}
 header a{color:var(--navy);text-decoration:none;font-weight:500}
 #bar{position:fixed;top:0;left:0;height:3px;background:var(--blue);transition:width .25s;z-index:6}
-.slide{display:none;position:absolute;inset:46px 0 56px 0;padding:clamp(12px,3vw,36px) clamp(18px,7vw,100px);overflow:auto;flex-direction:column;justify-content:center;gap:clamp(12px,2vw,22px)}
+.slide{display:none;position:absolute;inset:46px 0 56px 0;padding:clamp(12px,3vw,40px) clamp(18px,7vw,110px);overflow:auto;flex-direction:column;justify-content:center;gap:clamp(12px,2.2vw,26px)}
 .slide.active{display:flex}
 h1{font-size:clamp(30px,6.5vw,72px);font-weight:800;color:var(--navy);line-height:1.1;letter-spacing:-.02em}
-h2{font-size:clamp(22px,3.4vw,38px);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.01em}
-p,li{font-size:clamp(15px,1.9vw,22px);line-height:1.5}
-ul{padding-left:22px;display:flex;flex-direction:column;gap:8px}
+h2{font-size:clamp(22px,3.6vw,40px);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.01em}
+p,li{font-size:clamp(16px,2vw,24px);line-height:1.5}
 .sub{color:var(--mute)}
 .cover{background:var(--navy);color:#fff}
 .cover h1,.cover .sub{color:#fff}.cover .sub{opacity:.75}
 .big{font-size:clamp(18px,2.6vw,32px)}
-.eq{font-size:clamp(15px,2.1vw,26px);text-align:center;overflow-x:auto;overflow-y:hidden;padding:4px 0}
-.row{display:flex;gap:clamp(16px,3vw,36px);align-items:center;flex-wrap:wrap}
+.eq{font-size:clamp(15px,2.2vw,28px);text-align:center;overflow-x:auto;overflow-y:hidden;padding:4px 0}
+.row{display:flex;gap:clamp(16px,3vw,40px);align-items:center;flex-wrap:wrap}
 .row>*{flex:1 1 280px;min-width:0}
 .box{background:var(--sky);border-left:4px solid var(--blue);padding:12px 18px;border-radius:4px}
 .bad{background:#fdeceb;border-color:var(--red)}
-.good{background:#eaf7f0;border-color:var(--green)}
-.note{font-size:clamp(12px,1.35vw,15px);color:var(--mute);background:#f4f7fc;border-left:3px solid #9fb0cc;padding:8px 14px;border-radius:4px;margin-top:auto}
 .chain{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
 .chain div{background:var(--sky);border-radius:6px;padding:12px 16px;text-align:center;min-width:120px}
 .chain small{display:block;color:var(--mute);font-size:13px;margin-top:4px}
 .chain .ar{background:none;min-width:0;font-size:24px;color:var(--blue);padding:0}
-.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
-.card{background:var(--sky);border-radius:8px;padding:14px 16px;text-align:center}
-.card b{color:var(--navy);display:block;margin-bottom:6px;font-size:clamp(16px,1.9vw,21px)}
-svg{width:100%;height:auto;display:block;max-height:44vh}
+svg{width:100%;height:auto;display:block;max-height:46vh}
 svg text{font-family:inherit;font-size:12px;fill:var(--mute)}
-.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:8px 14px;align-items:center;font-size:clamp(14px,1.7vw,18px)}
-.ctl output{font-variant-numeric:tabular-nums;min-width:46px;text-align:right;color:var(--navy);font-weight:700}
+.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:8px 14px;align-items:center;font-size:clamp(14px,1.8vw,18px)}
+.ctl output{font-variant-numeric:tabular-nums;min-width:44px;text-align:right;color:var(--navy);font-weight:700}
 input[type=range]{width:100%;accent-color:var(--blue)}
-.bar-wrap{display:flex;flex-direction:column;gap:10px}
-.bar-item{display:grid;grid-template-columns:64px 1fr 56px;gap:10px;align-items:center;font-size:15px}
-.bar-bg{height:18px;background:#e3eaf6;border-radius:9px;overflow:hidden}
-.bar-fill{height:100%;background:var(--blue);transition:width .1s}
 nav{position:fixed;bottom:0;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:center;gap:18px;background:#fff;border-top:1px solid var(--line);z-index:5;font-size:14px;color:var(--mute)}
 nav button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;width:44px;height:36px;font-size:18px;cursor:pointer}
 nav button:hover{background:var(--sky)}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.katex{font-size:1.06em}
-.nowrap{white-space:nowrap}
+.katex{font-size:1.08em}
 </style>
 </head>
 <body>
 <div id="bar"></div>
-<header><a href="../index.html">← Mục lục</a><span>Softmax Regression · 1. Hàm softmax và loss function</span></header>
+<header><a href="../index.html">← Mục lục</a><span>Logistic Regression · 1. Hàm sigmoid và loss function</span></header>
 
-<!-- 1: BÌA -->
+<!-- 1 -->
 <section class="slide cover">
-  <h1>Softmax Regression</h1>
-  <p class="big sub">Phần 1 · Hàm softmax và loss function</p>
-  <p class="sub">Từ Categorical Distribution đến Softmax và Categorical Cross-Entropy</p>
+  <h1>Logistic Regression</h1>
+  <p class="big sub">Phần 1 · Hàm sigmoid và loss function</p>
+  <p class="sub">Từ Bernoulli đến Sigmoid và Binary Cross-Entropy</p>
 </section>
 
-<!-- 2: BÀI TOÁN & ĐỘNG LỰC -->
+<!-- 2 -->
 <section class="slide">
-  <h2>Bài toán phân loại nhiều lớp: Mèo, Chó hay Chim?</h2>
+  <h2>Sinh viên có đậu môn không?</h2>
   <div class="row">
     <div>
-      <p><b>Logistic Regression</b> chỉ xử lý 2 lớp ($y \in \{0, 1\}$) với phân phối Bernoulli.</p>
-      <p style="margin-top:12px"><b>Bài toán thực tế:</b> Nhận diện ảnh thuộc $K = 3$ lớp loại trừ lẫn nhau:</p>
-      <ul style="margin-top:8px">
-        <li>Lớp 1: <b>Mèo</b> ($y = 1$)</li>
-        <li>Lớp 2: <b>Chó</b> ($y = 2$)</li>
-        <li>Lớp 3: <b>Chim</b> ($y = 3$)</li>
-      </ul>
+      <p><b>x</b>: số giờ ôn tập</p>
+      <p style="margin-top:10px"><b>y</b>: kết quả thi</p>
+      <p class="sub" style="margin-top:6px">\(y=0\): rớt &nbsp;·&nbsp; \(y=1\): đậu</p>
     </div>
-    <div class="box">
-      <p><b>Mục tiêu:</b> Với mỗi vector đặc trưng đầu vào <span class="nowrap">$\mathbf{x} \in \mathbb{R}^d$</span>, mô hình cần ước lượng phân phối xác suất <span class="nowrap">$\mathbf{p} = (p_1, p_2, p_3)^\top$</span> cho cả 3 lớp.</p>
-    </div>
+    <svg id="p2" viewBox="0 0 400 240"></svg>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $d$ là số chiều vector đặc trưng $\mathbf{x} \in \mathbb{R}^d$; $K$ là tổng số lớp ($k \in \{1, \dots, K\}$); $y \in \{1, \dots, K\}$ là nhãn lớp dạng số nguyên.</div>
 </section>
 
-<!-- 3: TIẾP CẬN NGÂY THƠ -->
+<!-- 3 -->
 <section class="slide">
-  <h2>Thử dùng $K$ mô hình Logistic độc lập</h2>
-  <p>Tách thành 3 bộ phân loại nhị phân riêng biệt với hàm Sigmoid $\sigma(z_k) = \frac{1}{1+e^{-z_k}}$:</p>
-  <div class="grid3">
-    <div class="card"><b>Mèo (Lớp 1)</b><div class="eq">$$p_1 = \sigma(z_1) = 0.8$$</div></div>
-    <div class="card"><b>Chó (Lớp 2)</b><div class="eq">$$p_2 = \sigma(z_2) = 0.6$$</div></div>
-    <div class="card"><b>Chim (Lớp 3)</b><div class="eq">$$p_3 = \sigma(z_3) = 0.3$$</div></div>
-  </div>
-  <div class="box bad">
-    <p><b>Vấn đề cốt lõi:</b> Các mô hình độc lập không ràng buộc được tổng xác suất bằng 1 ($p_1 + p_2 + p_3 = 1.7 \neq 1$). Cần một phân phối xác suất chung cho cả $K$ lớp.</p>
-  </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $z_k = \mathbf{w}_k^\top \mathbf{x} + b_k$ là điểm số tuyến tính (logit) của lớp $k$; $p_k \in (0, 1)$ là xác suất dự đoán cho lớp $k$.</div>
-</section>
-
-<!-- 4: PHÂN PHỐI CATEGORICAL & ONE-HOT -->
-<section class="slide">
-  <h2>Phân phối Categorical &amp; Mã hóa One-Hot</h2>
+  <h2>Thử dùng Linear Regression</h2>
+  <div class="eq">$$z = w^\top x + b$$</div>
   <div class="row">
+    <svg id="p3" viewBox="0 0 400 240"></svg>
     <div>
-      <p><b>Phân phối Categorical</b> mở rộng Bernoulli cho $K$ kết quả loại trừ lẫn nhau, thỏa mãn:</p>
-      <div class="eq">$$p_k = P(Y = k \mid \mathbf{X} = \mathbf{x}) \ge 0, \qquad \sum_{k=1}^{K} p_k = 1$$</div>
-      <p style="margin-top:10px"><b>Mã hóa One-Hot:</b> Biểu diễn nhãn lớp $c$ thành vector $\mathbf{y} \in \{0, 1\}^K$ với duy nhất $y_c = 1$ và $y_{k \neq c} = 0$.</p>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="box eq">Mèo ($y=1$) $\rightarrow \mathbf{y} = \begin{bmatrix} 1 & 0 & 0 \end{bmatrix}^\top$</div>
-      <div class="box eq">Chó ($y=2$) $\rightarrow \mathbf{y} = \begin{bmatrix} 0 & 1 & 0 \end{bmatrix}^\top$</div>
-      <div class="box eq">Chim ($y=3$) $\rightarrow \mathbf{y} = \begin{bmatrix} 0 & 0 & 1 \end{bmatrix}^\top$</div>
+      <div class="box bad"><p>Ôn 10 giờ → \(z=1.4\) (140%)</p></div>
+      <div class="box bad" style="margin-top:12px"><p>Không ôn → \(z=-0.2\) (−20%)</p></div>
     </div>
   </div>
-  <div class="eq">$$P(Y = y \mid \mathbf{X} = \mathbf{x}) = \prod_{k=1}^{K} p_k^{y_k} = p_1^{y_1} p_2^{y_2} \dots p_K^{y_K}$$</div>
-  <div class="note"><b>Chuyển đổi ký hiệu:</b> Nhãn lớp chuyển từ số nguyên $y \in \{1, \dots, K\}$ sang vector One-Hot in đậm $\mathbf{y} = (y_1, \dots, y_K)^\top \in \{0, 1\}^K$ với $\sum_{k=1}^K y_k = 1$.</div>
 </section>
 
-<!-- 5: MÔ HÌNH TUYẾN TÍNH & Ý NGHĨA HÌNH HỌC -->
+<!-- 4 -->
 <section class="slide">
-  <h2>Hàm điểm số tuyến tính &amp; Biểu diễn ma trận</h2>
+  <h2>Cần một mô hình có đầu ra trong [0, 1]</h2>
+  <p>Linear Regression cho ra mọi số thực: \(z\in(-\infty,+\infty)\).</p>
+  <p>Xác suất bắt buộc: \(0\le p\le 1\).</p>
+  <div class="eq">$$\mathbb{R}\;\longrightarrow\;(0,1)$$</div>
+  <p class="sub">Giải pháp: hàm Sigmoid. Ta sẽ xây dựng nó từ phân phối Bernoulli.</p>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <h2>Bắt đầu từ phân phối Bernoulli</h2>
+  <p>\(y\in\{0,1\}\), giả sử \(Y\mid X=x\sim \text{Bernoulli}(p)\) với \(p=P(Y=1\mid X=x)\)</p>
+  <div class="eq">$$P(Y=y)=p^{y}(1-p)^{1-y}$$</div>
   <div class="row">
-    <div>
-      <p>Mỗi lớp $k$ có một vector trọng số $\mathbf{w}_k \in \mathbb{R}^d$ và bias $b_k \in \mathbb{R}$:</p>
-      <div class="eq">$$z_k = \mathbf{w}_k^\top \mathbf{x} + b_k = \sum_{j=1}^{d} w_{j,k} x_j + b_k$$</div>
-      <p class="sub" style="margin-top:8px"><b>Ý nghĩa hình học:</b> Tích vô hướng $\mathbf{w}_k^\top \mathbf{x}$ đo mức độ chiếu của $\mathbf{x}$ lên hướng đặc trưng $\mathbf{w}_k$ của lớp $k$.</p>
-    </div>
-    <div class="box">
-      <p><b>Biểu diễn cho 1 mẫu</b> ($\mathbf{W} \in \mathbb{R}^{d \times K}$, $\mathbf{b} \in \mathbb{R}^K$):</p>
-      <div class="eq">$$\mathbf{z} = \mathbf{W}^\top \mathbf{x} + \mathbf{b}$$</div>
-      <p style="margin-top:10px"><b>Biểu diễn cho $N$ mẫu</b> ($\mathbf{X} \in \mathbb{R}^{N \times d}$):</p>
-      <div class="eq">$$\mathbf{Z} = \mathbf{X}\mathbf{W} + \mathbf{1}_N \mathbf{b}^\top \in \mathbb{R}^{N \times K}$$</div>
-    </div>
+    <div class="box eq">\(y=1:\; P=p\)</div>
+    <div class="box eq">\(y=0:\; P=1-p\)</div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $\mathbf{W} = [\mathbf{w}_1, \dots, \mathbf{w}_K] \in \mathbb{R}^{d \times K}$ là ma trận trọng số; $N$ là số lượng mẫu dữ liệu; $\mathbf{1}_N \in \mathbb{R}^N$ là vector gồm toàn số $1$.</div>
+  <p class="sub">Mỗi quan sát \(i\) có \(p_i=P(Y_i=1\mid x_i)\). Cần tìm \(p_i=f(x_i)\) với \(0\le p_i\le1\).</p>
 </section>
 
-<!-- 6: SUY DẪN HÀM SOFTMAX -->
+<!-- 6 -->
 <section class="slide">
-  <h2>Suy dẫn hàm kích hoạt Softmax</h2>
-  <p>Cần ánh xạ vector điểm số $\mathbf{z} \in \mathbb{R}^K$ sang Simplex xác suất $\Delta^{K-1} = \left\{\mathbf{p} : p_k \ge 0, \sum_{k=1}^K p_k = 1\right\}$ qua 2 bước:</p>
+  <h2>Từ xác suất đến Log-Odds</h2>
   <div class="chain">
-    <div>$\mathbf{z} \in \mathbb{R}^K$<small>Logits (âm hoặc dương)</small></div><div class="ar">→</div>
-    <div>$u_k = e^{z_k} > 0$<small>Hàm mũ · Bảo toàn thứ tự</small></div><div class="ar">→</div>
-    <div>$p_k = \dfrac{e^{z_k}}{\sum_{m=1}^{K} e^{z_m}}$<small>Chuẩn hóa · Tổng bằng 1</small></div>
+    <div>\(p\)<small>(0, 1)</small></div><div class="ar">→</div>
+    <div>\(\dfrac{p}{1-p}\)<small>Odds · (0, +∞)</small></div><div class="ar">→</div>
+    <div>\(\ln\dfrac{p}{1-p}\)<small>Log-odds · ℝ</small></div>
   </div>
-  <div class="grid3">
-    <div class="box"><p><b>1. Luôn dương:</b> $e^{z_k} > 0$ với mọi $z_k \in \mathbb{R}$.</p></div>
-    <div class="box"><p><b>2. Đồng biến:</b> $z_a > z_b \Leftrightarrow e^{z_a} > e^{z_b}$, giữ nguyên thứ tự lớp.</p></div>
-    <div class="box"><p><b>3. Khả vi &amp; trơn:</b> Đạo hàm tồn tại mọi nơi, tối ưu dễ dàng.</p></div>
-  </div>
-  <div class="eq">$$p_k = P(Y = k \mid \mathbf{X} = \mathbf{x}; \mathbf{W}, \mathbf{b}) = \frac{e^{\mathbf{w}_k^\top \mathbf{x} + b_k}}{\sum_{m=1}^{K} e^{\mathbf{w}_m^\top \mathbf{x} + b_m}}$$</div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $u_k = e^{z_k}$ là biến trung gian sau hàm mũ; chỉ số chạy ở mẫu số dùng $m \in \{1, \dots, K\}$ để phân biệt với lớp $k$ ở tử số.</div>
+  <p>Odds vẫn chỉ dương. Logarithm tự nhiên ánh xạ \((0,+\infty)\to\mathbb{R}\), khớp với miền giá trị của \(z=w^\top x+b\).</p>
 </section>
 
-<!-- 7: KIẾN TRÚC MẠNG & TƯƠNG TÁC -->
+<!-- 7 -->
 <section class="slide">
-  <h2>Kiến trúc Softmax &amp; Tương tác thử đổi Logits</h2>
+  <h2>Giả định log-odds tuyến tính</h2>
+  <div class="eq">$$\ln\frac{p}{1-p}=w^\top x+b=z$$</div>
+  <p>Với \(m\) đặc trưng:</p>
+  <div class="eq">$$\ln\frac{p}{1-p}=w_1x_1+w_2x_2+\dots+w_mx_m+b$$</div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <h2>Giải ngược tìm p: hàm Sigmoid</h2>
+  <div class="eq">$$\frac{p}{1-p}=e^{z}\;\Rightarrow\; p(1+e^{z})=e^{z}\;\Rightarrow\; p=\frac{e^{z}}{1+e^{z}}$$</div>
+  <div class="eq" style="font-size:clamp(20px,3.2vw,38px)">$$p=\sigma(z)=\frac{1}{1+e^{-z}}$$</div>
+  <div class="eq">$$P(Y=1\mid x)=\frac{1}{1+e^{-(w^\top x+b)}}$$</div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <h2>Sigmoid trên dữ liệu: thử đổi w và b</h2>
   <div class="row">
-    <svg id="netSvg" viewBox="0 0 430 230"></svg>
+    <svg id="p9" viewBox="0 0 400 240"></svg>
     <div>
       <div class="ctl">
-        <label for="z1">$z_1$ (Mèo)</label><input id="z1" type="range" min="-3" max="5" step="0.1" value="2.0"><output id="z1o"></output>
-        <label for="z2">$z_2$ (Chó)</label><input id="z2" type="range" min="-3" max="5" step="0.1" value="1.0"><output id="z2o"></output>
-        <label for="z3">$z_3$ (Chim)</label><input id="z3" type="range" min="-3" max="5" step="0.1" value="0.0"><output id="z3o"></output>
+        <label for="w">w</label><input id="w" type="range" min="0.1" max="3" step="0.1" value="1"><output id="wo"></output>
+        <label for="b">b</label><input id="b" type="range" min="-15" max="3" step="0.5" value="-5"><output id="bo"></output>
       </div>
-      <div class="bar-wrap" style="margin-top:14px">
-        <div class="bar-item"><span>Mèo $p_1$</span><div class="bar-bg"><div id="b1" class="bar-fill"></div></div><b id="p1o"></b></div>
-        <div class="bar-item"><span>Chó $p_2$</span><div class="bar-bg"><div id="b2" class="bar-fill" style="background:#3b82f6"></div></div><b id="p2o"></b></div>
-        <div class="bar-item"><span>Chim $p_3$</span><div class="bar-bg"><div id="b3" class="bar-fill" style="background:#64748b"></div></div><b id="p3o"></b></div>
-      </div>
-      <p id="sumOut" class="sub" style="margin-top:8px;font-size:14px"></p>
+      <p id="t9" class="box" style="margin-top:14px"></p>
     </div>
   </div>
-  <div class="note"><b>Ghi chú sơ đồ:</b> Luồng truyền thẳng từ đặc trưng đầu vào $x_1, \dots, x_d \rightarrow$ điểm số $z_1, \dots, z_K \rightarrow$ xác suất $p_1, \dots, p_K \rightarrow$ hàm mất mát $J$.</div>
 </section>
 
-<!-- 8: LIKELIHOOD VÀ LOG-LIKELIHOOD -->
+<!-- 10 -->
 <section class="slide">
-  <h2>Hàm Likelihood và Log-Likelihood</h2>
-  <div class="box">
-    <p><b>Ví dụ:</b> Mẫu $i$ có nhãn Mèo $\mathbf{y}^{(i)} = [1, 0, 0]^\top$, mô hình dự đoán $\mathbf{p}^{(i)} = [0.7, 0.2, 0.1]^\top$. Xác suất khớp nhãn thực tế là: $(0.7)^1 \cdot (0.2)^0 \cdot (0.1)^0 = 0.7 = \prod_{k=1}^{3} \left(p_k^{(i)}\right)^{y_k^{(i)}}$.</p>
-  </div>
-  <p>Trên toàn bộ tập dữ liệu độc lập $\mathcal{D} = \{(\mathbf{x}^{(i)}, \mathbf{y}^{(i)})\}_{i=1}^{N}$, hàm <b>Likelihood</b> là:</p>
-  <div class="eq">$$L(\mathbf{W}, \mathbf{b}) = \prod_{i=1}^{N} P\left(Y^{(i)} = y^{(i)} \mid \mathbf{x}^{(i)}; \mathbf{W}, \mathbf{b}\right) = \prod_{i=1}^{N} \prod_{k=1}^{K} \left(p_k^{(i)}\right)^{y_k^{(i)}}$$</div>
-  <p>Lấy logarit tự nhiên hai vế để biến tích thành tổng (tránh underflow), thu được <b>Log-Likelihood</b>:</p>
-  <div class="eq">$$\ell(\mathbf{W}, \mathbf{b}) = \ln L(\mathbf{W}, \mathbf{b}) = \sum_{i=1}^{N} \sum_{k=1}^{K} y_k^{(i)} \ln\left(p_k^{(i)}\right)$$</div>
-  <div class="note"><b>Bổ sung chỉ số mẫu:</b> Ký hiệu mũ trong ngoặc đơn $^{(i)}$ dùng để đánh chỉ số cho mẫu dữ liệu thứ $i \in \{1, \dots, N\}$ (ví dụ: $\mathbf{x}^{(i)}, \mathbf{y}^{(i)}, p_k^{(i)}$).</div>
-</section>
-
-<!-- 9: CROSS-ENTROPY LOSS & LÝ THUYẾT THÔNG TIN -->
-<section class="slide">
-  <h2>Hàm mất mát Categorical Cross-Entropy</h2>
-  <p>Đổi dấu Log-Likelihood để chuyển bài toán cực đại hóa (MLE) thành cực tiểu hóa và lấy trung bình trên $N$ mẫu:</p>
-  <div class="eq">$$J(\mathbf{W}, \mathbf{b}) = -\frac{1}{N} \ell(\mathbf{W}, \mathbf{b}) = -\frac{1}{N} \sum_{i=1}^{N} \sum_{k=1}^{K} y_k^{(i)} \ln\left(p_k^{(i)}\right)$$</div>
+  <h2>Ba tính chất của Sigmoid</h2>
   <div class="row">
-    <div class="box">
-      <p><b>Xét trên 1 mẫu $i$ thuộc lớp thực tế $c$:</b></p>
-      <div class="eq">$$J^{(i)} = -\sum_{k=1}^{K} y_k^{(i)} \ln\left(p_k^{(i)}\right) = -\ln\left(p_c^{(i)}\right)$$</div>
-      <p class="sub">Chỉ giữ lại xác suất dự đoán cho đúng lớp thực tế $c$ ($y_c^{(i)}=1$).</p>
-    </div>
-    <div class="box good">
-      <p><b>Liên hệ Lý thuyết Thông tin:</b></p>
-      <div class="eq">$$H(\mathbf{y}, \mathbf{p}) = -\sum_{k=1}^{K} y_k \ln(p_k) = -\ln(p_c)$$</div>
-      <p class="sub">Tối thiểu hóa Cross-Entropy giữa phân phối thật $\mathbf{y}$ và ước lượng $\mathbf{p}$ tương đương với MLE.</p>
+    <div class="box"><p class="sub">Miền giá trị</p><div class="eq">$$0<\sigma(z)<1$$</div></div>
+    <div class="box"><p class="sub">Đối xứng</p><div class="eq">$$\sigma(-z)=1-\sigma(z)$$</div></div>
+    <div class="box"><p class="sub">Đạo hàm</p><div class="eq">$$\sigma'(z)=\sigma(z)\bigl(1-\sigma(z)\bigr)$$</div></div>
+  </div>
+  <p class="sub">Đạo hàm sẽ dùng ở phần Gradient.</p>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <h2>Quy tắc quyết định</h2>
+  <p>Chọn lớp có xác suất lớn hơn. Ranh giới là nơi hai lớp bằng nhau, \(p=0.5\):</p>
+  <div class="eq">$$\ln\frac{0.5}{1-0.5}=w^\top x+b\;\Rightarrow\;0=w^\top x+b$$</div>
+  <div class="row">
+    <div class="box eq">\(w^\top x+b>0\Rightarrow\hat y=1\)</div>
+    <div class="box eq">\(w^\top x+b<0\Rightarrow\hat y=0\)</div>
+  </div>
+  <p class="sub">Ranh giới quyết định luôn là một đường (siêu phẳng) tuyến tính.</p>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <h2>Likelihood: dữ liệu "khớp" mô hình đến đâu?</h2>
+  <p>\(n\) mẫu độc lập, \(D=\{(x_i,y_i)\}_{i=1}^n\). Xác suất đồng thời là tích:</p>
+  <div class="eq">$$L(w,b)=\prod_{i=1}^{n}P(Y_i=y_i\mid x_i)=\prod_{i=1}^{n}p_i^{y_i}(1-p_i)^{1-y_i}$$</div>
+  <p>Ước lượng hợp lý cực đại (MLE):</p>
+  <div class="eq">$$(w^*,b^*)=\arg\max_{w,b}L(w,b)$$</div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <h2>Log-Likelihood</h2>
+  <p>Tích của nhiều xác suất nhỏ dễ gây underflow. Lấy logarit để biến tích thành tổng:</p>
+  <div class="eq">$$\ell(w,b)=\sum_{i=1}^{n}\Bigl[y_i\ln p_i+(1-y_i)\ln(1-p_i)\Bigr]$$</div>
+  <p class="sub">Logarit đồng biến nên nghiệm của bài toán max không đổi.</p>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <h2>Binary Cross-Entropy Loss</h2>
+  <p>Đổi dấu để chuyển max thành min, chia cho \(n\):</p>
+  <div class="eq">$$L(w,b)=-\frac1n\sum_{i=1}^{n}\Bigl[y_i\ln p_i+(1-y_i)\ln(1-p_i)\Bigr]$$</div>
+  <div class="eq">$$L=-\frac1n\Bigl[y^\top\ln p+(\mathbf{1}-y)^\top\ln(\mathbf{1}-p)\Bigr]$$</div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <h2>Loss của một mẫu: kéo p để xem</h2>
+  <div class="row">
+    <svg id="p16" viewBox="0 0 400 240"></svg>
+    <div>
+      <div class="ctl"><label for="pp">p</label><input id="pp" type="range" min="0.01" max="0.99" step="0.01" value="0.8"><output id="ppo"></output></div>
+      <p id="t16" class="box" style="margin-top:14px"></p>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $J(\mathbf{W}, \mathbf{b})$ là hàm mất mát trung bình trên toàn bộ tập dữ liệu; $J^{(i)}$ là giá trị mất mát riêng của mẫu thứ $i$ với $c$ là chỉ số lớp đúng.</div>
+  <p class="sub">Dự đoán sai mà tự tin → loss rất lớn. Đúng mà tự tin → loss gần 0.</p>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <h2>Tóm tắt</h2>
+  <div class="chain">
+    <div>Bernoulli</div><div class="ar">→</div><div>Odds</div><div class="ar">→</div><div>Log-odds<br>tuyến tính</div><div class="ar">→</div><div>Sigmoid</div><div class="ar">→</div><div>Likelihood</div><div class="ar">→</div><div>BCE Loss</div>
+  </div>
+  <div class="eq">$$p=\sigma(w^\top x+b)\qquad L=-\frac1n\sum_i\bigl[y_i\ln p_i+(1-y_i)\ln(1-p_i)\bigr]$$</div>
+  <p class="sub">Tiếp theo: Gradient và Gradient Descent.</p>
 </section>
 
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
 
 <script>
-// Vẽ sơ đồ mạng Softmax trên Slide 7
-(function drawNet(){
-  const s=document.getElementById('netSvg');
-  const cx=[45,165,285,385];
-  const y3=[45,115,185];
-  let h='';
-  // Nối x -> z
-  y3.forEach(y1=>y3.forEach(y2=>h+=`<line x1="${cx[0]}" y1="${y1}" x2="${cx[1]}" y2="${y2}" stroke="#c4d3eb" stroke-width="1.4"/>`));
-  // Nối z -> p (fully connected qua softmax)
-  y3.forEach(y1=>y3.forEach(y2=>h+=`<line x1="${cx[1]}" y1="${y1}" x2="${cx[2]}" y2="${y2}" stroke="#93b4eb" stroke-width="1.4" stroke-dasharray="3,2"/>`));
-  // Nối p -> J
-  y3.forEach(y1=>h+=`<line x1="${cx[2]}" y1="${y1}" x2="${cx[3]}" y2="115" stroke="#c4d3eb" stroke-width="1.4"/>`);
-
-  const xLab=['x₁','x₂','x_d'],zLab=['z₁','z₂','z_K'],pLab=['p₁','p₂','p_K'];
-  y3.forEach((y,idx)=>{
-    h+=`<circle cx="${cx[0]}" cy="${y}" r="18" fill="#fff" stroke="#0b2447" stroke-width="2"/><text x="${cx[0]}" y="${y+4}" text-anchor="middle" style="fill:#0b2447;font-weight:700">${xLab[idx]}</text>`;
-    h+=`<circle cx="${cx[1]}" cy="${y}" r="18" fill="#e8f0fc" stroke="#1f5fd6" stroke-width="2"/><text x="${cx[1]}" y="${y+4}" text-anchor="middle" style="fill:#0b2447;font-weight:700">${zLab[idx]}</text>`;
-    h+=`<circle cx="${cx[2]}" cy="${y}" r="18" fill="#1f5fd6"/><text x="${cx[2]}" y="${y+4}" text-anchor="middle" style="fill:#fff;font-weight:700">${pLab[idx]}</text>`;
-  });
-  h+=`<circle cx="${cx[3]}" cy="115" r="20" fill="#0b2447"/><text x="${cx[3]}" y="119" text-anchor="middle" style="fill:#fff;font-weight:700">J</text>`;
-  h+=`<text x="${cx[0]}" y="218" text-anchor="middle">Đầu vào</text>`;
-  h+=`<text x="${cx[1]}" y="218" text-anchor="middle">Logits</text>`;
-  h+=`<text x="${cx[2]}" y="218" text-anchor="middle">Softmax</text>`;
-  h+=`<text x="${cx[3]}" y="218" text-anchor="middle">Loss</text>`;
-  s.innerHTML=h;
-})();
-
-// Tương tác Softmax trên Slide 7
-const z1=document.getElementById('z1'),z2=document.getElementById('z2'),z3=document.getElementById('z3');
-function upSoftmax(){
-  const v=[+z1.value,+z2.value,+z3.value];
-  z1o.textContent=v[0].toFixed(1);
-  z2o.textContent=v[1].toFixed(1);
-  z3o.textContent=v[2].toFixed(1);
-  const mx=Math.max(...v);
-  const ex=v.map(x=>Math.exp(x-mx));
-  const sm=ex.reduce((a,b)=>a+b,0);
-  const p=ex.map(e=>e/sm);
-  [b1,b2,b3].forEach((el,idx)=>el.style.width=(p[idx]*100).toFixed(1)+'%');
-  [p1o,p2o,p3o].forEach((el,idx)=>el.textContent=(p[idx]*100).toFixed(1)+'%');
-  sumOut.textContent=`Tổng xác suất: p₁ + p₂ + p₃ = ${(p[0]+p[1]+p[2]).toFixed(2)} (luôn bằng 1.00)`;
+const NS='http://www.w3.org/2000/svg',sig=z=>1/(1+Math.exp(-z));
+const X=[0,1,2,3,4,5,6,7,8,9,10],Y=[0,0,0,0,0,1,0,1,1,1,1];
+// khung vẽ: x 0..10, y ymin..ymax
+function frame(id,ymin,ymax,xmax=10,xl='số giờ ôn tập'){
+  const s=document.getElementById(id),L=40,R=390,T=14,B=206;
+  const sx=x=>L+(x-0)/xmax*(R-L),sy=y=>B-(y-ymin)/(ymax-ymin)*(B-T);
+  let h=`<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#9fb0cc"/><line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#9fb0cc"/>`;
+  for(let y=Math.ceil(ymin);y<=ymax;y++)h+=`<line x1="${L}" x2="${R}" y1="${sy(y)}" y2="${sy(y)}" stroke="#e3eaf6"/><text x="${L-6}" y="${sy(y)+4}" text-anchor="end">${y}</text>`;
+  [0,2,4,6,8,10].filter(v=>v<=xmax).forEach(v=>h+=`<text x="${sx(v)}" y="${B+16}" text-anchor="middle">${v}</text>`);
+  h+=`<text x="${(L+R)/2}" y="236" text-anchor="middle">${xl}</text>`;
+  s.innerHTML=h;s._sx=sx;s._sy=sy;s._xmax=xmax;return s;
 }
-z1.oninput=z2.oninput=z3.oninput=upSoftmax;
+const path=(s,f,c,w=3,x0=0,x1=s._xmax)=>{let d='';for(let i=0;i<=120;i++){const x=x0+(x1-x0)*i/120;d+=(i?'L':'M')+s._sx(x).toFixed(1)+' '+s._sy(f(x)).toFixed(1)}s.insertAdjacentHTML('beforeend',`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}"/>`)};
+const pts=s=>X.forEach((x,i)=>s.insertAdjacentHTML('beforeend',`<circle cx="${s._sx(x)}" cy="${s._sy(Y[i])}" r="5" fill="${Y[i]?'#1f5fd6':'#fff'}" stroke="#1f5fd6" stroke-width="2"/>`));
+const lab=(s,x,y,t,c)=>s.insertAdjacentHTML('beforeend',`<text x="${x}" y="${y}" style="fill:${c};font-weight:700">${t}</text>`);
 
-// KaTeX render
-const render=el=>window.renderMathInElement&&renderMathInElement(el,{
-  delimiters:[
-    {left:'$$',right:'$$',display:true},
-    {left:'$',right:'$',display:false},
-    {left:'\\(',right:'\\)',display:false}
-  ],
-  throwOnError:false
-});
+// slide 2
+let s=frame('p2',-0.5,1.5);pts(s);
+// slide 3
+s=frame('p3',-0.5,1.5);path(s,x=>.16*x-.2,'#d6453d');pts(s);
+s.insertAdjacentHTML('beforeend',`<line x1="40" x2="390" y1="${s._sy(1)}" y2="${s._sy(1)}" stroke="#1f5fd6" stroke-dasharray="4"/>`);
+lab(s,250,40,'z = 1.4 ?','#d6453d');lab(s,46,s._sy(-.2)-8,'z = −0.2 ?','#d6453d');
 
-// Điều hướng slide
+// slide 9 (tương tác)
+const p9=frame('p9',0,1),w=document.getElementById('w'),b=document.getElementById('b');
+function up9(){
+  const W=+w.value,B=+b.value;wo.textContent=W.toFixed(1);bo.textContent=B.toFixed(1);
+  p9.querySelectorAll('.dyn').forEach(e=>e.remove());
+  const g=document.createElementNS(NS,'g');g.setAttribute('class','dyn');p9.appendChild(g);
+  const keep=p9;let tmp=document.createElementNS(NS,'svg');
+  const old=p9.innerHTML;
+  p9.innerHTML=base9;path(p9,x=>sig(W*x+B),'#1f5fd6');
+  const xb=-B/W;
+  if(xb>=0&&xb<=10){p9.insertAdjacentHTML('beforeend',`<line x1="${p9._sx(xb)}" x2="${p9._sx(xb)}" y1="14" y2="206" stroke="#d6453d" stroke-dasharray="5"/>`);lab(p9,p9._sx(xb)+5,28,'p = 0.5','#d6453d')}
+  pts(p9);
+  t9.innerHTML=`Ranh giới \\(x=-b/w=${xb.toFixed(1)}\\) giờ<br>Ôn 6 giờ: \\(p=${sig(W*6+B).toFixed(2)}\\)`;
+  render(t9);
+}
+const base9=p9.innerHTML;
+
+// slide 15 (loss một mẫu)
+const p16=frame('p16',0,5,1,'p');
+[0,0.2,0.4,0.6,0.8,1].forEach(v=>{});
+const base16=p16.innerHTML,pp=document.getElementById('pp');
+function up16(){
+  const p=+pp.value;ppo.textContent=p.toFixed(2);
+  p16.innerHTML=base16;
+  const f1=x=>Math.min(5,-Math.log(Math.max(x,1e-4))),f0=x=>Math.min(5,-Math.log(Math.max(1-x,1e-4)));
+  path(p16,f1,'#1f5fd6');path(p16,f0,'#d6453d');
+  p16.insertAdjacentHTML('beforeend',`<circle cx="${p16._sx(p)}" cy="${p16._sy(f1(p))}" r="5" fill="#1f5fd6"/><circle cx="${p16._sx(p)}" cy="${p16._sy(f0(p))}" r="5" fill="#d6453d"/>`);
+  lab(p16,60,34,'y = 1: −ln p','#1f5fd6');lab(p16,270,34,'y = 0: −ln(1−p)','#d6453d');
+  t16.innerHTML=`Nếu \\(y=1\\): loss \\(=${(-Math.log(p)).toFixed(2)}\\)<br>Nếu \\(y=0\\): loss \\(=${(-Math.log(1-p)).toFixed(2)}\\)`;
+  render(t16);
+}
+const render=el=>window.renderMathInElement&&renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});
+
+// điều hướng
 const S=[...document.querySelectorAll('.slide')];let i=0;
 function go(n){
   i=Math.max(0,Math.min(S.length-1,n));
   S.forEach((e,k)=>e.classList.toggle('active',k===i));
-  cnt.textContent=`${i+1} / ${S.length}`;
-  bar.style.width=(i+1)/S.length*100+'%';
-  S[i].scrollTop=0;
-  history.replaceState(null,'','#'+(i+1));
-  if(i===6)upSoftmax();
+  cnt.textContent=`${i+1} / ${S.length}`;bar.style.width=(i+1)/S.length*100+'%';
+  S[i].scrollTop=0;history.replaceState(null,'','#'+(i+1));
+  if(i===8)up9();if(i===14)up16();
 }
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')&&!e.shiftKey)e.target.blur();
   if(e.key==='ArrowRight'||e.key==='PageDown')go(i+1);
   if(e.key==='ArrowLeft'||e.key==='PageUp')go(i-1);
 });
-pv.onclick=()=>go(i-1);
-nx.onclick=()=>go(i+1);
-let tx=null;
-document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
-document.addEventListener('touchend',e=>{
-  if(tx===null||e.target.tagName==='INPUT')return;
-  const d=e.changedTouches[0].clientX-tx;
-  if(Math.abs(d)>60)go(i+(d<0?1:-1));
-  tx=null;
-});
-addEventListener('load',()=>{
-  render(document.body);
-  go((parseInt(location.hash.slice(1))||1)-1);
-});
-upSoftmax();
+pv.onclick=()=>go(i-1);nx.onclick=()=>go(i+1);
+let tx=null;document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{if(tx===null||e.target.tagName==='INPUT')return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(i+(d<0?1:-1));tx=null});
+w.oninput=b.oninput=up9;pp.oninput=up16;
+addEventListener('load',()=>{render(document.body);go((parseInt(location.hash.slice(1))||1)-1)});
 go(0);
 </script>
 </body>
