@@ -2,311 +2,629 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Logistic Regression – Phần 3: Newton và Quasi-Newton</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logistic Regression – Phần 3: Newton và Quasi-Newton's Method (Chi tiết)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&display=swap">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
 <style>
-:root{
-  --navy:#0b2447;--blue:#1f5fd6;--sky:#e8f0fc;--ink:#16233b;--mute:#5b6b85;--line:#d5deee;--red:#d6453d;--bg:#fff;
-  --top:44px;--bot:50px;
-}
+:root{--navy:#0b2447;--blue:#1f5fd6;--sky:#e8f0fc;--ink:#16233b;--mute:#5b6b85;--line:#d5deee;--red:#d6453d;--green:#198754;--amber:#d9822b;--bg:#fff}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%;height:100dvh;overflow:hidden}
-body{font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-header{position:fixed;top:0;left:0;right:0;height:var(--top);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,32px);font-size:13px;color:var(--mute);z-index:5;background:#fff;border-bottom:1px solid transparent}
-header a{color:var(--navy);text-decoration:none;font-weight:500}
+html,body{height:100%}
+body{font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);overflow:hidden}
+header{position:fixed;top:0;left:0;right:0;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,32px);font-size:12.5px;color:var(--mute);z-index:5;background:#fff;border-bottom:1px solid #eef2f8}
+header a{color:var(--navy);text-decoration:none;font-weight:500;white-space:nowrap}
+header span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:12px}
 #bar{position:fixed;top:0;left:0;height:3px;background:var(--blue);transition:width .25s;z-index:6}
-
-/* Khung slide tự động co giãn vừa vặn 100% khung nhìn web */
-.slide{
-  display:none;
-  position:fixed;
-  inset:var(--top) 0 var(--bot) 0;
-  padding:clamp(10px,2.2vh,28px) clamp(16px,6vw,96px);
-  overflow-y:auto;
-  overflow-x:hidden;
-  flex-direction:column;
-  justify-content:safe center;
-  gap:clamp(8px,1.8vh,20px);
-}
+.slide{display:none;position:absolute;inset:40px 0 48px 0;padding:clamp(10px,2vh,22px) clamp(18px,6vw,90px);overflow-y:auto;flex-direction:column;justify-content:center;gap:clamp(8px,1.4vh,16px)}
 .slide.active{display:flex}
-.slide > *{max-width:1200px;width:100%;margin-inline:auto}
-
-/* Scale chữ theo cả chiều rộng (vw) và chiều cao (vh) để không tràn dọc */
-h1{font-size:clamp(28px,min(6vw,8.5vh),64px);font-weight:800;color:var(--navy);line-height:1.1;letter-spacing:-.02em}
-h2{font-size:clamp(20px,min(3.2vw,4.5vh),36px);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.01em}
-p,li{font-size:clamp(14px,min(1.8vw,2.6vh),21px);line-height:1.45}
-.sub{color:var(--mute);font-size:clamp(13px,min(1.6vw,2.3vh),19px)}
+h1{font-size:clamp(28px,5.2vw,58px);font-weight:800;color:var(--navy);line-height:1.12;letter-spacing:-.02em}
+h2{font-size:clamp(20px,2.7vw,30px);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.01em}
+h3{font-size:clamp(15px,1.8vw,20px);font-weight:700;color:var(--navy);margin-bottom:4px}
+p,li{font-size:clamp(14px,1.5vw,18.5px);line-height:1.45}
+ul,ol{padding-left:1.3em}
+li{margin:.25em 0}
+.sub{color:var(--mute)}
 .nw{white-space:nowrap}
-
 .cover{background:var(--navy);color:#fff}
-.cover h1,.cover .sub{color:#fff}.cover .sub{opacity:.75}
-.big{font-size:clamp(17px,min(2.4vw,3.4vh),28px)}
-
-.eq{font-size:clamp(14px,min(2vw,2.8vh),24px);text-align:center;overflow-x:auto;overflow-y:hidden;padding:2px 0}
-.katex-display{margin:0.25em 0 !important}
-.katex{font-size:1.05em}
-
-.row{display:flex;gap:clamp(12px,2.5vw,32px);align-items:center;flex-wrap:wrap}
-.row>*{flex:1 1 260px;min-width:0}
-
-.box{background:var(--sky);border-left:4px solid var(--blue);padding:clamp(8px,1.4vh,14px) clamp(12px,2vw,18px);border-radius:4px}
+.cover h1,.cover .sub{color:#fff}.cover .sub{opacity:.8}
+.big{font-size:clamp(17px,2.1vw,25px)}
+.eq{font-size:clamp(13.5px,1.65vw,20px);text-align:center;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.eq .katex-display{margin:.26em 0}
+.eq.sm{font-size:clamp(12.5px,1.4vw,17px)}
+.eq.mat{font-size:clamp(12.5px,1.45vw,17.5px)}
+.mat .katex .arraycolsep{width:.85em!important}
+.row{display:flex;gap:clamp(14px,2.4vw,30px);align-items:center;flex-wrap:wrap}
+.row>*{flex:1 1 280px;min-width:0}
+.box{background:var(--sky);border-left:4px solid var(--blue);padding:10px 15px;border-radius:4px}
+.good{background:#eaf7f0;border-color:var(--green)}
 .bad{background:#fdeceb;border-color:var(--red)}
-
-/* Chain flowchart tự động co gọn trên 1 hàng */
-.chain{display:flex;align-items:stretch;gap:clamp(6px,1vw,10px);flex-wrap:wrap;justify-content:center}
-.chain div{background:var(--sky);border-radius:6px;padding:clamp(8px,1.3vh,12px) clamp(8px,1.2vw,14px);text-align:center;flex:1 1 115px;min-width:105px;display:flex;flex-direction:column;justify-content:center;font-size:clamp(13px,min(1.6vw,2.2vh),18px)}
-.chain small{display:block;color:var(--mute);font-size:clamp(11px,min(1.3vw,1.8vh),13px);margin-top:4px;line-height:1.35}
-.chain .ar{background:none;flex:0 0 auto;min-width:0;font-size:clamp(18px,2.2vw,24px);color:var(--blue);padding:0;justify-content:center}
-
-/* Biểu đồ SVG giới hạn chiều cao theo viewport */
-svg{width:100%;height:auto;display:block;max-height:min(38vh,300px)}
+.warn{background:#fef5e7;border-color:var(--amber)}
+.chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+.chain div{background:var(--sky);border-radius:6px;padding:8px 14px;text-align:center;min-width:88px;font-size:clamp(13px,1.45vw,17.5px)}
+.chain small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+.chain .ar{background:none;min-width:0;font-size:20px;color:var(--blue);padding:0}
+svg{width:100%;height:auto;display:block;max-height:39vh}
 svg text{font-family:inherit;font-size:12px;fill:var(--mute)}
-
-.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:8px 14px;align-items:center;font-size:clamp(14px,1.7vw,18px)}
-.ctl output{font-variant-numeric:tabular-nums;min-width:44px;text-align:right;color:var(--navy);font-weight:700}
+.tri{align-items:stretch}
+.tri>.box{flex:1 1 230px;display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;font-size:clamp(13.5px,1.5vw,17px)}
+.ctl output{font-variant-numeric:tabular-nums;min-width:48px;text-align:right;color:var(--navy);font-weight:700}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.btns button,.ctl button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;padding:6px 14px;font:inherit;font-size:clamp(13px,1.4vw,16px);font-weight:500;cursor:pointer}
+.btns button:hover,.ctl button:hover{background:var(--sky)}
+.btns button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
 input[type=range]{width:100%;accent-color:var(--blue)}
-
-.tw{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
-table{border-collapse:collapse;width:100%;font-size:clamp(12px,min(1.55vw,2.2vh),18px)}
-th,td{padding:clamp(6px,1.1vh,10px) 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
-tr:last-child td{border-bottom:none}
-th{background:var(--navy);color:#fff;font-weight:500}
-
-.bar2{height:clamp(22px,3.4vh,32px);border-radius:5px;background:var(--blue);color:#fff;padding:0 12px;display:flex;align-items:center;font-size:clamp(12px,min(1.5vw,2vh),16px);white-space:nowrap}
-.bar2.r{background:var(--red)}
-.cb{color:var(--blue)}.cr{color:var(--red)}
-
-nav{position:fixed;bottom:0;left:0;right:0;height:var(--bot);display:flex;align-items:center;justify-content:center;gap:18px;background:#fff;border-top:1px solid var(--line);z-index:5;font-size:14px;color:var(--mute)}
-nav button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;width:42px;height:34px;font-size:17px;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:clamp(12.5px,1.35vw,16px);background:#fff}
+th,td{border:1px solid var(--line);padding:7px 11px;text-align:left}
+th{background:var(--sky);color:var(--navy);font-weight:700}
+.steps{display:flex;flex-direction:column;gap:6px}
+.step{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:4px;padding:7px 12px;font-size:clamp(13px,1.4vw,16.5px);transition:all .15s}
+.step.on{background:var(--sky);border-left-color:var(--blue);border-color:var(--blue)}
+nav{position:fixed;bottom:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:center;gap:16px;background:#fff;border-top:1px solid var(--line);z-index:5;font-size:13px;color:var(--mute)}
+nav button{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:6px;width:40px;height:32px;font-size:16px;cursor:pointer}
 nav button:hover{background:var(--sky)}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.katex{font-size:1.02em}
+.stack3{display:flex;flex-direction:column;gap:7px}
+.stack3>.box{padding:7px 14px}
+.stack-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.stack-head .sub{font-size:clamp(12.5px,1.35vw,15.5px)}
+.stack3 .eq .katex-display{margin:.12em 0}
 </style>
 </head>
 <body>
 <div id="bar"></div>
-<header><a href="../index.html">← Mục lục</a><span>Logistic Regression · 3. Newton và Quasi-Newton</span></header>
+<header><a href="../index.html">← Mục lục</a><span>Logistic Regression · 3. Newton và Quasi-Newton's Method</span></header>
 
-<!-- 1 -->
+<!-- SLIDE 1: BÌA -->
 <section class="slide cover">
   <h1>Logistic Regression</h1>
-  <p class="big sub">Phần 3 · Newton và Quasi-Newton</p>
-  <p class="sub">Dùng độ cong của hàm loss để đi nhanh hơn Gradient Descent</p>
+  <p class="big sub">Phần 3 · Newton và Quasi-Newton's Method</p>
+  <p class="sub">Khai triển Taylor bậc 2 · Bất biến Affine · Hội tụ bậc hai · IRLS · BFGS &amp; L-BFGS</p>
 </section>
 
-<!-- 2 -->
+<!-- SLIDE 2: BÀI TOÁN TỐI ƯU & TÍNH KHẢ NGHỊCH CỦA HESSIAN -->
 <section class="slide">
-  <h2>Gradient Descent chỉ nhìn độ dốc</h2>
-  <p>Hàm mất mát có điều chuẩn \(L_2\) (hệ số \(\lambda>0\)), với \(\hat y=\sigma(Xw)\) và \(R=\mathrm{diag}\bigl(\hat y\odot(1-\hat y)\bigr)\):</p>
+  <h2>1.1. Thiết lập bài toán &amp; Hessian khả nghịch</h2>
+  <p>Trong không gian tham số <span class="nw">\(w \in \mathbb{R}^d\)</span> (đã gộp hệ số chặn bias <span class="nw">\(b\)</span> vào vector <span class="nw">\(w\)</span>), xét hàm rủi ro thực nghiệm có điều chuẩn <span class="nw">\(L_2\)</span> (<span class="nw">\(\lambda > 0\)</span>):</p>
+  <div class="eq sm">$$J(w) = -\frac{1}{m}\sum_{i=1}^{m}\Bigl[y_i\ln\sigma(w^\top x_i) + (1-y_i)\ln\bigl(1-\sigma(w^\top x_i)\bigr)\Bigr] + \frac{\lambda}{2}\|w\|_2^2$$</div>
   <div class="row">
-    <div class="box"><p class="sub">Gradient (độ dốc)</p><div class="eq">$$\nabla J=\tfrac1mX^\top(\hat y-y)+\lambda w$$</div></div>
-    <div class="box"><p class="sub">Hessian (độ cong)</p><div class="eq">$$\nabla^2J=\tfrac1mX^\top RX+\lambda I$$</div></div>
-  </div>
-  <p class="sub">Newton dùng cả hai. Mọi giá trị riêng của Hessian đều \(\ge\lambda>0\), nên Hessian luôn <span class="nw">xác định dương ngặt</span> và luôn khả nghịch, kể cả khi dữ liệu đa cộng tuyến.</p>
-</section>
-
-<!-- 3 -->
-<section class="slide">
-  <h2>Xấp xỉ \(J\) bằng một parabol</h2>
-  <p>Khai triển Taylor bậc 2 quanh \(w^{(t)}\):</p>
-  <div class="eq">$$J(w^{(t)}+\Delta w)\approx J+\nabla J^\top\Delta w+\tfrac12\Delta w^\top\nabla^2J\,\Delta w$$</div>
-  <p>Đáy parabol: lấy gradient theo \(\Delta w\) và đặt bằng 0.</p>
-  <div class="eq">$$\nabla J+\nabla^2J\,\Delta w=0\;\Rightarrow\;\Delta w_{nt}=-[\nabla^2J]^{-1}\nabla J$$</div>
-  <div class="eq">$$w^{(t+1)}=w^{(t)}-[\nabla^2J(w^{(t)})]^{-1}\nabla J(w^{(t)})$$</div>
-  <p class="sub">Dùng \(\nabla_{\Delta w}(g^\top\Delta w)=g\) và \(\nabla_{\Delta w}(\tfrac12\Delta w^\top H\Delta w)=H\Delta w\) (\(H\) đối xứng theo định lý Schwarz).</p>
-</section>
-
-<!-- 4 -->
-<section class="slide">
-  <h2>Newton nhảy thẳng tới đáy parabol</h2>
-  <div class="row">
-    <svg id="p4" viewBox="0 0 400 240"></svg>
-    <div>
-      <div class="ctl"><label for="w4">w</label><input id="w4" type="range" min="0.2" max="2.2" step="0.05" value="0.4"><output id="o4"></output></div>
-      <p id="t4" class="box" style="margin-top:12px"></p>
+    <div class="box good">
+      <p><b>Tại sao Hessian luôn khả nghịch?</b></p>
+      <div class="eq sm">$$\nabla^2 J(w) = \frac{1}{m}X^\top R X + \lambda I_d \succeq \lambda I_d \succ 0$$</div>
+      <p>Mọi giá trị riêng của <span class="nw">\(\nabla^2 J(w)\)</span> đều <span class="nw">\(\ge \lambda > 0\)</span>. Ma trận xác định dương ngặt tại mọi <span class="nw">\(w\)</span> — không bao giờ suy biến ngay cả khi dữ liệu đa cộng tuyến.</p>
+    </div>
+    <div class="box">
+      <p><b>Bài toán phương trình siêu việt:</b></p>
+      <p>Ta muốn tìm <span class="nw">\(w^* = \arg\min_w J(w)\)</span> bằng cách giải <span class="nw">\(\nabla J(w) = 0\)</span>. Vì chứa hàm Sigmoid phi tuyến, ta không thể giải trực tiếp bằng đại số tuyến tính.</p>
     </div>
   </div>
-  <p class="sub"><span class="cb">━</span> loss \(J(w)\) trên dữ liệu đậu/rớt (\(b=-5\)) &nbsp; <span class="cr">━</span> parabol Taylor &nbsp; ● điểm Newton tới. Đứng xa đáy thì bước có thể vọt quá.</p>
 </section>
 
-<!-- 5 -->
+<!-- SLIDE 3: KHAI TRIỂN TAYLOR BẬC 2 & ĐẠO HÀM THEO GIA SỐ -->
 <section class="slide">
-  <h2>Đặc trưng lệch thang đo: GD zíc-zắc, Newton không</h2>
-  <div class="row">
-    <svg id="p5" viewBox="0 0 400 240"></svg>
-    <div>
-      <div class="ctl"><label for="k5">κ</label><input id="k5" type="range" min="1" max="50" step="1" value="20"><output id="ko"></output></div>
-      <p id="t5" class="box" style="margin-top:12px"></p>
+  <h2>1.2. Khai triển Taylor bậc 2</h2>
+  <p>Tại bước lặp <span class="nw">\(t\)</span>, phương pháp Newton xấp xỉ mặt cong <span class="nw">\(J(w)\)</span> quanh điểm <span class="nw">\(w^{(t)}\)</span> bằng đa thức <b>Taylor bậc 2</b> theo gia số <span class="nw">\(\Delta w\)</span>:</p>
+  <div class="eq sm">$$J(w^{(t)} + \Delta w) \approx \tilde{J}(\Delta w) = J(w^{(t)}) + \nabla J(w^{(t)})^\top \Delta w + \frac{1}{2}\Delta w^\top \nabla^2 J(w^{(t)})\Delta w$$</div>
+  <div class="stack3">
+    <div class="box">
+      <div class="stack-head"><b>1. Hạng tử bậc 0</b><span class="sub">Hằng số đối với biến <span class="nw">\(\Delta w\)</span>.</span></div>
+      <div class="eq sm">$$\nabla_{\Delta w}\bigl(J(w^{(t)})\bigr) = 0$$</div>
+    </div>
+    <div class="box">
+      <div class="stack-head"><b>2. Hạng tử bậc 1 (<span class="nw">\(g = \nabla J(w^{(t)})\)</span>)</b><span class="sub">Đạo hàm tuyến tính theo <span class="nw">\(\Delta w\)</span>.</span></div>
+      <div class="eq sm">$$\nabla_{\Delta w}(g^\top \Delta w) = g$$</div>
+    </div>
+    <div class="box">
+      <div class="stack-head"><b>3. Hạng tử bậc 2 (<span class="nw">\(H = \nabla^2 J(w^{(t)})\)</span>)</b><span class="sub">Do <span class="nw">\(H\)</span> đối xứng theo định lý Schwarz.</span></div>
+      <div class="eq sm">$$\nabla_{\Delta w}\Bigl(\tfrac{1}{2}\Delta w^\top H \Delta w\Bigr) = \tfrac{1}{2}(H + H^\top)\Delta w = H\Delta w$$</div>
     </div>
   </div>
-  <p class="sub"><span class="cb">●</span> Gradient Descent (25 bước) &nbsp; <span class="cr">●</span> Newton (1 bước). \(\kappa\) là số điều kiện của Hessian; \(\kappa\gg1\) làm GD dao động hoặc phân kỳ.</p>
+  <div class="box good eq">$$\nabla_{\Delta w}\tilde{J}(\Delta w) = \nabla J(w^{(t)}) + \nabla^2 J(w^{(t)})\Delta w = 0 \;\Longrightarrow\; \Delta w_{\mathrm{nt}} = -\bigl[\nabla^2 J(w^{(t)})\bigr]^{-1}\nabla J(w^{(t)})$$</div>
 </section>
 
-<!-- 6 -->
-<section class="slide">
-  <h2>Bất biến Affine: Newton miễn nhiễm với feature scaling</h2>
-  <p>Đổi thang đo đặc trưng: \(\tilde X=XA\), \(A\) khả nghịch. Giữ dự đoán \(\tilde X\tilde w=Xw\) nên \(\tilde w=A^{-1}w\), và \(\tilde J(\tilde w)=J(A\tilde w)=J(w)\).</p>
+<!-- SLIDE 4: QUY TẮC CẬP NHẬT & TƯƠNG TÁC PARABOL 1D -->
+<section class="slide" data-fn="up4">
+  <h2>1.3. Trực quan hóa bước nhảy Newton</h2>
   <div class="row">
-    <div class="box eq">\(\nabla\tilde J=A^\top\nabla J\)</div>
-    <div class="box eq">\(\tilde H=A^\top HA\)</div>
+    <svg id="p4" viewBox="0 0 400 220"></svg>
+    <div>
+      <div class="ctl">
+        <label for="w4">w⁽ᵗ⁾</label><input id="w4" type="range" min="-2.5" max="2.5" step="0.05" value="-2.0"><output id="o4w"></output>
+        <label for="l4">λ</label><input id="l4" type="range" min="0.05" max="0.5" step="0.05" value="0.15"><output id="o4l"></output>
+      </div>
+      <div class="btns">
+        <button id="b4_step" class="on">Nhảy 1 bước Newton: w⁽ᵗ⁾ → w⁽ᵗ⁺¹⁾</button>
+        <button id="b4_rst">Đặt lại</button>
+      </div>
+      <p id="t4" class="box" style="margin-top:10px"></p>
+      <p class="sub" style="margin-top:6px">Quy tắc cập nhật: <span class="nw">\(w^{(t+1)} = w^{(t)} - [\nabla^2 J(w^{(t)})]^{-1}\nabla J(w^{(t)})\)</span>. Parabol đỏ khớp giá trị, độ dốc và độ cong tại <span class="nw">\(w^{(t)}\)</span>.</p>
+    </div>
   </div>
-  <div class="eq">$$\Delta\tilde w=-\tilde H^{-1}\nabla\tilde J=-A^{-1}H^{-1}\nabla J=A^{-1}\Delta w$$</div>
-  <p class="sub">Quỹ đạo trong không gian mới trùng khớp qua phép ánh xạ \(\tilde w^{(t)}=A^{-1}w^{(t)}\).</p>
 </section>
 
-<!-- 7 -->
+<!-- SLIDE 5: VẤN ĐỀ SCALING & CHỨNG MINH BẤT BIẾN AFFINE -->
 <section class="slide">
-  <h2>Gần nghiệm, số chữ số đúng nhân đôi mỗi vòng</h2>
-  <div class="eq">$$\|w^{(t+1)}-w^*\|_2\le\frac{L}{2\mu}\|w^{(t)}-w^*\|_2^2$$</div>
-  <div style="display:grid;gap:6px">
-    <div class="bar2" style="width:25%">bước \(t\): \(10^{-3}\)</div>
-    <div class="bar2" style="width:50%">bước \(t+1\): \(10^{-6}\)</div>
-    <div class="bar2 r" style="width:100%">bước \(t+2\): \(10^{-12}\)</div>
+  <h2>2.1. Tính bất biến Affine</h2>
+  <p><b>Điểm yếu của Gradient Descent:</b> Nếu các đặc trưng có đơn vị đo chênh lệch (giờ học <span class="nw">\(\in [0,10]\)</span> vs. điểm rèn luyện <span class="nw">\(\in [0,1000]\)</span>), số điều kiện <span class="nw">\(\kappa(H) \gg 1\)</span> làm đường đồng mức kéo dẹt và GD dao động zíc zắc.</p>
+  <p><b>Biến đổi tuyến tính không suy biến:</b> Xét <span class="nw">\(\tilde{X} = XA\)</span> (<span class="nw">\(A \in \mathbb{R}^{d\times d}\)</span> khả nghịch). Để bảo toàn dự đoán <span class="nw">\(\tilde{X}\tilde{w} = Xw\)</span>, tham số mới là <span class="nw">\(\tilde{w} = A^{-1}w\)</span> và hàm mục tiêu <span class="nw">\(\tilde{J}(\tilde{w}) = J(A\tilde{w})\)</span>:</p>
+  <div class="box">
+    <p>Áp dụng Chain Rule: <span class="nw">\(\nabla\tilde{J}(\tilde{w}) = A^\top\nabla J(w)\)</span> và <span class="nw">\(\tilde{H}(\tilde{w}) = A^\top H(w) A\)</span>.</p>
+    <div class="eq sm">$$\Delta\tilde{w} = -\tilde{H}^{-1}\nabla\tilde{J} = -(A^\top H A)^{-1}(A^\top\nabla J) = -A^{-1}H^{-1}(A^\top)^{-1}A^\top\nabla J = A^{-1}\Delta w$$</div>
   </div>
+  <div class="box good">
+    <p><b>Hệ quả:</b> Quỹ đạo <span class="nw">\(\tilde{w}^{(t)} = A^{-1}w^{(t)}\)</span> trùng khớp 100% với không gian gốc tại mọi bước <span class="nw">\(t\)</span>. Phương pháp Newton <b>miễn nhiễm tuyệt đối</b> với Feature Scaling.</p>
+  </div>
+</section>
+
+<!-- SLIDE 6: TƯƠNG TÁC GD VS NEWTON KHI KÉO GIÃN HỆ TRỤC -->
+<section class="slide" data-fn="up6">
+  <h2>2.2. GD vs. Newton khi kéo giãn hệ trục</h2>
   <div class="row">
-    <div class="box"><p>Newton: <b>dưới 10</b> vòng lặp</p></div>
-    <div class="box"><p>GD: có thể tới <b>\(10^5\)</b> vòng</p></div>
+    <svg id="p6" viewBox="0 0 400 220"></svg>
+    <div>
+      <div class="ctl">
+        <label for="k6">Số điều kiện κ</label><input id="k6" type="range" min="1" max="15" step="0.5" value="9"><output id="o6k"></output>
+      </div>
+      <div class="btns">
+        <button id="b6_step" class="on">Thêm 6 vòng lặp GD</button>
+        <button id="b6_rst">Đặt lại</button>
+      </div>
+      <p id="t6" class="box" style="margin-top:10px"></p>
+      <p class="sub" style="margin-top:6px"><b style="color:var(--red)">Đỏ</b>: Gradient Descent bị ép dùng bước nhảy nhỏ <span class="nw">\(\alpha < 2/\kappa\)</span> nên dao động zíc zắc · <b style="color:var(--green)">Xanh</b>: Newton khử sạch <span class="nw">\(\kappa\)</span> nhờ nhân <span class="nw">\(H^{-1}\)</span>.</p>
+    </div>
   </div>
-  <p class="sub">Điều kiện (Kantorovich): Hessian liên tục Lipschitz hằng số \(L\), \(\mu=\lambda_{\min}(H(w^*))>0\), và \(\|w^{(t)}-w^*\|_2<\frac{2\mu}{L}\) để sai số thực sự co lại.</p>
 </section>
 
-<!-- 8 -->
+<!-- SLIDE 7: ĐỊNH LÝ KANTOROVICH & VÙNG HỘI TỤ BẬC HAI -->
 <section class="slide">
-  <h2>Mỗi vòng Newton là một bài bình phương tối thiểu có trọng số</h2>
-  <p class="sub">IRLS. Để thấy dạng thuần, bỏ \(\lambda\) và hệ số \(\tfrac1m\).</p>
-  <div class="eq">$$w^{(t+1)}=w^{(t)}-(X^\top RX)^{-1}X^\top(\hat y-y)=(X^\top RX)^{-1}X^\top R\,z^{(t)}$$</div>
-  <div class="eq">$$z^{(t)}=Xw^{(t)}-R^{-1}(\hat y-y)\in\mathbb R^m$$</div>
-  <div class="box"><p>\(z^{(t)}\) là <b>working response</b>; \(R\) (đường chéo, phần tử dương nên khả nghịch) là trọng số của từng mẫu, được tính lại ở mỗi vòng.</p></div>
-</section>
-
-<!-- 9 -->
-<section class="slide">
-  <h2>Khi \(d\gg m\): nghịch đảo ma trận nhỏ thay vì lớn</h2>
-  <p>NLP, Genomics: \(d\) hàng triệu, \(m\) vài nghìn. Nghịch đảo \(d\times d\) là bất khả thi. Bổ đề Woodbury cho:</p>
-  <div class="eq">$$H^{-1}=\tfrac1\lambda I_d-\tfrac1\lambda X^\top\bigl(m\lambda R^{-1}+XX^\top\bigr)^{-1}X$$</div>
+  <h2>3.1. Định lý Kantorovich &amp; Hội tụ bậc 2</h2>
+  <p>Khi điểm lặp <span class="nw">\(w^{(t)}\)</span> tiến vào lân cận đủ gần nghiệm tối ưu toàn cục <span class="nw">\(w^*\)</span>, phương pháp Newton kích hoạt trạng thái <b>hội tụ bậc hai (Quadratic Convergence)</b>.</p>
   <div class="row">
-    <div class="box bad eq">Newton: nghịch đảo \(d\times d\)<br>\(O(d^3)\)</div>
-    <div class="box eq">Woodbury: nghịch đảo \(m\times m\)<br>\(O(m^3)\)</div>
+    <div class="box">
+      <p><b>Hai giả thiết của Định lý Kantorovich:</b></p>
+      <ul>
+        <li><b>Hessian liên tục Lipschitz (<span class="nw">\(L > 0\)</span>):</b> <span class="nw">\(\|\nabla^2 J(w_1) - \nabla^2 J(w_2)\|_2 \le L\|w_1 - w_2\|_2\)</span>.</li>
+        <li><b>Lồi chặt cục bộ (<span class="nw">\(\mu > 0\)</span>):</b> Giá trị riêng nhỏ nhất <span class="nw">\(\mu = \lambda_{\min}(H(w^*)) > 0\)</span>.</li>
+      </ul>
+    </div>
+    <div class="box good">
+      <p><b>Chặn trên sai số &amp; Quả cầu hội tụ:</b></p>
+      <div class="eq sm">$$\|w^{(t+1)} - w^*\|_2 \le \frac{L}{2\mu}\|w^{(t)} - w^*\|_2^2$$</div>
+      <p>Để sai số thực sự co lại (<span class="nw">\(\|w^{(t+1)}-w^*\|_2 < \|w^{(t)}-w^*\|_2\)</span>), điểm xuất phát phải nằm trong bán kính:</p>
+      <div class="eq sm">$$\|w^{(t)} - w^*\|_2 < \frac{2\mu}{L}$$</div>
+    </div>
   </div>
 </section>
 
-<!-- 10 -->
+<!-- SLIDE 8: ĐỊNH LƯỢNG TỐC ĐỘ HỘI TỤ BẬC 2 VS BẬC 1 -->
 <section class="slide">
-  <h2>Dữ liệu cực lớn: không tính Hessian nữa</h2>
-  <p>Khi \(d=10^7\), \(m=10^8\): cả \(O(d^3)\) lẫn \(O(m^3)\) đều sụp đổ bộ nhớ.</p>
-  <div class="box"><p><b>Quasi-Newton (BFGS, L-BFGS):</b> không tính Hessian, không nghịch đảo. Xấp xỉ trực tiếp <span class="nw">\(H^{-1}\)</span> chỉ bằng cách quan sát gradient thay đổi qua mỗi vòng lặp.</p></div>
+  <h2>3.2. Tốc độ hội tụ bậc 2 và bậc 1</h2>
+  <p>Khi đã lọt vào quả cầu hội tụ <span class="nw">\(\|w^{(t)}-w^*\|_2 < \frac{2\mu}{L}\)</span>, sai số ở bước <span class="nw">\(t+1\)</span> tỉ lệ với <b>bình phương</b> sai số bước <span class="nw">\(t\)</span> (từ <span class="nw">\(10^{-3} \to 10^{-6} \to 10^{-12}\)</span>).</p>
   <div class="row">
-    <div class="box eq">\(s_k=w_{k+1}-w_k\)<p class="sub">trọng số đổi</p></div>
-    <div class="box eq">\(y_k=\nabla J(w_{k+1})-\nabla J(w_k)\)<p class="sub">gradient đổi</p></div>
+    <div>
+      <table>
+        <thead><tr><th>Vòng lặp <span class="nw">\(t\)</span></th><th>Sai số GD (<span class="nw">\(\rho=0.9\)</span>)</th><th>Sai số Newton (Bậc 2)</th></tr></thead>
+        <tbody>
+          <tr><td><span class="nw">\(t=0\)</span></td><td><span class="nw">\(10^{-1}\)</span></td><td><span class="nw">\(10^{-1}\)</span> (1 chữ số)</td></tr>
+          <tr><td><span class="nw">\(t=1\)</span></td><td><span class="nw">\(9\times 10^{-2}\)</span></td><td><span class="nw">\(10^{-2}\)</span> (2 chữ số)</td></tr>
+          <tr><td><span class="nw">\(t=2\)</span></td><td><span class="nw">\(8.1\times 10^{-2}\)</span></td><td><span class="nw">\(10^{-4}\)</span> (4 chữ số)</td></tr>
+          <tr><td><span class="nw">\(t=3\)</span></td><td><span class="nw">\(7.3\times 10^{-2}\)</span></td><td><span class="nw">\(10^{-8}\)</span> (8 chữ số)</td></tr>
+          <tr><td><span class="nw">\(t=4\)</span></td><td><span class="nw">\(6.5\times 10^{-2}\)</span></td><td><span class="nw">\(10^{-16}\)</span> (Giới hạn float64)</td></tr>
+        </tbody>
+      </table>
+      <p class="sub" style="margin-top:8px">Newton chỉ cần <b>&lt; 10 vòng lặp</b> để chạm giới hạn độ chính xác máy tính, trong khi GD có thể tốn tới <span class="nw">\(10^5\)</span> vòng.</p>
+    </div>
+    <svg id="p8" viewBox="0 0 400 220"></svg>
   </div>
 </section>
 
-<!-- 11 -->
+<!-- SLIDE 9: BIẾN ĐỔI ĐẠI SỐ SANG IRLS -->
 <section class="slide">
-  <h2>Trong Logistic, \(y_k\) là chênh lệch xác suất dự đoán</h2>
-  <div class="eq">$$y_k=\Bigl[\tfrac1mX^\top(\hat y_{k+1}-y)+\lambda w_{k+1}\Bigr]-\Bigl[\tfrac1mX^\top(\hat y_k-y)+\lambda w_k\Bigr]$$</div>
-  <div class="eq" style="font-size:clamp(17px,min(2.6vw,3.5vh),32px)">$$y_k=\tfrac1mX^\top(\hat y_{k+1}-\hat y_k)+\lambda s_k$$</div>
-  <p class="sub">Nhãn \(y\) triệt tiêu. Khác mạng nơ-ron, \(y_k\) ở đây có cấu trúc rõ ràng và tuyến tính theo \(\hat y_{k+1}-\hat y_k\). Quasi-Newton dùng chính độ chênh lệch xác suất này để nắn ma trận xấp xỉ Hessian.</p>
+  <h2>4.1. Biến đổi Newton sang IRLS</h2>
+  <p>Xét bài toán tối thiểu hóa NLL không điều chuẩn trên <span class="nw">\(X \in \mathbb{R}^{m\times d}\)</span>, <span class="nw">\(y \in \{0,1\}^m\)</span>. Tại bước <span class="nw">\(t\)</span>, xác suất dự báo là <span class="nw">\(a^{(t)} = \sigma(Xw^{(t)})\)</span>:</p>
+  <div class="eq sm">$$g^{(t)} = X^\top(a^{(t)} - y), \qquad H^{(t)} = X^\top R^{(t)} X, \qquad R_{ii}^{(t)} = a_i^{(t)}\bigl(1 - a_i^{(t)}\bigr) > 0$$</div>
+  <p>Áp dụng công thức Newton với bước nhảy <span class="nw">\(\alpha = 1\)</span> và đặt <span class="nw">\((X^\top R^{(t)} X)^{-1} X^\top R^{(t)}\)</span> làm nhân tử chung (vì <span class="nw">\(R^{(t)}\)</span> đường chéo dương nên luôn khả nghịch):</p>
+  <div class="eq sm">$$\begin{aligned}
+  w^{(t+1)} &= w^{(t)} - (X^\top R^{(t)} X)^{-1} X^\top(a^{(t)} - y) \\
+  &= (X^\top R^{(t)} X)^{-1}\Bigl[(X^\top R^{(t)} X)w^{(t)} - X^\top(a^{(t)} - y)\Bigr] \\
+  &= (X^\top R^{(t)} X)^{-1} X^\top R^{(t)}\Bigl[Xw^{(t)} + (R^{(t)})^{-1}(y - a^{(t)})\Bigr]
+  \end{aligned}$$</div>
 </section>
 
-<!-- 12 -->
+<!-- SLIDE 10: NGHIỆM DẠNG ĐÓNG WLS & CHU TRÌNH IRLS -->
 <section class="slide">
-  <h2>BFGS luôn ổn định với Logistic</h2>
-  <p>BFGS cần <b>điều kiện độ cong</b> \(s_k^\top y_k>0\) để \(H_{k+1}\) xác định dương. Deep Learning hay vi phạm điều kiện này.</p>
-  <div class="eq">$$y_k=\bar H\,s_k,\quad\bar H=\int_0^1\nabla^2J(w_k+t\,s_k)\,dt=\tfrac1mX^\top\bar RX+\lambda I$$</div>
-  <div class="eq">$$s_k^\top y_k=\tfrac1m\bigl\|\sqrt{\bar R}\,Xs_k\bigr\|_2^2+\lambda\|s_k\|_2^2>0$$</div>
-  <p class="sub">\(\bar R\) chứa các xác suất dương và \(\lambda>0\), nên không bao giờ cần bỏ qua bước cập nhật (skip update).</p>
-</section>
-
-<!-- 13 -->
-<section class="slide">
-  <h2>Cập nhật BFGS hạng 2</h2>
-  <p>Tìm \(H_{k+1}\) thỏa \(H_{k+1}y_k=s_k\) và ít khác \(H_k\) nhất (\(H_k\approx[\nabla^2J]^{-1}\)):</p>
-  <div class="eq">$$H_{k+1}=(I-\rho_ks_ky_k^\top)\,H_k\,(I-\rho_ky_ks_k^\top)+\rho_ks_ks_k^\top,\qquad\rho_k=\frac1{y_k^\top s_k}$$</div>
-  <p class="sub">Vẫn phải lưu ma trận \(d\times d\): \(10^7\times10^7\) cần hàng Terabyte RAM.</p>
-</section>
-
-<!-- 14 -->
-<section class="slide">
-  <h2>L-BFGS: chỉ nhớ \(c\) bước gần nhất</h2>
-  <p>Không dựng \(H_k\). Lưu \(c\) cặp \((s_i,y_i)\) (thường \(c=10\)) và tính hướng đi bằng đệ quy hai vòng:</p>
-  <div class="chain">
-    <div>Khởi tạo<small>\(q=\nabla J(w_k)\)</small></div><div class="ar">→</div>
-    <div>Vòng lùi<small>\(i=k-1\to k-c\)<br>\(\alpha_i=\rho_is_i^\top q\)<br>\(q\leftarrow q-\alpha_iy_i\)</small></div><div class="ar">→</div>
-    <div>Độ cong nền<small>\(r=\gamma_kq\)</small></div><div class="ar">→</div>
-    <div>Vòng tiến<small>\(i=k-c\to k-1\)<br>\(\beta=\rho_iy_i^\top r\)<br>\(r\leftarrow r+s_i(\alpha_i-\beta)\)</small></div><div class="ar">→</div>
-    <div>Hướng đi<small>\(p_k=-r\)</small></div>
+  <h2>4.2. Nghiệm dạng đóng WLS</h2>
+  <p>Định nghĩa vector <b>biến phản hồi làm việc (working response vector)</b> <span class="nw">\(z^{(t)} \in \mathbb{R}^m\)</span> theo từng mẫu <span class="nw">\(i\)</span>:</p>
+  <div class="eq">$$z^{(t)} \triangleq Xw^{(t)} + (R^{(t)})^{-1}(y - a^{(t)}) \quad\Longleftrightarrow\quad z_i^{(t)} = (w^{(t)})^\top x_i + \frac{y_i - a_i^{(t)}}{a_i^{(t)}\bigl(1 - a_i^{(t)}\bigr)}$$</div>
+  <div class="box good">
+    <p><b>Bản chất IRLS (Iteratively Reweighted Least Squares):</b> Mỗi bước Newton chính là nghiệm giải tích của một bài toán Hồi quy tuyến tính có trọng số:</p>
+    <div class="eq sm">$$w^{(t+1)} = (X^\top R^{(t)} X)^{-1} X^\top R^{(t)} z^{(t)} = \arg\min_{w\in\mathbb{R}^d}\sum_{i=1}^{m} R_{ii}^{(t)}\bigl(z_i^{(t)} - w^\top x_i\bigr)^2$$</div>
   </div>
-  <div class="eq">$$\gamma_k=\frac{s_{k-1}^\top y_{k-1}}{y_{k-1}^\top y_{k-1}},\qquad w_{k+1}=w_k+\alpha_kp_k\ \text{(Line Search Wolfe)}$$</div>
-  <p class="sub">Loss của Logistic rất mượt nên Line Search thường chọn ngay \(\alpha_k=1\).</p>
+  <div class="chain" style="margin-top:4px">
+    <div>\(w^{(t)}\)<small>tham số hiện tại</small></div><div class="ar">→</div>
+    <div>\(a^{(t)} = \sigma(Xw^{(t)})\)<small>xác suất dự báo</small></div><div class="ar">→</div>
+    <div>\(R^{(t)},\; z^{(t)}\)<small>trọng số &amp; phản hồi</small></div><div class="ar">→</div>
+    <div>Giải WLS<small>\(w^{(t+1)}\) (5–10 vòng)</small></div>
+  </div>
 </section>
 
-<!-- 15 -->
+<!-- SLIDE 11: NÚT THẮT CỔ CHAI CỦA NEWTON & TRIẾT LÝ QUASI-NEWTON -->
 <section class="slide">
-  <h2>Chọn phương pháp nào?</h2>
-  <div class="tw"><table>
-    <tr><th>Phương pháp</th><th>Chi phí / bước</th><th>Bộ nhớ</th><th>Hội tụ</th><th>Phù hợp khi</th></tr>
-    <tr><td>GD</td><td>\(O(md)\)</td><td>\(O(d)\)</td><td>Tuyến tính</td><td>Dữ liệu đã chuẩn hóa</td></tr>
-    <tr><td>Newton</td><td>\(O(d^3)\)</td><td>\(O(d^2)\)</td><td>Bậc hai</td><td>\(d\) nhỏ, cần chính xác cao</td></tr>
-    <tr><td>IRLS + Woodbury</td><td>\(O(m^3)\)</td><td>\(O(m^2)\)</td><td>Bậc hai</td><td>\(d\gg m\)</td></tr>
-    <tr><td>BFGS</td><td>\(O(d^2)\)</td><td>\(O(d^2)\)</td><td>Siêu tuyến tính</td><td>\(d\sim10^3\text{–}10^4\)</td></tr>
-    <tr><td>L-BFGS</td><td>\(O(cd)\)</td><td>\(O(cd)\)</td><td>Tuyến tính (nhanh)</td><td>\(d\sim10^7\)</td></tr>
-  </table></div>
+  <h2>5.1. Hạn chế Newton &amp; Ý tưởng Quasi-Newton</h2>
+  <div class="row tri">
+    <div class="box bad">
+      <p><b>Chi phí đắt đỏ của Newton thuần túy</b></p>
+      <ul>
+        <li>Tính ma trận Hessian <span class="nw">\(X^\top R^{(t)} X\)</span>: tốn <span class="nw">\(\mathcal{O}(m\cdot d^2)\)</span>.</li>
+        <li>Nghịch đảo ma trận <span class="nw">\((H^{(t)})^{-1}\)</span>: tốn <span class="nw">\(\mathcal{O}(d^3)\)</span>.</li>
+      </ul>
+      <p>Khi <span class="nw">\(d \sim 10^4 - 10^7\)</span> (TF-IDF, One-Hot, tương tác đa thức), lặp lại <span class="nw">\(\mathcal{O}(d^3)\)</span> là bất khả thi.</p>
+    </div>
+    <div class="box good">
+      <p><b>Triết lý Quasi-Newton (BFGS / L-BFGS)</b></p>
+      <ul>
+        <li><b>Không tính</b> ma trận Hessian <span class="nw">\(\nabla^2 J(w)\)</span>.</li>
+        <li><b>Không nghịch đảo</b> ma trận hệ số.</li>
+        <li><b>Xấp xỉ trực tiếp</b> nghịch đảo Hessian <span class="nw">\(H_k \approx (\nabla^2 J)^{-1}\)</span> chỉ từ lịch sử dịch chuyển <span class="nw">\(s_k\)</span> và biến thiên Gradient <span class="nw">\(y_k\)</span>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 12: PHƯƠNG TRÌNH CÁT TUYẾN TRONG HỒI QUY LOGISTIC -->
+<section class="slide">
+  <h2>5.2. Phương trình Cát tuyến (Secant Equation)</h2>
+  <p>Ghi nhận độ dịch chuyển trọng số <span class="nw">\(s_k = w_{k+1} - w_k\)</span> và độ biến thiên Gradient <span class="nw">\(y_k = \nabla J(w_{k+1}) - \nabla J(w_k)\)</span>. Thay công thức <span class="nw">\(\nabla J(w) = \frac{1}{m}X^\top(a-y) + \lambda w\)</span> vào <span class="nw">\(y_k\)</span>:</p>
+  <div class="eq sm">$$y_k = \Bigl[\frac{1}{m}X^\top(a_{k+1} - y) + \lambda w_{k+1}\Bigr] - \Bigl[\frac{1}{m}X^\top(a_k - y) + \lambda w_k\Bigr]$$</div>
+  <div class="box good">
+    <p><b>Triệt tiêu nhãn thực tế <span class="nw">\(y\)</span>, ta thu được bản chất của <span class="nw">\(y_k\)</span>:</b></p>
+    <div class="eq">$$y_k = \frac{1}{m}X^\top(a_{k+1} - a_k) + \lambda s_k$$</div>
+  </div>
+  <p class="box"><b>Ý nghĩa học thuật:</b> Trái với mạng nơ-ron (hộp đen hỗn loạn), trong Logistic Regression, <span class="nw">\(y_k\)</span> tỉ lệ thuận tuyến tính tuyệt đối với <b>độ chênh lệch xác suất dự đoán (probability divergence)</b> <span class="nw">\(a_{k+1} - a_k\)</span> giữa hai bước lặp.</p>
+</section>
+
+<!-- SLIDE 13: TƯƠNG TÁC PROBABILITY DIVERGENCE -->
+<section class="slide" data-fn="up13">
+  <h2>5.3. Chênh lệch xác suất <span class="nw">\(a_{k+1} - a_k\)</span></h2>
+  <div class="row">
+    <svg id="p13" viewBox="0 0 400 220"></svg>
+    <div>
+      <div class="ctl">
+        <label for="s13">Bước dịch sₖ</label><input id="s13" type="range" min="0.1" max="1.5" step="0.05" value="0.6"><output id="o13s"></output>
+      </div>
+      <p id="t13" class="box" style="margin-top:12px"></p>
+      <p class="sub" style="margin-top:8px">Vùng ranh giới quyết định (nơi <span class="nw">\(a \approx 0.5\)</span>) có độ chênh lệch xác suất <span class="nw">\(a_{k+1}-a_k\)</span> lớn nhất, cung cấp nhiều thông tin độ cong nhất cho <span class="nw">\(y_k\)</span>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 14: ĐỊNH LÝ LỒI NGẶT & SỰ BẤT TỬ CỦA BFGS -->
+<section class="slide">
+  <h2>6.1. Điều kiện độ cong &amp; Tính ổn định BFGS</h2>
+  <p>Để ma trận xấp xỉ nghịch đảo Hessian <span class="nw">\(H_{k+1}\)</span> luôn xác định dương (<span class="nw">\(H_{k+1} \succ 0\)</span>, đảm bảo hướng bước nhảy luôn lao dốc), điều kiện bắt buộc là <b>Điều kiện Độ cong (Curvature Condition)</b>: <span class="nw">\(s_k^\top y_k > 0\)</span>.</p>
+  <p><b>Chứng minh giải tích:</b> Theo Định lý Giá trị Trung bình trên đa tạp, tồn tại <span class="nw">\(\xi = \theta w_k + (1-\theta)w_{k+1}\)</span> (<span class="nw">\(\theta \in (0,1)\)</span>) sao cho:</p>
+  <div class="eq sm">$$y_k = \nabla^2 J(\xi) s_k = \Bigl[\frac{1}{m}X^\top R(\xi) X + \lambda I_d\Bigr] s_k, \qquad R(\xi) = \operatorname{diag}\bigl(\sigma(X\xi)\odot(1-\sigma(X\xi))\bigr)$$</div>
+  <div class="box good">
+    <p>Nhân vô hướng <span class="nw">\(s_k^\top\)</span> vào hai vế:</p>
+    <div class="eq">$$s_k^\top y_k = s_k^\top\Bigl[\frac{1}{m}X^\top R(\xi) X + \lambda I_d\Bigr]s_k = \frac{1}{m}\bigl\|\sqrt{R(\xi)}\,X s_k\bigr\|_2^2 + \lambda\|s_k\|_2^2 > 0$$</div>
+    <p>Vì <span class="nw">\(R(\xi) \succ 0\)</span> và <span class="nw">\(\lambda > 0\)</span>, <span class="nw">\(s_k^\top y_k > 0\)</span> là <b>chân lý tuyệt đối</b> — không bao giờ cần bỏ qua bước cập nhật (skip updates) như trong Deep Learning.</p>
+  </div>
+</section>
+
+<!-- SLIDE 15: CÔNG THỨC CẬP NHẬT BFGS RANK-2 -->
+<section class="slide">
+  <h2>6.2. Cập nhật BFGS hạng 2 (Rank-2)</h2>
+  <p>Nhờ điều kiện độ cong <span class="nw">\(s_k^\top y_k > 0\)</span> luôn thỏa mãn, tại mỗi bước BFGS tìm ma trận đối xứng <span class="nw">\(H_{k+1}\)</span> gần <span class="nw">\(H_k\)</span> nhất thỏa mãn phương trình cát tuyến <span class="nw">\(H_{k+1} y_k = s_k\)</span>.</p>
+  <div class="box good eq sm">$$H_{k+1} = (I_d - \rho_k s_k y_k^\top) H_k (I_d - \rho_k y_k s_k^\top) + \rho_k s_k s_k^\top, \qquad \rho_k = \frac{1}{y_k^\top s_k}$$</div>
+  <div class="row">
+    <div class="box">
+      <p><b>Bổ đề Sherman–Morrison hạng 2:</b></p>
+      <p>Cập nhật trực tiếp nghịch đảo Hessian chỉ tốn <span class="nw">\(\mathcal{O}(d^2)\)</span> phép nhân vector–ma trận thay vì <span class="nw">\(\mathcal{O}(d^3)\)</span> nghịch đảo ma trận.</p>
+    </div>
+    <div class="box">
+      <p><b>Vai trò hệ số hấp thụ <span class="nw">\(\rho_k\)</span> (Damping factor):</b></p>
+      <p>Kiểm soát mức độ mà thông tin chênh lệch xác suất phân lớp mới <span class="nw">\((a_{k+1} - a_k)\)</span> bẻ cong không gian đặc trưng hiện tại.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 16: BÀI TOÁN SIÊU CHIỀU & Ý TƯỞNG L-BFGS -->
+<section class="slide">
+  <h2>7.1. Bài toán siêu chiều &amp; Ý tưởng L-BFGS</h2>
+  <p>Trong Phân loại văn bản (TF-IDF) hoặc Tin sinh học (Genomics), số chiều đặc trưng <span class="nw">\(d\)</span> có thể lên tới <span class="nw">\(10^7\)</span>. Lúc này ngay cả ma trận BFGS dày đặc <span class="nw">\(H_k \in \mathbb{R}^{10^7 \times 10^7}\)</span> cũng tiêu tốn hàng <b>Terabyte RAM</b>.</p>
+  <div class="row">
+    <div class="box bad">
+      <p><b>BFGS chuẩn:</b></p>
+      <p>Lưu toàn bộ ma trận <span class="nw">\(H_k\)</span> kích thước <span class="nw">\(d \times d\)</span> → Bộ nhớ <span class="nw">\(\mathcal{O}(d^2)\)</span>, bùng nổ RAM khi <span class="nw">\(d > 10^5\)</span>.</p>
+    </div>
+    <div class="box good">
+      <p><b>L-BFGS (Limited-memory BFGS):</b></p>
+      <p><b>Tuyệt đối không dựng ma trận <span class="nw">\(H_k\)</span></b>, chỉ lưu <span class="nw">\(c\)</span> cặp vector lịch sử gần nhất <span class="nw">\(\{(s_i, y_i)\}_{i=k-c}^{k-1}\)</span> (thường <span class="nw">\(c = 10\)</span>) → Bộ nhớ chỉ còn <span class="nw">\(\mathcal{O}(c\cdot d)\)</span>.</p>
+    </div>
+  </div>
+  <p class="box"><b>Mục tiêu thuật toán Đệ quy hai vòng (Two-Loop Recursion):</b> Tính trực tiếp tích <span class="nw">\(r = H_k q\)</span> từ Gradient hiện tại <span class="nw">\(q = \nabla J(w_k)\)</span> và <span class="nw">\(c\)</span> cặp lịch sử mà không tạo bất kỳ ma trận vuông nào.</p>
+</section>
+
+<!-- SLIDE 17: CHI TIẾT THUẬT TOÁN TWO-LOOP RECURSION (BƯỚC 1-3) -->
+<section class="slide">
+  <h2>7.2. Two-Loop Recursion: Vòng lùi &amp; Scaling</h2>
+  <div class="row tri">
+    <div class="box">
+      <p><b>Bước 1 · Khởi tạo Vector <span class="nw">\(q\)</span></b></p>
+      <p>Lấy Gradient thực tại từ hàm Cross-Entropy có điều chuẩn:</p>
+      <div class="eq sm">$$q = \frac{1}{m}X^\top(a_k - y) + \lambda w_k$$</div>
+      <p class="sub">Vector cần được nắn thành hướng Newton <span class="nw">\(p_k = -H_k q\)</span>.</p>
+    </div>
+    <div class="box">
+      <p><b>Bước 2 · Vòng lùi (Backward Pass)</b></p>
+      <p>Chạy ngược lịch sử từ <span class="nw">\(i = k-1\)</span> về <span class="nw">\(k-c\)</span>:</p>
+      <div class="eq sm">$$\alpha_i = \rho_i(s_i^\top q), \quad q \leftarrow q - \alpha_i y_i$$</div>
+      <p class="sub">Đo lường độ "đụng độ" với các hướng đi cũ và gọt giũa <span class="nw">\(q\)</span>.</p>
+    </div>
+    <div class="box good">
+      <p><b>Bước 3 · Độ cong nền tảng (<span class="nw">\(H_k^{(0)}\)</span>)</b></p>
+      <p>Dùng ma trận vô hướng <span class="nw">\(H_k^{(0)} = \gamma_k I_d\)</span>:</p>
+      <div class="eq sm">$$\gamma_k = \frac{s_{k-1}^\top y_{k-1}}{y_{k-1}^\top y_{k-1}}, \quad r = \gamma_k q$$</div>
+      <p class="sub">Xấp xỉ nghịch đảo <span class="nw">\(\lambda_{\max}(X^\top R X)\)</span>, triệt tiêu gradient nổ.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 18: CHI TIẾT TWO-LOOP RECURSION (BƯỚC 4-5) & WOLFE LINE SEARCH -->
+<section class="slide">
+  <h2>7.3. Two-Loop Recursion: Vòng tiến &amp; Wolfe</h2>
+  <div class="row">
+    <div class="box">
+      <p><b>Bước 4 · Vòng tiến (Forward Pass)</b></p>
+      <p>Chạy xuôi lịch sử từ <span class="nw">\(i = k-c\)</span> tới <span class="nw">\(k-1\)</span>, đắp lại thông tin độ cong bậc 2 bằng cách chiếu <span class="nw">\(r\)</span> lên vector chênh lệch xác suất <span class="nw">\(y_i\)</span>:</p>
+      <div class="eq sm">$$\beta = \rho_i(y_i^\top r), \qquad r \leftarrow r + s_i(\alpha_i - \beta)$$</div>
+    </div>
+    <div class="box good">
+      <p><b>Bước 5 · Xuất hướng &amp; Line Search Wolfe</b></p>
+      <p>Vector kết quả <span class="nw">\(r = H_k q\)</span> cho hướng bước nhảy <span class="nw">\(p_k = -r\)</span>, cập nhật <span class="nw">\(w_{k+1} = w_k + \alpha_k p_k\)</span>.</p>
+      <p>Vì hàm mất mát Logistic rất mượt, Line Search thỏa mãn điều kiện Wolfe thường chấp nhận <b><span class="nw">\(\alpha_k = 1\)</span> ngay lần thử đầu tiên</b>, đẩy tốc độ tính toán lên cực đại.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 19: MÔ PHỎNG TƯƠNG TÁC L-BFGS TWO-LOOP RECURSION -->
+<section class="slide" data-fn="up19">
+  <h2>7.4. Mô phỏng Đệ quy hai vòng L-BFGS</h2>
+  <div class="row">
+    <div class="steps" id="st19">
+      <div class="step" data-i="0"><b>1. Khởi tạo <span class="nw">\(q\)</span>:</b> Nhận Gradient thực tại <span class="nw">\(q = \frac{1}{m}X^\top(a_k - y) + \lambda w_k\)</span>.</div>
+      <div class="step" data-i="1"><b>2. Vòng lùi (Backward <span class="nw">\(i=k-1 \to k-c\)</span>):</b> Chiếu <span class="nw">\(\alpha_i = \rho_i(s_i^\top q)\)</span>, gọt giũa <span class="nw">\(q \leftarrow q - \alpha_i y_i\)</span>.</div>
+      <div class="step" data-i="2"><b>3. Độ cong nền tảng (<span class="nw">\(H_k^{(0)}\)</span>):</b> Hệ số vô hướng <span class="nw">\(\gamma_k = \frac{s_{k-1}^\top y_{k-1}}{y_{k-1}^\top y_{k-1}}\)</span>, biến đổi tâm <span class="nw">\(r = \gamma_k q\)</span>.</div>
+      <div class="step" data-i="3"><b>4. Vòng tiến (Forward <span class="nw">\(i=k-c \to k-1\)</span>):</b> Phục dựng độ cong <span class="nw">\(\beta = \rho_i(y_i^\top r)\)</span>, cập nhật <span class="nw">\(r \leftarrow r + s_i(\alpha_i - \beta)\)</span>.</div>
+      <div class="step" data-i="4"><b>5. Xuất hướng cập nhật:</b> <span class="nw">\(p_k = -r\)</span>. Line Search Wolfe chọn <span class="nw">\(\alpha_k = 1 \Rightarrow w_{k+1} = w_k + p_k\)</span>.</div>
+    </div>
+    <div>
+      <svg id="p19" viewBox="0 0 400 220"></svg>
+      <div class="btns">
+        <button id="b19_pv">← Bước trước</button>
+        <button id="b19_nx" class="on">Bước tiếp theo →</button>
+      </div>
+      <p id="t19" class="box" style="margin-top:8px"></p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 20: TỔNG KẾT & SO SÁNH TOÀN DIỆN -->
+<section class="slide">
+  <h2>Tổng kết: So sánh các bộ tối ưu</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Thuật toán</th>
+        <th>Chi phí / Vòng lặp</th>
+        <th>Bộ nhớ RAM</th>
+        <th>Tốc độ hội tụ</th>
+        <th>Kịch bản ứng dụng</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Gradient Descent</b></td>
+        <td><span class="nw">\(\mathcal{O}(m\cdot d)\)</span></td>
+        <td><span class="nw">\(\mathcal{O}(d)\)</span></td>
+        <td>Tuyến tính (Bậc 1)</td>
+        <td>Dữ liệu chuẩn hóa tốt, cần triển khai đơn giản.</td>
+      </tr>
+      <tr>
+        <td><b>Newton / IRLS</b></td>
+        <td><span class="nw">\(\mathcal{O}(m\cdot d^2 + d^3)\)</span></td>
+        <td><span class="nw">\(\mathcal{O}(d^2)\)</span></td>
+        <td>Bậc hai (5–10 vòng)</td>
+        <td>Số đặc trưng nhỏ/vừa (<span class="nw">\(d \le 10^3\)</span>), bất biến scaling.</td>
+      </tr>
+      <tr>
+        <td><b>BFGS chuẩn</b></td>
+        <td><span class="nw">\(\mathcal{O}(m\cdot d + d^2)\)</span></td>
+        <td><span class="nw">\(\mathcal{O}(d^2)\)</span></td>
+        <td>Siêu tuyến tính</td>
+        <td>Số đặc trưng trung bình (<span class="nw">\(d \sim 10^3 - 10^4\)</span>).</td>
+      </tr>
+      <tr style="background:#eaf7f0">
+        <td><b>L-BFGS (<span class="nw">\(c \approx 10\)</span>)</b></td>
+        <td><span class="nw">\(\mathcal{O}(m\cdot d + c\cdot d)\)</span></td>
+        <td><span class="nw">\(\mathcal{O}(c\cdot d)\)</span></td>
+        <td>Siêu tuyến tính</td>
+        <td><b>Mặc định trong scikit-learn</b> (<span class="nw">\(d\)</span> lên tới <span class="nw">\(10^7\)</span>, TF-IDF).</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="box good" style="margin-top:6px">
+    <p><b>Điểm cốt lõi:</b> Nhờ tính lồi ngặt của Cross-Entropy + <span class="nw">\(L_2\)</span>, điều kiện độ cong <span class="nw">\(s_k^\top y_k > 0\)</span> luôn được bảo toàn tuyệt đối, giúp <b>L-BFGS</b> trở thành tiêu chuẩn vàng cho Logistic Regression quy mô lớn.</p>
+  </div>
 </section>
 
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
 
 <script>
 const sig=z=>1/(1+Math.exp(-z));
-const render=el=>window.renderMathInElement&&renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});
+const el=id=>document.getElementById(id);
+const RED='#d6453d',BLUE='#1f5fd6',GREEN='#198754',AMBER='#d9822b',NAVY='#0b2447';
+const MACROS={"\\tw":"\\tilde{w}","\\tx":"\\tilde{x}","\\tX":"\\tilde{X}","\\norm":"\\left\\lVert#1\\right\\rVert","\\diag":"\\operatorname{diag}","\\R":"\\mathbb{R}"};
+const render=e=>{window.renderMathInElement&&renderMathInElement(e,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],macros:MACROS,throwOnError:false})};
 
-/* Demo 4: loss 1 chiều trên dữ liệu đậu/rớt (b=-5), bước Newton */
-const X=[0,1,2,3,4,5,6,7,8,9,10],Y=[0,0,0,0,0,1,0,1,1,1,1],B0=-5,LAM=.05,M=X.length;
-const J=w=>X.reduce((a,x,i)=>{const p=sig(w*x+B0);return a-(Y[i]*Math.log(p)+(1-Y[i])*Math.log(1-p))},0)/M+LAM/2*w*w;
-const G=w=>X.reduce((a,x,i)=>a+(sig(w*x+B0)-Y[i])*x,0)/M+LAM*w;
-const H=w=>X.reduce((a,x)=>{const p=sig(w*x+B0);return a+p*(1-p)*x*x},0)/M+LAM;
-const sx=x=>40+x/3*350,sy=v=>206-v/4*192,cl=v=>Math.max(-20,Math.min(230,v));
-const base4=`<line x1="40" y1="206" x2="390" y2="206" stroke="#9fb0cc"/><line x1="40" y1="14" x2="40" y2="206" stroke="#9fb0cc"/>`+[0,1,2,3].map(v=>`<text x="${sx(v)}" y="222" text-anchor="middle">${v}</text>`).join('')+`<text x="215" y="238" text-anchor="middle">w</text>`;
+function chart(id,o){
+  const s=el(id),L=44,R=392,T=14,B=190,W=R-L;
+  const sx=x=>L+(x-o.x0)/(o.x1-o.x0)*W,sy=y=>B-(Math.max(o.y0,Math.min(o.y1,y))-o.y0)/(o.y1-o.y0)*(B-T);
+  let h=`<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="#9fb0cc"/><line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#9fb0cc"/>`;
+  for(let k=0;k<=4;k++){const v=o.y0+(o.y1-o.y0)*k/4;h+=`<line x1="${L}" x2="${R}" y1="${sy(v)}" y2="${sy(v)}" stroke="#e3eaf6"/><text x="${L-6}" y="${sy(v)+4}" text-anchor="end">${v.toFixed(o.yd??2)}</text>`}
+  for(let k=0;k<=4;k++){const v=o.x0+(o.x1-o.x0)*k/4;h+=`<text x="${sx(v)}" y="${B+15}" text-anchor="middle">${+v.toFixed(1)}</text>`}
+  h+=`<text x="${(L+R)/2}" y="214" text-anchor="middle">${o.xl||''}</text>`;
+  (o.hl||[]).forEach(q=>{h+=`<line x1="${L}" x2="${R}" y1="${sy(q.v)}" y2="${sy(q.v)}" stroke="${q.c}" stroke-dasharray="4"/><text x="${R-2}" y="${sy(q.v)-5}" text-anchor="end" style="fill:${q.c};font-weight:700">${q.t}</text>`});
+  (o.vl||[]).forEach(q=>{h+=`<line x1="${sx(q.v)}" x2="${sx(q.v)}" y1="${T}" y2="${B}" stroke="${q.c}" stroke-dasharray="4"/>`});
+  (o.lines||[]).forEach(q=>{h+=`<polyline fill="none" stroke="${q.c}" stroke-width="${q.w||2.8}" ${q.dash?'stroke-dasharray="5,4"':''} stroke-linejoin="round" points="${q.p.map(p=>sx(p[0]).toFixed(1)+','+sy(p[1]).toFixed(1)).join(' ')}"/>`});
+  (o.dots||[]).forEach(q=>{h+=`<circle cx="${sx(q[0])}" cy="${sy(q[1])}" r="5.5" fill="${q[2]||BLUE}"/>`});
+  (o.labels||[]).forEach(q=>{h+=`<text x="${q[0]}" y="${q[1]}" style="fill:${q[3]};font-weight:700">${q[2]}</text>`});
+  s.innerHTML=h;
+}
+const curve=(f,a,b,k=120)=>{const p=[];for(let i=0;i<=k;i++){const x=a+(b-a)*i/k;p.push([x,f(x)])}return p};
+
+/* SLIDE 4: Newton 1D */
+const D4=[[-2,0],[-1,0],[0.5,1],[1.5,1],[2.5,1]];
+const J4=(w,lam)=>D4.reduce((s,[x,y])=>s+Math.log1p(Math.exp(y?-w*x:w*x)),0)/D4.length+0.5*lam*w*w;
+const gH4=(w,lam)=>{let g=lam*w,H=lam;for(const[x,y]of D4){const p=sig(w*x);g+=(p-y)*x/D4.length;H+=p*(1-p)*x*x/D4.length}return[g,H]};
+const w4=el('w4'),l4=el('l4');
 function up4(){
-  const w=+w4.value,g=G(w),h=H(w),nw=w-g/h,T=x=>J(w)+g*(x-w)+.5*h*(x-w)**2;
-  let c='',q='';for(let i=0;i<=120;i++){const x=3*i/120;c+=(i?'L':'M')+sx(x).toFixed(1)+' '+cl(sy(J(x))).toFixed(1);q+=(i?'L':'M')+sx(x).toFixed(1)+' '+cl(sy(T(x))).toFixed(1)}
-  p4.innerHTML=base4+`<path d="${c}" fill="none" stroke="#1f5fd6" stroke-width="3"/><path d="${q}" fill="none" stroke="#d6453d" stroke-width="2.5"/><circle cx="${sx(w)}" cy="${sy(J(w))}" r="5" fill="#0b2447"/>`+(nw>=0&&nw<=3?`<circle cx="${sx(nw)}" cy="${cl(sy(T(nw)))}" r="6" fill="#d6453d"/><line x1="${sx(nw)}" x2="${sx(nw)}" y1="14" y2="206" stroke="#d6453d" stroke-dasharray="4"/>`:'');
-  o4.textContent=w.toFixed(2);
-  t4.innerHTML=`\\(w^{(t)}=${w.toFixed(2)}\\to w^{(t+1)}=${nw.toFixed(2)}\\)`+(nw<0||nw>3?'<br>Vọt ra ngoài khung: đang đứng quá xa đáy.':'');render(t4);
+  const wt=+w4.value,lam=+l4.value;
+  el('o4w').textContent=wt.toFixed(2);el('o4l').textContent=lam.toFixed(2);
+  const Jt=J4(wt,lam),[gt,Ht]=gH4(wt,lam),wn=wt-gt/Ht;
+  const tay=w=>Jt+gt*(w-wt)+0.5*Ht*(w-wt)**2;
+  chart('p4',{
+    x0:-3,x1:3,y0:0,y1:2.2,xl:'trọng số w',
+    vl:[{v:wt,c:AMBER},{v:wn,c:GREEN}],
+    lines:[{p:curve(w=>J4(w,lam),-3,3),c:BLUE},{p:curve(tay,-3,3),c:RED,dash:true}],
+    dots:[[wt,Jt,AMBER],[wn,J4(wn,lam),GREEN]],
+    labels:[[52,28,'J(w) thực tế',BLUE],[52,44,'Parabol Taylor bậc 2',RED]]
+  });
+  el('t4').innerHTML=`Tại \\(w^{(t)}=${wt.toFixed(2)}\\): \\(g=${gt.toFixed(3)},\\ H=${Ht.toFixed(3)}\\)<br>Bước nhảy Newton: \\(w^{(t+1)} = w^{(t)} - g/H = \\mathbf{${wn.toFixed(3)}}\\)`;
+  render(el('t4'));
 }
+w4.oninput=up4;l4.oninput=up4;
+el('b4_step').onclick=()=>{const wt=+w4.value,lam=+l4.value,[gt,Ht]=gH4(wt,lam);w4.value=Math.max(-2.5,Math.min(2.5,wt-gt/Ht)).toFixed(2);up4()};
+el('b4_rst').onclick=()=>{w4.value=-2.0;l4.value=0.15;up4()};
 
-/* Demo 5: GD vs Newton trên f = (w1² + κ w2²)/2 */
-function up5(){
-  const k=+k5.value,u=400/28,px=x=>200+x*u,py=y=>120-y*u,s=[9,1.5],f0=.5*(s[0]**2+k*s[1]**2);
-  let h='';[.04,.15,.35,.65,1].forEach(t=>{const a=Math.sqrt(2*f0*t);h+=`<ellipse cx="200" cy="120" rx="${a*u}" ry="${a/Math.sqrt(k)*u}" fill="none" stroke="#d5deee" stroke-width="1.5"/>`});
-  let p=[...s],a=1.8/k,pts=[`${px(p[0])},${py(p[1])}`],dots='';
-  for(let i=0;i<25;i++){p=[p[0]*(1-a),p[1]*(1-a*k)];pts.push(`${px(p[0])},${py(p[1])}`);dots+=`<circle cx="${px(p[0])}" cy="${py(p[1])}" r="2.5" fill="#1f5fd6"/>`}
-  h+=`<polyline points="${pts.join(' ')}" fill="none" stroke="#1f5fd6" stroke-width="1.5"/>${dots}<line x1="${px(9)}" y1="${py(1.5)}" x2="200" y2="120" stroke="#d6453d" stroke-width="2"/><circle cx="200" cy="120" r="5" fill="#d6453d"/><circle cx="${px(9)}" cy="${py(1.5)}" r="5" fill="#0b2447"/>`;
-  p5.innerHTML=h;ko.textContent=k;
-  t5.innerHTML=`Sau 25 bước, GD còn cách đáy \\(${Math.hypot(p[0],p[1]).toFixed(2)}\\); Newton cách \\(0\\) sau 1 bước.`;render(t5);
+/* SLIDE 6: Affine Invariance */
+const k6=el('k6');let gdSteps=6;
+function up6(){
+  const kap=+k6.value;el('o6k').textContent=kap.toFixed(1);
+  const s=el('p6'),cx=210,cy=110,rx=165,ry=rx/Math.sqrt(kap);
+  let h='';
+  for(let l=1;l<=5;l++){
+    h+=`<ellipse cx="${cx}" cy="${cy}" rx="${(rx*l/5).toFixed(1)}" ry="${(ry*l/5).toFixed(1)}" fill="none" stroke="#c8d6f0" stroke-width="1.2"/>`;
+  }
+  let gx=-rx*0.84,gy=ry*0.84;
+  const lr=1.82/kap,pts=[[cx+gx,cy-gy]];
+  for(let i=0;i<gdSteps;i++){gx-=lr*gx;gy-=lr*(kap*gy);pts.push([cx+gx,cy-gy])}
+  h+=`<polyline fill="none" stroke="${RED}" stroke-width="2.2" points="${pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}"/>`;
+  pts.forEach(p=>{h+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="${RED}"/>`});
+  const nx0=cx-rx*0.84,ny0=cy-ry*0.84;
+  h+=`<line x1="${nx0.toFixed(1)}" y1="${ny0.toFixed(1)}" x2="${cx}" y2="${cy}" stroke="${GREEN}" stroke-width="2.6" stroke-dasharray="5,3"/>`;
+  h+=`<circle cx="${nx0.toFixed(1)}" cy="${ny0.toFixed(1)}" r="5.5" fill="${AMBER}"/>`;
+  h+=`<circle cx="${cx}" cy="${cy}" r="6" fill="${GREEN}"/>`;
+  h+=`<text x="12" y="18" style="fill:${RED};font-weight:700">Gradient Descent (${gdSteps} bước)</text>`;
+  h+=`<text x="12" y="35" style="fill:${GREEN};font-weight:700">Newton Method (bất biến Affine)</text>`;
+  s.innerHTML=h;
+  el('t6').innerHTML=`Với \\(\\kappa=${kap.toFixed(1)}\\), GD bị giới hạn \\(\\alpha < 2/\\kappa = ${(2/kap).toFixed(3)}\\) nên dao động zíc zắc, còn Newton nhân \\(H^{-1}\\) khử sạch \\(\\kappa\\).`;
+  render(el('t6'));
 }
+k6.oninput=up6;
+el('b6_step').onclick=()=>{gdSteps=(gdSteps>=30?6:gdSteps+6);up6()};
+el('b6_rst').onclick=()=>{gdSteps=6;k6.value=9;up6()};
 
-/* điều hướng */
+/* SLIDE 8: Quadratic Convergence Chart */
+(function(){
+  const gd=[],nt=[];
+  let eg=0.1,en=0.1;
+  for(let t=0;t<=6;t++){
+    gd.push([t,-Math.log10(eg)]);
+    nt.push([t,-Math.log10(Math.max(en,1e-16))]);
+    eg*=0.9;en=en*en;
+  }
+  chart('p8',{
+    x0:0,x1:6,y0:0,y1:16,yd:0,xl:'vòng lặp t (số chữ số chính xác)',
+    hl:[{v:16,c:'#9fb0cc',t:'float64 (16 chữ số)'}],
+    lines:[{p:nt,c:GREEN},{p:gd,c:RED}],
+    dots:[...nt.map(p=>[p[0],p[1],GREEN]),...gd.map(p=>[p[0],p[1],RED])],
+    labels:[[55,34,'Newton (Bậc 2: 1→2→4→8→16)',GREEN],[55,155,'GD (Tuyến tính ρ=0.9)',RED]]
+  });
+})();
+
+/* SLIDE 13: Secant Equation & Probability Divergence */
+const s13=el('s13');
+function up13(){
+  const dw=+s13.value;el('o13s').textContent=dw.toFixed(2);
+  const w0=0.8,b=-4.0;
+  const p0=x=>sig(w0*x+b),p1=x=>sig((w0+dw)*x+b),df=x=>p1(x)-p0(x);
+  const c0=curve(p0,0,10,100),c1=curve(p1,0,10,100),cd=curve(df,0,10,100);
+  const mx=Math.max(...cd.map(p=>p[1]));
+  chart('p13',{
+    x0:0,x1:10,y0:0,y1:1,xl:'giờ học x',
+    hl:[{v:0.5,c:'#9fb0cc',t:'ngưỡng 0.5'}],
+    lines:[{p:c0,c:'#8898b5',dash:true},{p:c1,c:BLUE},{p:cd,c:GREEN}],
+    labels:[[52,26,'aₖ₊₁(x) sau bước dịch',BLUE],[52,42,'Chênh lệch (aₖ₊₁ − aₖ)',GREEN]]
+  });
+  el('t13').innerHTML=`Khi trọng số dịch \\(s_k = ${dw.toFixed(2)}\\), chênh lệch xác suất cực đại đạt <b>${mx.toFixed(3)}</b>. Vector \\(y_k = \\frac{1}{m}X^\\top(a_{k+1}-a_k) + \\lambda s_k\\) dùng dải chênh lệch xanh này để cập nhật Hessian.`;
+  render(el('t13'));
+}
+s13.oninput=up13;
+
+/* SLIDE 19: L-BFGS Two-Loop Recursion */
+let st19=0;
+const desc19=[
+  '<b>Bước 1 · Khởi tạo:</b> Lấy Gradient thực tại \\(q = \\nabla J(w_k)\\) (mũi tên đỏ). Mục tiêu là biến \\(q\\) thành hướng Newton \\(p_k = -H_k q\\) mà không tạo ma trận vuông.',
+  '<b>Bước 2 · Vòng lùi (Backward):</b> Duyệt ngược \\(i=k-1 \\to k-c\\), chiết khấu các thành phần gradient đã gặp: \\(q \\leftarrow q - \\alpha_i y_i\\).',
+  '<b>Bước 3 · Độ cong nền tảng:</b> Nhân với hệ số vô hướng \\(\\gamma_k = \\frac{s_{k-1}^\\top y_{k-1}}{y_{k-1}^\\top y_{k-1}}\\) để chuẩn hóa tỉ lệ: \\(r = \\gamma_k q\\) (chống nổ gradient).',
+  '<b>Bước 4 · Vòng tiến (Forward):</b> Duyệt xuôi \\(i=k-c \\to k-1\\), bơm lại độ cong bậc 2 từ chênh lệch xác suất: \\(r \\leftarrow r + s_i(\\alpha_i - \\beta)\\).',
+  '<b>Bước 5 · Xuất hướng bước nhảy:</b> Đảo dấu \\(p_k = -r\\) (mũi tên xanh). Hàm loss Logistic mượt nên Line Search Wolfe thường chọn \\(\\alpha_k=1\\) ngay lần đầu!'
+];
+function up19(){
+  [...el('st19').children].forEach((e,idx)=>e.classList.toggle('on',idx===st19));
+  const s=el('p19'),cx=95,cy=165;
+  const arr=(x1,y1,x2,y2,col,lbl,fade)=>{
+    const op=fade?0.3:1,ang=Math.atan2(y2-y1,x2-x1);
+    const p1x=x2-10*Math.cos(ang-0.35),p1y=y2-10*Math.sin(ang-0.35);
+    const p2x=x2-10*Math.cos(ang+0.35),p2y=y2-10*Math.sin(ang+0.35);
+    return `<g opacity="${op}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="2.6"/><polygon points="${x2},${y2} ${p1x.toFixed(1)},${p1y.toFixed(1)} ${p2x.toFixed(1)},${p2y.toFixed(1)}" fill="${col}"/><text x="${x2+7}" y="${y2-5}" style="fill:${col};font-weight:700">${lbl}</text></g>`;
+  };
+  let h=`<line x1="${cx}" y1="15" x2="${cx}" y2="205" stroke="#d5deee"/><line x1="20" y1="${cy}" x2="385" y2="${cy}" stroke="#d5deee"/>`;
+  h+=arr(cx,cy,310,45,RED,'q = ∇J(wₖ)',st19>0);
+  if(st19>=1)h+=arr(cx,cy,255,105,AMBER,'q (sau Backward)',st19>1);
+  if(st19>=2)h+=arr(cx,cy,185,130,BLUE,'r = γₖ·q',st19>2);
+  if(st19>=3)h+=arr(cx,cy,280,68,GREEN,'r (sau Forward)',st19>3);
+  if(st19>=4)h+=arr(cx,cy,32,202,GREEN,'pₖ = −r',false);
+  s.innerHTML=h;
+  el('t19').innerHTML=desc19[st19];
+  render(el('t19'));
+}
+el('b19_pv').onclick=()=>{st19=Math.max(0,st19-1);up19()};
+el('b19_nx').onclick=()=>{st19=Math.min(4,st19+1);up19()};
+
+/* NAVIGATION */
 const S=[...document.querySelectorAll('.slide')];let i=0;
-function go(n){
-  i=Math.max(0,Math.min(S.length-1,n));
-  S.forEach((e,k)=>e.classList.toggle('active',k===i));
-  cnt.textContent=`${i+1} / ${S.length}`;bar.style.width=(i+1)/S.length*100+'%';
-  S[i].scrollTop=0;history.replaceState(null,'','#'+(i+1));
-  if(i===3)up4();if(i===4)up5();
+function go(k){
+  i=Math.max(0,Math.min(S.length-1,k));
+  S.forEach((e,j)=>e.classList.toggle('active',j===i));
+  el('cnt').textContent=`${i+1} / ${S.length}`;
+  el('bar').style.width=(i+1)/S.length*100+'%';
+  S[i].scrollTop=0;
+  history.replaceState(null,'','#'+(i+1));
+  const f=S[i].dataset.fn;if(f)({up4,up6,up13,up19})[f]();
 }
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'&&(e.key==='ArrowLeft'||e.key==='ArrowRight')&&!e.shiftKey)e.target.blur();
   if(e.key==='ArrowRight'||e.key==='PageDown')go(i+1);
   if(e.key==='ArrowLeft'||e.key==='PageUp')go(i-1);
 });
-pv.onclick=()=>go(i-1);nx.onclick=()=>go(i+1);
+el('pv').onclick=()=>go(i-1);el('nx').onclick=()=>go(i+1);
 let tx=null;document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
 document.addEventListener('touchend',e=>{if(tx===null||e.target.tagName==='INPUT')return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(i+(d<0?1:-1));tx=null});
-w4.oninput=up4;k5.oninput=up5;
 addEventListener('load',()=>{render(document.body);go((parseInt(location.hash.slice(1))||1)-1)});
 go(0);
 </script>
