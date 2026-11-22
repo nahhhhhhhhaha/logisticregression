@@ -62,181 +62,181 @@ nav button:hover{background:var(--sky)}
 </head>
 <body>
 <div id="bar"></div>
-<header><a href="../index.html">← Mục lục</a><span>Softmax Regression · 1. Hàm softmax và loss function</span></header>
+<header><a href="../index.html">← Mục lục</a><span>Softmax Regression · Hàm Softmax và Loss Function</span></header>
 
-<!-- 1: BÌA -->
+<!-- BÌA -->
 <section class="slide cover">
   <h1>Softmax Regression</h1>
-  <p class="big sub">Phần 1 · Hàm softmax và loss function</p>
+  <p class="big sub">Hàm Softmax và Loss Function</p>
   <p class="sub">Từ Categorical Distribution đến Softmax và Categorical Cross-Entropy</p>
 </section>
 
-<!-- 2: BÀI TOÁN & ĐỘNG LỰC -->
+<!-- BÀI TOÁN & ĐỘNG LỰC -->
 <section class="slide">
-  <h2>Bài toán phân loại nhiều lớp: Mèo, Chó hay Chim?</h2>
+  <h2>Phân loại nhiều lớp</h2>
   <div class="body-wrap">
     <div class="row">
       <div>
-        <p><b>Logistic Regression</b> chỉ xử lý 2 lớp ($y \in \{0, 1\}$) với phân phối Bernoulli.</p>
+        <p><b>Logistic Regression</b> chỉ xử lý 2 lớp ($y_i \in \{0, 1\}$) với phân phối Bernoulli.</p>
         <p style="margin-top:10px"><b>Bài toán thực tế:</b> Nhận diện ảnh thuộc $K = 3$ lớp loại trừ lẫn nhau:</p>
         <ul style="margin-top:6px">
-          <li>Lớp 1: <b>Mèo</b> ($y = 1$)</li>
-          <li>Lớp 2: <b>Chó</b> ($y = 2$)</li>
-          <li>Lớp 3: <b>Chim</b> ($y = 3$)</li>
+          <li>Lớp 1: <b>Mèo</b> ($y_i = 1$)</li>
+          <li>Lớp 2: <b>Chó</b> ($y_i = 2$)</li>
+          <li>Lớp 3: <b>Chim</b> ($y_i = 3$)</li>
         </ul>
       </div>
       <div class="box">
-        <p><b>Mục tiêu:</b> Với mỗi vector đặc trưng đầu vào <span class="nowrap">$\mathbf{x} \in \mathbb{R}^d$</span>, mô hình cần ước lượng phân phối xác suất <span class="nowrap">$\mathbf{p} = (p_1, p_2, p_3)^\top$</span> cho cả 3 lớp.</p>
+        <p><b>Mục tiêu:</b> Với mỗi vector đặc trưng đầu vào <span class="nowrap">$\mathbf{x}_i \in \mathbb{R}^d$</span>, mô hình cần ước lượng phân phối xác suất <span class="nowrap">$\mathbf{p}_i = (p_{i,1}, p_{i,2}, p_{i,3})^\top$</span> cho cả 3 lớp.</p>
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $d$ là số chiều vector đặc trưng $\mathbf{x} \in \mathbb{R}^d$; $K$ là tổng số lớp ($k \in \{1, \dots, K\}$); $y \in \{1, \dots, K\}$ là nhãn lớp dạng số nguyên.</div>
+  <div class="note"><b>Ký hiệu:</b> $d$ là số chiều vector đặc trưng $\mathbf{x}_i \in \mathbb{R}^d$; $K$ là tổng số lớp ($k \in \{1, \dots, K\}$); $y_i \in \{1, \dots, K\}$ là nhãn lớp dạng số nguyên.</div>
 </section>
 
-<!-- 3: TIẾP CẬN NGÂY THƠ -->
+<!-- TIẾP CẬN NGÂY THƠ -->
 <section class="slide">
-  <h2>Thử dùng $K$ mô hình Logistic độc lập</h2>
+  <h2>Hạn chế của $K$ mô hình Logistic độc lập</h2>
   <div class="body-wrap">
-    <p>Tách thành 3 bộ phân loại nhị phân riêng biệt với hàm Sigmoid $\sigma(z_k) = \frac{1}{1+e^{-z_k}}$:</p>
+    <p>Tách thành 3 bộ phân loại nhị phân riêng biệt với hàm Sigmoid $\sigma(z_{i,k}) = \frac{1}{1+e^{-z_{i,k}}}$:</p>
     <div class="grid3">
-      <div class="card"><b>Mèo (Lớp 1)</b><div class="eq">$$p_1 = \sigma(z_1) = 0.8$$</div></div>
-      <div class="card"><b>Chó (Lớp 2)</b><div class="eq">$$p_2 = \sigma(z_2) = 0.6$$</div></div>
-      <div class="card"><b>Chim (Lớp 3)</b><div class="eq">$$p_3 = \sigma(z_3) = 0.3$$</div></div>
+      <div class="card"><b>Mèo</b><div class="eq">$$p_{i,1} = \sigma(z_{i,1}) = 0.8$$</div></div>
+      <div class="card"><b>Chó</b><div class="eq">$$p_{i,2} = \sigma(z_{i,2}) = 0.6$$</div></div>
+      <div class="card"><b>Chim</b><div class="eq">$$p_{i,3} = \sigma(z_{i,3}) = 0.3$$</div></div>
     </div>
     <div class="box bad">
-      <p><b>Vấn đề cốt lõi:</b> Các mô hình độc lập không ràng buộc được tổng xác suất bằng 1 ($p_1 + p_2 + p_3 = 1.7 \neq 1$). Cần một phân phối xác suất chung cho cả $K$ lớp.</p>
+      <p><b>Vấn đề cốt lõi:</b> Các mô hình độc lập không ràng buộc được tổng xác suất bằng 1 ($p_{i,1} + p_{i,2} + p_{i,3} = 1.7 \neq 1$). Cần một phân phối xác suất chung cho cả $K$ lớp.</p>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $z_k = \mathbf{w}_k^\top \mathbf{x} + b_k$ là điểm số tuyến tính (logit) của lớp $k$; $p_k \in (0, 1)$ là xác suất dự đoán cho lớp $k$.</div>
+  <div class="note"><b>Ký hiệu:</b> $z_{i,k} = \mathbf{w}_k^\top \mathbf{x}_i + b_k$ là điểm số tuyến tính (logit) của lớp $k$; $p_{i,k} \in (0, 1)$ là xác suất dự đoán cho lớp $k$.</div>
 </section>
 
-<!-- 4: PHÂN PHỐI CATEGORICAL & ONE-HOT -->
+<!-- PHÂN PHỐI CATEGORICAL & ONE-HOT -->
 <section class="slide">
-  <h2>Phân phối Categorical &amp; Mã hóa One-Hot</h2>
+  <h2>Categorical &amp; One-Hot</h2>
   <div class="body-wrap">
     <div class="row">
       <div>
         <p><b>Phân phối Categorical</b> mở rộng Bernoulli cho $K$ kết quả loại trừ lẫn nhau:</p>
-        <div class="eq">$$p_k = P(Y = k \mid \mathbf{X} = \mathbf{x}) \ge 0, \qquad \sum_{k=1}^{K} p_k = 1$$</div>
-        <p style="margin-top:8px"><b>Mã hóa One-Hot:</b> Biểu diễn nhãn lớp $c$ thành vector $\mathbf{y} \in \{0, 1\}^K$ với duy nhất $y_c = 1$ và $y_{k \neq c} = 0$.</p>
+        <div class="eq">$$p_{i,k} = P(Y_i = k \mid \mathbf{X}_i = \mathbf{x}_i) \ge 0, \qquad \sum_{k=1}^{K} p_{i,k} = 1$$</div>
+        <p style="margin-top:8px"><b>Mã hóa One-Hot:</b> Biểu diễn nhãn lớp $c$ thành vector $\mathbf{y}_i \in \{0, 1\}^K$ với duy nhất $y_{i,c} = 1$ và $y_{i,k \neq c} = 0$.</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px">
-        <div class="box eq">Mèo ($y=1$) $\rightarrow \mathbf{y} = \begin{bmatrix} 1 & 0 & 0 \end{bmatrix}^\top$</div>
-        <div class="box eq">Chó ($y=2$) $\rightarrow \mathbf{y} = \begin{bmatrix} 0 & 1 & 0 \end{bmatrix}^\top$</div>
-        <div class="box eq">Chim ($y=3$) $\rightarrow \mathbf{y} = \begin{bmatrix} 0 & 0 & 1 \end{bmatrix}^\top$</div>
+        <div class="box eq">Mèo ($y_i=1$) $\rightarrow \mathbf{y}_i = \begin{bmatrix} 1 & 0 & 0 \end{bmatrix}^\top$</div>
+        <div class="box eq">Chó ($y_i=2$) $\rightarrow \mathbf{y}_i = \begin{bmatrix} 0 & 1 & 0 \end{bmatrix}^\top$</div>
+        <div class="box eq">Chim ($y_i=3$) $\rightarrow \mathbf{y}_i = \begin{bmatrix} 0 & 0 & 1 \end{bmatrix}^\top$</div>
       </div>
     </div>
-    <div class="eq">$$P(Y = y \mid \mathbf{X} = \mathbf{x}) = \prod_{k=1}^{K} p_k^{y_k} = p_1^{y_1} p_2^{y_2} \dots p_K^{y_K}$$</div>
+    <div class="eq">$$P(Y_i = y_i \mid \mathbf{X}_i = \mathbf{x}_i) = \prod_{k=1}^{K} p_{i,k}^{y_{i,k}} = p_{i,1}^{y_{i,1}} p_{i,2}^{y_{i,2}} \dots p_{i,K}^{y_{i,K}}$$</div>
   </div>
-  <div class="note"><b>Chuyển đổi ký hiệu:</b> Nhãn lớp chuyển từ số nguyên $y \in \{1, \dots, K\}$ sang vector One-Hot in đậm $\mathbf{y} = (y_1, \dots, y_K)^\top \in \{0, 1\}^K$ với $\sum_{k=1}^K y_k = 1$.</div>
+  <div class="note"><b>Ký hiệu:</b> $\mathbf{y}_i = (y_{i,1}, \dots, y_{i,K})^\top \in \{0, 1\}^K$ là vector mã hóa One-Hot của mẫu thứ $i$ với $\sum_{k=1}^K y_{i,k} = 1$.</div>
 </section>
 
-<!-- 5: MÔ HÌNH TUYẾN TÍNH & Ý NGHĨA HÌNH HỌC -->
+<!-- MÔ HÌNH TUYẾN TÍNH & Ý NGHĨA HÌNH HỌC -->
 <section class="slide">
-  <h2>Hàm điểm số tuyến tính &amp; Biểu diễn ma trận</h2>
+  <h2>Điểm số tuyến tính &amp; Ma trận</h2>
   <div class="body-wrap">
     <div class="row">
       <div>
         <p>Mỗi lớp $k$ có một vector trọng số $\mathbf{w}_k \in \mathbb{R}^d$ và bias $b_k \in \mathbb{R}$:</p>
-        <div class="eq">$$z_k = \mathbf{w}_k^\top \mathbf{x} + b_k = \sum_{j=1}^{d} w_{j,k} x_j + b_k$$</div>
-        <p class="sub" style="margin-top:6px"><b>Ý nghĩa hình học:</b> Tích vô hướng $\mathbf{w}_k^\top \mathbf{x}$ đo mức độ chiếu của $\mathbf{x}$ lên hướng đặc trưng $\mathbf{w}_k$ của lớp $k$.</p>
+        <div class="eq">$$z_{i,k} = \mathbf{w}_k^\top \mathbf{x}_i + b_k = \sum_{j=1}^{d} w_{j,k} x_{i,j} + b_k$$</div>
+        <p class="sub" style="margin-top:6px"><b>Ý nghĩa hình học:</b> Tích vô hướng $\mathbf{w}_k^\top \mathbf{x}_i$ đo mức độ chiếu của $\mathbf{x}_i$ lên hướng đặc trưng $\mathbf{w}_k$ của lớp $k$.</p>
       </div>
       <div class="box">
         <p><b>Biểu diễn cho 1 mẫu</b> ($\mathbf{W} \in \mathbb{R}^{d \times K}$, $\mathbf{b} \in \mathbb{R}^K$):</p>
-        <div class="eq">$$\mathbf{z} = \mathbf{W}^\top \mathbf{x} + \mathbf{b}$$</div>
+        <div class="eq">$$\mathbf{z}_i = \mathbf{W}^\top \mathbf{x}_i + \mathbf{b}$$</div>
         <p style="margin-top:8px"><b>Biểu diễn cho $N$ mẫu</b> ($\mathbf{X} \in \mathbb{R}^{N \times d}$):</p>
         <div class="eq">$$\mathbf{Z} = \mathbf{X}\mathbf{W} + \mathbf{1}_N \mathbf{b}^\top \in \mathbb{R}^{N \times K}$$</div>
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $\mathbf{W} = [\mathbf{w}_1, \dots, \mathbf{w}_K] \in \mathbb{R}^{d \times K}$ là ma trận trọng số; $N$ là số lượng mẫu dữ liệu; $\mathbf{1}_N \in \mathbb{R}^N$ là vector gồm toàn số $1$.</div>
+  <div class="note"><b>Ký hiệu:</b> $\mathbf{W} = [\mathbf{w}_1, \dots, \mathbf{w}_K] \in \mathbb{R}^{d \times K}$ là ma trận trọng số; $N$ là số lượng mẫu dữ liệu; $\mathbf{1}_N \in \mathbb{R}^N$ là vector gồm toàn số $1$.</div>
 </section>
 
-<!-- 6: SUY DẪN HÀM SOFTMAX -->
+<!-- SUY DẪN HÀM SOFTMAX -->
 <section class="slide">
-  <h2>Suy dẫn hàm kích hoạt Softmax</h2>
+  <h2>Hàm kích hoạt Softmax</h2>
   <div class="body-wrap">
-    <p>Cần ánh xạ vector điểm số $\mathbf{z} \in \mathbb{R}^K$ sang Simplex xác suất $\Delta^{K-1} = \left\{\mathbf{p} : p_k \ge 0, \sum_{k=1}^K p_k = 1\right\}$ qua 2 bước:</p>
+    <p>Cần ánh xạ vector điểm số $\mathbf{z}_i \in \mathbb{R}^K$ sang Simplex xác suất $\Delta^{K-1} = \left\{\mathbf{p}_i : p_{i,k} \ge 0, \sum_{k=1}^K p_{i,k} = 1\right\}$ qua 2 bước:</p>
     <div class="chain">
-      <div>$\mathbf{z} \in \mathbb{R}^K$<small>Logits (âm hoặc dương)</small></div><div class="ar">→</div>
-      <div>$u_k = e^{z_k} > 0$<small>Hàm mũ · Bảo toàn thứ tự</small></div><div class="ar">→</div>
-      <div>$p_k = \dfrac{e^{z_k}}{\sum_{m=1}^{K} e^{z_m}}$<small>Chuẩn hóa · Tổng bằng 1</small></div>
+      <div>$\mathbf{z}_i \in \mathbb{R}^K$<small>Logits (âm hoặc dương)</small></div><div class="ar">→</div>
+      <div>$u_{i,k} = e^{z_{i,k}} > 0$<small>Hàm mũ · Bảo toàn thứ tự</small></div><div class="ar">→</div>
+      <div>$p_{i,k} = \dfrac{e^{z_{i,k}}}{\sum_{m=1}^{K} e^{z_{i,m}}}$<small>Chuẩn hóa · Tổng bằng 1</small></div>
     </div>
     <div class="grid3">
-      <div class="box"><p><b>1. Luôn dương:</b> $e^{z_k} > 0$ với mọi $z_k \in \mathbb{R}$.</p></div>
-      <div class="box"><p><b>2. Đồng biến:</b> $z_a > z_b \Leftrightarrow e^{z_a} > e^{z_b}$, giữ nguyên thứ tự lớp.</p></div>
-      <div class="box"><p><b>3. Khả vi &amp; trơn:</b> Đạo hàm tồn tại mọi nơi, tối ưu dễ dàng.</p></div>
+      <div class="box"><p><b>Luôn dương:</b> $e^{z_{i,k}} > 0$ với mọi $z_{i,k} \in \mathbb{R}$.</p></div>
+      <div class="box"><p><b>Đồng biến:</b> $z_{i,a} > z_{i,b} \Leftrightarrow e^{z_{i,a}} > e^{z_{i,b}}$, giữ nguyên thứ tự lớp.</p></div>
+      <div class="box"><p><b>Khả vi &amp; trơn:</b> Đạo hàm tồn tại mọi nơi, tối ưu dễ dàng.</p></div>
     </div>
-    <div class="eq">$$p_k = P(Y = k \mid \mathbf{X} = \mathbf{x}; \mathbf{W}, \mathbf{b}) = \frac{e^{\mathbf{w}_k^\top \mathbf{x} + b_k}}{\sum_{m=1}^{K} e^{\mathbf{w}_m^\top \mathbf{x} + b_m}}$$</div>
+    <div class="eq">$$p_{i,k} = \operatorname{softmax}(\mathbf{z}_i)_k = P(Y_i = k \mid \mathbf{X}_i = \mathbf{x}_i; \mathbf{W}, \mathbf{b}) = \frac{e^{\mathbf{w}_k^\top \mathbf{x}_i + b_k}}{\sum_{m=1}^{K} e^{\mathbf{w}_m^\top \mathbf{x}_i + b_m}}$$</div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $u_k = e^{z_k}$ là biến trung gian sau hàm mũ; chỉ số chạy ở mẫu số dùng $m \in \{1, \dots, K\}$ để phân biệt với lớp $k$ ở tử số.</div>
+  <div class="note"><b>Ký hiệu:</b> $u_{i,k} = e^{z_{i,k}}$ là biến trung gian sau hàm mũ; chỉ số chạy ở mẫu số dùng $m \in \{1, \dots, K\}$ để phân biệt với lớp $k$ ở tử số.</div>
 </section>
 
-<!-- 7: KIẾN TRÚC MẠNG & TƯƠNG TÁC -->
+<!-- KIẾN TRÚC MẠNG & TƯƠNG TÁC -->
 <section class="slide">
-  <h2>Kiến trúc Softmax &amp; Tương tác thử đổi Logits</h2>
+  <h2>Kiến trúc &amp; Tương tác Logits</h2>
   <div class="body-wrap">
     <div class="row">
       <svg id="netSvg" viewBox="0 0 430 220"></svg>
       <div>
         <div class="ctl">
-          <label for="z1">$z_1$ (Mèo)</label><input id="z1" type="range" min="-3" max="5" step="0.1" value="2.0"><output id="z1o"></output>
-          <label for="z2">$z_2$ (Chó)</label><input id="z2" type="range" min="-3" max="5" step="0.1" value="1.0"><output id="z2o"></output>
-          <label for="z3">$z_3$ (Chim)</label><input id="z3" type="range" min="-3" max="5" step="0.1" value="0.0"><output id="z3o"></output>
+          <label for="z1">$z_{i,1}$ (Mèo)</label><input id="z1" type="range" min="-3" max="5" step="0.1" value="2.0"><output id="z1o">2.0</output>
+          <label for="z2">$z_{i,2}$ (Chó)</label><input id="z2" type="range" min="-3" max="5" step="0.1" value="1.0"><output id="z2o">1.0</output>
+          <label for="z3">$z_{i,3}$ (Chim)</label><input id="z3" type="range" min="-3" max="5" step="0.1" value="0.0"><output id="z3o">0.0</output>
         </div>
         <div class="bar-wrap" style="margin-top:12px">
-          <div class="bar-item"><span>Mèo $p_1$</span><div class="bar-bg"><div id="b1" class="bar-fill"></div></div><b id="p1o"></b></div>
-          <div class="bar-item"><span>Chó $p_2$</span><div class="bar-bg"><div id="b2" class="bar-fill" style="background:#3b82f6"></div></div><b id="p2o"></b></div>
-          <div class="bar-item"><span>Chim $p_3$</span><div class="bar-bg"><div id="b3" class="bar-fill" style="background:#64748b"></div></div><b id="p3o"></b></div>
+          <div class="bar-item"><span>Mèo $p_{i,1}$</span><div class="bar-bg"><div id="b1" class="bar-fill"></div></div><b id="p1o"></b></div>
+          <div class="bar-item"><span>Chó $p_{i,2}$</span><div class="bar-bg"><div id="b2" class="bar-fill" style="background:#3b82f6"></div></div><b id="p2o"></b></div>
+          <div class="bar-item"><span>Chim $p_{i,3}$</span><div class="bar-bg"><div id="b3" class="bar-fill" style="background:#64748b"></div></div><b id="p3o"></b></div>
         </div>
         <p id="sumOut" class="sub" style="margin-top:8px;font-size:13.5px"></p>
       </div>
     </div>
   </div>
-  <div class="note"><b>Ghi chú sơ đồ:</b> Luồng truyền thẳng từ đặc trưng đầu vào $x_1, \dots, x_d \rightarrow$ điểm số $z_1, \dots, z_K \rightarrow$ xác suất $p_1, \dots, p_K \rightarrow$ hàm mất mát $J$.</div>
+  <div class="note"><b>Sơ đồ:</b> Luồng truyền thẳng từ đặc trưng đầu vào $x_{i,1}, \dots, x_{i,d} \rightarrow$ điểm số $z_{i,1}, \dots, z_{i,K} \rightarrow$ xác suất $p_{i,1}, \dots, p_{i,K} \rightarrow$ hàm mất mát $J$.</div>
 </section>
 
-<!-- 8: LIKELIHOOD VÀ LOG-LIKELIHOOD -->
+<!-- LIKELIHOOD VÀ LOG-LIKELIHOOD -->
 <section class="slide">
-  <h2>Hàm Likelihood và Log-Likelihood</h2>
+  <h2>Likelihood &amp; Log-Likelihood</h2>
   <div class="body-wrap">
     <div class="box">
-      <p><b>Ví dụ:</b> Mẫu $i$ có nhãn Mèo $\mathbf{y}^{(i)} = [1, 0, 0]^\top$, mô hình dự đoán $\mathbf{p}^{(i)} = [0.7, 0.2, 0.1]^\top$. Xác suất khớp nhãn thực tế: $(0.7)^1 \cdot (0.2)^0 \cdot (0.1)^0 = 0.7 = \prod_{k=1}^{3} \left(p_k^{(i)}\right)^{y_k^{(i)}}$.</p>
+      <p><b>Ví dụ:</b> Mẫu $i$ có nhãn Mèo $\mathbf{y}_i = [1, 0, 0]^\top$, mô hình dự đoán $\mathbf{p}_i = [0.7, 0.2, 0.1]^\top$. Xác suất khớp nhãn thực tế: $(0.7)^1 \cdot (0.2)^0 \cdot (0.1)^0 = 0.7 = \prod_{k=1}^{3} p_{i,k}^{y_{i,k}}$.</p>
     </div>
-    <p>Trên tập dữ liệu độc lập $\mathcal{D} = \{(\mathbf{x}^{(i)}, \mathbf{y}^{(i)})\}_{i=1}^{N}$, hàm <b>Likelihood</b> là:</p>
-    <div class="eq">$$L(\mathbf{W}, \mathbf{b}) = \prod_{i=1}^{N} P\left(Y^{(i)} = y^{(i)} \mid \mathbf{x}^{(i)}; \mathbf{W}, \mathbf{b}\right) = \prod_{i=1}^{N} \prod_{k=1}^{K} \left(p_k^{(i)}\right)^{y_k^{(i)}}$$</div>
+    <p>Trên tập dữ liệu độc lập $\mathcal{D} = \{(\mathbf{x}_i, \mathbf{y}_i)\}_{i=1}^{N}$, hàm <b>Likelihood</b> là:</p>
+    <div class="eq">$$L(\mathbf{W}, \mathbf{b}) = \prod_{i=1}^{N} P\left(Y_i = y_i \mid \mathbf{X}_i = \mathbf{x}_i; \mathbf{W}, \mathbf{b}\right) = \prod_{i=1}^{N} \prod_{k=1}^{K} p_{i,k}^{y_{i,k}}$$</div>
     <p>Lấy logarit tự nhiên hai vế để biến tích thành tổng (tránh underflow), thu được <b>Log-Likelihood</b>:</p>
-    <div class="eq">$$\ell(\mathbf{W}, \mathbf{b}) = \ln L(\mathbf{W}, \mathbf{b}) = \sum_{i=1}^{N} \sum_{k=1}^{K} y_k^{(i)} \ln\left(p_k^{(i)}\right)$$</div>
+    <div class="eq">$$\ell(\mathbf{W}, \mathbf{b}) = \ln L(\mathbf{W}, \mathbf{b}) = \sum_{i=1}^{N} \sum_{k=1}^{K} y_{i,k} \ln(p_{i,k})$$</div>
   </div>
-  <div class="note"><b>Bổ sung chỉ số mẫu:</b> Ký hiệu mũ trong ngoặc đơn $^{(i)}$ dùng để đánh chỉ số cho mẫu dữ liệu thứ $i \in \{1, \dots, N\}$ (ví dụ: $\mathbf{x}^{(i)}, \mathbf{y}^{(i)}, p_k^{(i)}$).</div>
+  <div class="note"><b>Ký hiệu:</b> Chỉ số dưới $i \in \{1, \dots, N\}$ đánh số cho mẫu dữ liệu thứ $i$ (ví dụ: $\mathbf{x}_i, \mathbf{y}_i, p_{i,k}$).</div>
 </section>
 
-<!-- 9: CROSS-ENTROPY LOSS & LÝ THUYẾT THÔNG TIN -->
+<!-- CROSS-ENTROPY LOSS & LÝ THUYẾT THÔNG TIN -->
 <section class="slide">
-  <h2>Hàm mất mát Categorical Cross-Entropy</h2>
+  <h2>Categorical Cross-Entropy Loss</h2>
   <div class="body-wrap">
     <p>Đổi dấu Log-Likelihood để chuyển bài toán cực đại hóa (MLE) thành cực tiểu hóa và lấy trung bình trên $N$ mẫu:</p>
-    <div class="eq">$$J(\mathbf{W}, \mathbf{b}) = -\frac{1}{N} \ell(\mathbf{W}, \mathbf{b}) = -\frac{1}{N} \sum_{i=1}^{N} \sum_{k=1}^{K} y_k^{(i)} \ln\left(p_k^{(i)}\right)$$</div>
+    <div class="eq">$$J(\mathbf{W}, \mathbf{b}) = -\frac{1}{N} \ell(\mathbf{W}, \mathbf{b}) = -\frac{1}{N} \sum_{i=1}^{N} \sum_{k=1}^{K} y_{i,k} \ln(p_{i,k})$$</div>
     <div class="row">
       <div class="box">
-        <p><b>Xét trên 1 mẫu $i$ thuộc lớp thực tế $c$:</b></p>
-        <div class="eq">$$J^{(i)} = -\sum_{k=1}^{K} y_k^{(i)} \ln\left(p_k^{(i)}\right) = -\ln\left(p_c^{(i)}\right)$$</div>
-        <p class="sub">Chỉ giữ lại xác suất dự đoán cho đúng lớp thực tế $c$ ($y_c^{(i)}=1$).</p>
+        <p><b>Trên 1 mẫu $i$ thuộc lớp thực tế $c$:</b></p>
+        <div class="eq">$$J_i = -\sum_{k=1}^{K} y_{i,k} \ln(p_{i,k}) = -\ln(p_{i,c})$$</div>
+        <p class="sub">Chỉ giữ lại xác suất dự đoán cho đúng lớp thực tế $c$ ($y_{i,c}=1$).</p>
       </div>
       <div class="box good">
         <p><b>Liên hệ Lý thuyết Thông tin:</b></p>
-        <div class="eq">$$H(\mathbf{y}, \mathbf{p}) = -\sum_{k=1}^{K} y_k \ln(p_k) = -\ln(p_c)$$</div>
-        <p class="sub">Tối thiểu hóa Cross-Entropy giữa phân phối thật $\mathbf{y}$ và ước lượng $\mathbf{p}$ tương đương với MLE.</p>
+        <div class="eq">$$H(\mathbf{y}_i, \mathbf{p}_i) = -\sum_{k=1}^{K} y_{i,k} \ln(p_{i,k}) = -\ln(p_{i,c})$$</div>
+        <p class="sub">Tối thiểu hóa Cross-Entropy giữa phân phối thật $\mathbf{y}_i$ và ước lượng $\mathbf{p}_i$ tương đương với MLE.</p>
       </div>
     </div>
   </div>
-  <div class="note"><b>Quy ước ký hiệu:</b> $J(\mathbf{W}, \mathbf{b})$ là hàm mất mát trung bình trên toàn bộ tập dữ liệu; $J^{(i)}$ là giá trị mất mát riêng của mẫu thứ $i$ với $c$ là chỉ số lớp đúng.</div>
+  <div class="note"><b>Ký hiệu:</b> $J(\mathbf{W}, \mathbf{b})$ là hàm mất mát trung bình trên toàn bộ tập dữ liệu; $J_i$ là giá trị mất mát riêng của mẫu thứ $i$ với $c$ là chỉ số lớp đúng.</div>
 </section>
 
 <nav><button id="pv" aria-label="Trước">←</button><span id="cnt"></span><button id="nx" aria-label="Sau">→</button></nav>
 
 <script>
-// Vẽ sơ đồ mạng Softmax trên Slide 7
+// Vẽ sơ đồ mạng Softmax trên slide tương tác
 (function drawNet(){
   const s=document.getElementById('netSvg');
   const cx=[45,165,285,385];
@@ -244,9 +244,9 @@ nav button:hover{background:var(--sky)}
   let h='';
   y3.forEach(y1=>y3.forEach(y2=>h+=`<line x1="${cx[0]}" y1="${y1}" x2="${cx[1]}" y2="${y2}" stroke="#c4d3eb" stroke-width="1.4"/>`));
   y3.forEach(y1=>y3.forEach(y2=>h+=`<line x1="${cx[1]}" y1="${y1}" x2="${cx[2]}" y2="${y2}" stroke="#93b4eb" stroke-width="1.4" stroke-dasharray="3,2"/>`));
-  y3.forEach(y1=>h+=`<line x1="${cx[2]}" y1="${y1}" x2="${cx[3]}" y2="110" stroke="#c4d3eb" stroke-width="1.4"/>`);
+  y3.forEach(y1=>y3.forEach(y2=>h+=`<line x1="${cx[2]}" y1="${y1}" x2="${cx[3]}" y2="110" stroke="#c4d3eb" stroke-width="1.4"/>`));
 
-  const xLab=['x₁','x₂','x_d'],zLab=['z₁','z₂','z_K'],pLab=['p₁','p₂','p_K'];
+  const xLab=['x_i,1','x_i,2','x_i,d'],zLab=['z_i,1','z_i,2','z_i,K'],pLab=['p_i,1','p_i,2','p_i,K'];
   y3.forEach((y,idx)=>{
     h+=`<circle cx="${cx[0]}" cy="${y}" r="17" fill="#fff" stroke="#0b2447" stroke-width="2"/><text x="${cx[0]}" y="${y+4}" text-anchor="middle" style="fill:#0b2447;font-weight:700">${xLab[idx]}</text>`;
     h+=`<circle cx="${cx[1]}" cy="${y}" r="17" fill="#e8f0fc" stroke="#1f5fd6" stroke-width="2"/><text x="${cx[1]}" y="${y+4}" text-anchor="middle" style="fill:#0b2447;font-weight:700">${zLab[idx]}</text>`;
@@ -260,7 +260,7 @@ nav button:hover{background:var(--sky)}
   s.innerHTML=h;
 })();
 
-// Tương tác Softmax trên Slide 7
+// Tương tác Softmax
 const z1=document.getElementById('z1'),z2=document.getElementById('z2'),z3=document.getElementById('z3');
 function upSoftmax(){
   const v=[+z1.value,+z2.value,+z3.value];
@@ -273,7 +273,7 @@ function upSoftmax(){
   const p=ex.map(e=>e/sm);
   [b1,b2,b3].forEach((el,idx)=>el.style.width=(p[idx]*100).toFixed(1)+'%');
   [p1o,p2o,p3o].forEach((el,idx)=>el.textContent=(p[idx]*100).toFixed(1)+'%');
-  sumOut.textContent=`Tổng xác suất: p₁ + p₂ + p₃ = ${(p[0]+p[1]+p[2]).toFixed(2)} (luôn bằng 1.00)`;
+  sumOut.textContent=`Tổng xác suất: p_i,1 + p_i,2 + p_i,3 = ${(p[0]+p[1]+p[2]).toFixed(2)} (luôn bằng 1.00)`;
 }
 z1.oninput=z2.oninput=z3.oninput=upSoftmax;
 
